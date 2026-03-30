@@ -48,12 +48,12 @@ input[type=text].error{border-color:var(--red)}
 /* File list */
 .file-list{margin-top:16px}
 .file-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--gray-light);border-radius:6px;margin-bottom:8px;border:1px solid var(--border)}
-.file-type-select{font-size:12px;border:1px solid var(--border);border-radius:6px;padding:4px 6px;background:#fff;color:var(--text);flex-shrink:0;max-width:160px;cursor:pointer}
 .file-icon{font-size:22px;flex-shrink:0}
 .file-info{flex:1;min-width:0}
 .file-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .file-meta{font-size:11px;color:var(--gray);margin-top:2px}
 .file-status{font-size:12px;font-weight:600;flex-shrink:0;padding:3px 8px;border-radius:10px}
+.file-type-tag{font-size:11px;font-weight:600;flex-shrink:0;padding:3px 8px;border-radius:10px;background:#ede9fe;color:#5b21b6}
 .file-status.pending{background:#fef9c3;color:#854d0e}
 .file-status.compressing{background:#dbeafe;color:#1e40af}
 .file-status.uploading{background:#dbeafe;color:#1e40af}
@@ -123,18 +123,51 @@ input[type=text].error{border-color:var(--red)}
 
 
 
+<!-- STEP 2: Document Type -->
+<div class="card">
+  <div class="card-header"><span class="card-num">2</span><span class="zh">选择文件类型</span><span class="en" style="display:none">Select Document Type</span></div>
+  <div class="card-body">
+    <label><span class="zh">本次上传的文件类型</span><span class="en" style="display:none">Document Type</span><span class="req">*</span></label>
+    <select id="docTypeSelect" onchange="onTypeChange()" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;background:#fff;color:var(--text);margin-top:4px">
+      <option value="" class="zh">-- 请选择文件类型 --</option>
+      <option value="" class="en" style="display:none">-- Select document type --</option>
+      <option value="护照">护照 Passport</option>
+      <option value="出生证明/公证">出生证明/公证 Birth Certificate</option>
+      <option value="结婚证">结婚证 Marriage Certificate</option>
+      <option value="户口本">户口本 Hukou</option>
+      <option value="身份证">身份证 ID Card</option>
+      <option value="学签">学签 Study Permit</option>
+      <option value="工签">工签 Work Permit</option>
+      <option value="访客记录(VR)">访客记录(VR) Visitor Record</option>
+      <option value="学历证明">学历证明 Education Certificate</option>
+      <option value="成绩单">成绩单 Transcript</option>
+      <option value="语言成绩(IELTS等)">语言成绩(IELTS等) Language Test</option>
+      <option value="银行流水/存款证明">银行流水/存款证明 Bank Statement</option>
+      <option value="录取通知书(LOA)">录取通知书(LOA) Letter of Acceptance</option>
+      <option value="在读证明">在读证明 Enrollment Letter</option>
+      <option value="工作证明">工作证明 Employment Letter</option>
+      <option value="拒信">拒信 Refusal Letter</option>
+      <option value="照片">照片 Photo</option>
+      <option value="其他">其他 Other</option>
+    </select>
+    <div id="otherNoteWrap" style="display:none;margin-top:8px">
+      <input type="text" id="otherNote" placeholder="请说明文件类型 / Please specify document type" style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px" oninput="updateUploadBtn()">
+    </div>
+  </div>
+</div>
+
 <!-- STEP 3: Upload -->
 <div class="card">
-  <div class="card-header"><span class="card-num">2</span><span class="zh">上传文件</span><span class="en" style="display:none">Upload Files</span></div>
+  <div class="card-header"><span class="card-num">3</span><span class="zh">上传文件</span><span class="en" style="display:none">Upload Files</span></div>
   <div class="card-body">
-    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+    <div class="drop-zone" id="dropZone" style="opacity:0.45;pointer-events:none" onclick="document.getElementById('fileInput').click()" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
       <div class="drop-zone-icon">📂</div>
       <div class="drop-zone-text zh">拖拽文件到此处，或 <strong>点击选择文件</strong></div>
       <div class="drop-zone-text en" style="display:none">Drag files here, or <strong>click to select</strong></div>
       <div class="drop-zone-meta zh">支持 PDF、JPG、PNG、Word｜每个文件最大 4MB（图片超限自动压缩）</div>
       <div class="drop-zone-meta en" style="display:none">PDF, JPG, PNG, Word supported · Max 4MB per file (images auto-compressed)</div>
     </div>
-    <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleFiles(this.files)">
+    <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleFiles(this.files)" disabled>
 
     <div class="file-list" id="fileList"></div>
 
@@ -213,12 +246,12 @@ function handleDrop(e) {
 }
 
 async function handleFiles(files) {
+  const docType = getSelectedType();
   for (const file of Array.from(files)) {
     const id = ++fileIdCounter;
-    const entry = { file, compressed: null, status: 'pending', id };
+    const entry = { file, compressed: null, status: 'pending', id, docType };
     pendingFiles.push(entry);
     addFileRow(entry);
-    // Process file
     await processFile(entry);
   }
   updateUploadBtn();
@@ -305,26 +338,27 @@ function statusLabel(s) {
   return (map[s]||map.pending)[currentLang];
 }
 
-const DOC_TYPES_ZH = ['护照','出生证明/公证','结婚证','户口本','身份证','学历证明','成绩单','语言成绩(IELTS等)','银行流水/存款证明','录取通知书(LOA)','在读证明','工作证明','拒信','照片','其他'];
-const DOC_TYPES_EN = ['Passport','Birth Certificate','Marriage Certificate','Hukou','ID Card','Education Certificate','Transcript','Language Test','Bank Statement','Letter of Acceptance (LOA)','Enrollment Letter','Employment Letter','Refusal Letter','Photo','Other'];
+// ── Type change handler ──────────────────────────────────────────────────────
+function getSelectedType() {
+  const sel = document.getElementById('docTypeSelect');
+  if (!sel || !sel.value) return '';
+  if (sel.value === '其他') {
+    const note = document.getElementById('otherNote').value.trim();
+    return note ? '其他-' + note : '其他';
+  }
+  return sel.value;
+}
 
-function buildTypeSelect(id) {
-  const sel = document.createElement('select');
-  sel.id = 'ftype-' + id;
-  sel.className = 'file-type-select';
-  sel.onchange = updateUploadBtn;
-  const placeholder = document.createElement('option');
-  placeholder.value = '';
-  placeholder.textContent = currentLang === 'zh' ? '-- 选择类型 --' : '-- Select type --';
-  sel.appendChild(placeholder);
-  const types = currentLang === 'zh' ? DOC_TYPES_ZH : DOC_TYPES_EN;
-  types.forEach((t, i) => {
-    const opt = document.createElement('option');
-    opt.value = DOC_TYPES_ZH[i]; // always store zh value
-    opt.textContent = t;
-    sel.appendChild(opt);
-  });
-  return sel;
+function onTypeChange() {
+  const sel = document.getElementById('docTypeSelect');
+  const isOther = sel && sel.value === '其他';
+  document.getElementById('otherNoteWrap').style.display = isOther ? 'block' : 'none';
+  // Lock/unlock drop zone
+  const locked = !sel || !sel.value;
+  document.getElementById('dropZone').style.opacity = locked ? '0.45' : '1';
+  document.getElementById('dropZone').style.pointerEvents = locked ? 'none' : '';
+  document.getElementById('fileInput').disabled = locked;
+  updateUploadBtn();
 }
 
 function addFileRow(entry) {
@@ -332,18 +366,18 @@ function addFileRow(entry) {
   const div = document.createElement('div');
   div.className = 'file-item';
   div.id = 'frow-' + entry.id;
+  const typeLabel = entry.docType || '';
   div.innerHTML = `
     <span class="file-icon">${fileIcon(entry.file)}</span>
     <div class="file-info">
       <div class="file-name">${entry.file.name}</div>
       <div class="file-meta" id="fmeta-${entry.id}">${fmtSize(entry.file.size)}</div>
     </div>
-    <span id="ftype-wrap-${entry.id}"></span>
+    ${typeLabel ? `<span class="file-type-tag">${typeLabel}</span>` : ''}
     <span class="file-status pending" id="fstatus-${entry.id}">${statusLabel('pending')}</span>
     <button class="file-remove" onclick="removeFile(${entry.id})" title="Remove">×</button>
   `;
   list.appendChild(div);
-  document.getElementById('ftype-wrap-' + entry.id).appendChild(buildTypeSelect(entry.id));
 }
 
 function setFileStatus(id, status) {
@@ -371,11 +405,8 @@ function updateUploadBtn() {
   const uploadable = pendingFiles.filter(f => f.status !== 'toolarge' && f.status !== 'error' && f.status !== 'done');
   const hasFiles = uploadable.length > 0;
   const hasName = document.getElementById('clientName').value.trim().length > 0;
-  const allTyped = uploadable.every(f => {
-    const sel = document.getElementById('ftype-' + f.id);
-    return sel && sel.value;
-  });
-  document.getElementById('uploadBtn').disabled = !(hasFiles && hasName && allTyped);
+  const hasType = !!getSelectedType();
+  document.getElementById('uploadBtn').disabled = !(hasFiles && hasName && hasType);
 }
 
 document.getElementById('clientName').addEventListener('input', updateUploadBtn);
@@ -409,8 +440,7 @@ async function startUpload() {
 
     try {
       const b64 = await fileToBase64(entry.compressed);
-      const sel = document.getElementById('ftype-' + entry.id);
-      const fileType = sel ? sel.value : '';
+      const fileType = entry.docType || getSelectedType();
       const payload = {
         clientName: name,
         docTypes: fileType ? [fileType] : [],
