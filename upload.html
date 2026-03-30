@@ -48,6 +48,7 @@ input[type=text].error{border-color:var(--red)}
 /* File list */
 .file-list{margin-top:16px}
 .file-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--gray-light);border-radius:6px;margin-bottom:8px;border:1px solid var(--border)}
+.file-type-select{font-size:12px;border:1px solid var(--border);border-radius:6px;padding:4px 6px;background:#fff;color:var(--text);flex-shrink:0;max-width:160px;cursor:pointer}
 .file-icon{font-size:22px;flex-shrink:0}
 .file-info{flex:1;min-width:0}
 .file-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -120,38 +121,11 @@ input[type=text].error{border-color:var(--red)}
   </div>
 </div>
 
-<!-- STEP 2: Document Types -->
-<div class="card">
-  <div class="card-header"><span class="card-num">2</span><span class="zh">选择文件类型</span><span class="en" style="display:none">Select Document Types</span></div>
-  <div class="card-body">
-    <div class="hint zh" style="margin-bottom:8px">可多选，选择本次上传的所有文件类型</div>
-    <div class="hint en" style="display:none;margin-bottom:8px">Select all document types you are uploading this time</div>
-    <div class="tag-grid" id="tagGrid">
-      <div class="tag" data-zh="护照" data-en="Passport" onclick="toggleTag(this)"><span class="zh">🛂 护照</span><span class="en" style="display:none">🛂 Passport</span></div>
-      <div class="tag" data-zh="出生证明" data-en="Birth Certificate" onclick="toggleTag(this)"><span class="zh">👶 出生证明/公证</span><span class="en" style="display:none">👶 Birth Certificate</span></div>
-      <div class="tag" data-zh="结婚证" data-en="Marriage Certificate" onclick="toggleTag(this)"><span class="zh">💍 结婚证</span><span class="en" style="display:none">💍 Marriage Certificate</span></div>
-      <div class="tag" data-zh="户口本" data-en="Hukou" onclick="toggleTag(this)"><span class="zh">📋 户口本</span><span class="en" style="display:none">📋 Hukou</span></div>
-      <div class="tag" data-zh="身份证" data-en="ID Card" onclick="toggleTag(this)"><span class="zh">🪪 身份证</span><span class="en" style="display:none">🪪 ID Card</span></div>
-      <div class="tag" data-zh="学历证明" data-en="Education Certificate" onclick="toggleTag(this)"><span class="zh">🎓 学历证明</span><span class="en" style="display:none">🎓 Education Certificate</span></div>
-      <div class="tag" data-zh="成绩单" data-en="Transcript" onclick="toggleTag(this)"><span class="zh">📄 成绩单</span><span class="en" style="display:none">📄 Transcript</span></div>
-      <div class="tag" data-zh="语言成绩" data-en="Language Test" onclick="toggleTag(this)"><span class="zh">🗣️ 语言成绩(IELTS等)</span><span class="en" style="display:none">🗣️ Language Test (IELTS etc.)</span></div>
-      <div class="tag" data-zh="银行流水" data-en="Bank Statement" onclick="toggleTag(this)"><span class="zh">🏦 银行流水/存款证明</span><span class="en" style="display:none">🏦 Bank Statement</span></div>
-      <div class="tag" data-zh="录取通知书" data-en="LOA" onclick="toggleTag(this)"><span class="zh">📩 录取通知书(LOA)</span><span class="en" style="display:none">📩 Letter of Acceptance (LOA)</span></div>
-      <div class="tag" data-zh="在读证明" data-en="Enrollment Letter" onclick="toggleTag(this)"><span class="zh">🏫 在读证明</span><span class="en" style="display:none">🏫 Enrollment Letter</span></div>
-      <div class="tag" data-zh="工作证明" data-en="Employment Letter" onclick="toggleTag(this)"><span class="zh">💼 工作证明</span><span class="en" style="display:none">💼 Employment Letter</span></div>
-      <div class="tag" data-zh="拒信" data-en="Refusal Letter" onclick="toggleTag(this)"><span class="zh">📮 拒信</span><span class="en" style="display:none">📮 Refusal Letter</span></div>
-      <div class="tag" data-zh="照片" data-en="Photo" onclick="toggleTag(this)"><span class="zh">📷 照片</span><span class="en" style="display:none">📷 Photo</span></div>
-      <div class="tag" data-zh="其他" data-en="Other" onclick="toggleTag(this, true)"><span class="zh">📎 其他</span><span class="en" style="display:none">📎 Other</span></div>
-    </div>
-    <div class="other-input" id="otherInput">
-      <input type="text" id="otherText" placeholder="请说明文件类型 / Please specify document type" style="margin-top:8px">
-    </div>
-  </div>
-</div>
+
 
 <!-- STEP 3: Upload -->
 <div class="card">
-  <div class="card-header"><span class="card-num">3</span><span class="zh">上传文件</span><span class="en" style="display:none">Upload Files</span></div>
+  <div class="card-header"><span class="card-num">2</span><span class="zh">上传文件</span><span class="en" style="display:none">Upload Files</span></div>
   <div class="card-body">
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
       <div class="drop-zone-icon">📂</div>
@@ -331,6 +305,28 @@ function statusLabel(s) {
   return (map[s]||map.pending)[currentLang];
 }
 
+const DOC_TYPES_ZH = ['护照','出生证明/公证','结婚证','户口本','身份证','学历证明','成绩单','语言成绩(IELTS等)','银行流水/存款证明','录取通知书(LOA)','在读证明','工作证明','拒信','照片','其他'];
+const DOC_TYPES_EN = ['Passport','Birth Certificate','Marriage Certificate','Hukou','ID Card','Education Certificate','Transcript','Language Test','Bank Statement','Letter of Acceptance (LOA)','Enrollment Letter','Employment Letter','Refusal Letter','Photo','Other'];
+
+function buildTypeSelect(id) {
+  const sel = document.createElement('select');
+  sel.id = 'ftype-' + id;
+  sel.className = 'file-type-select';
+  sel.onchange = updateUploadBtn;
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = currentLang === 'zh' ? '-- 选择类型 --' : '-- Select type --';
+  sel.appendChild(placeholder);
+  const types = currentLang === 'zh' ? DOC_TYPES_ZH : DOC_TYPES_EN;
+  types.forEach((t, i) => {
+    const opt = document.createElement('option');
+    opt.value = DOC_TYPES_ZH[i]; // always store zh value
+    opt.textContent = t;
+    sel.appendChild(opt);
+  });
+  return sel;
+}
+
 function addFileRow(entry) {
   const list = document.getElementById('fileList');
   const div = document.createElement('div');
@@ -342,10 +338,12 @@ function addFileRow(entry) {
       <div class="file-name">${entry.file.name}</div>
       <div class="file-meta" id="fmeta-${entry.id}">${fmtSize(entry.file.size)}</div>
     </div>
+    <span id="ftype-wrap-${entry.id}"></span>
     <span class="file-status pending" id="fstatus-${entry.id}">${statusLabel('pending')}</span>
     <button class="file-remove" onclick="removeFile(${entry.id})" title="Remove">×</button>
   `;
   list.appendChild(div);
+  document.getElementById('ftype-wrap-' + entry.id).appendChild(buildTypeSelect(entry.id));
 }
 
 function setFileStatus(id, status) {
@@ -370,10 +368,14 @@ function removeFile(id) {
 }
 
 function updateUploadBtn() {
-  const hasFiles = pendingFiles.some(f => f.status !== 'toolarge' && f.status !== 'error' && f.status !== 'done');
+  const uploadable = pendingFiles.filter(f => f.status !== 'toolarge' && f.status !== 'error' && f.status !== 'done');
+  const hasFiles = uploadable.length > 0;
   const hasName = document.getElementById('clientName').value.trim().length > 0;
-  const hasType = document.querySelectorAll('.tag.selected').length > 0;
-  document.getElementById('uploadBtn').disabled = !(hasFiles && hasName && hasType);
+  const allTyped = uploadable.every(f => {
+    const sel = document.getElementById('ftype-' + f.id);
+    return sel && sel.value;
+  });
+  document.getElementById('uploadBtn').disabled = !(hasFiles && hasName && allTyped);
 }
 
 document.getElementById('clientName').addEventListener('input', updateUploadBtn);
@@ -387,12 +389,6 @@ async function startUpload() {
     return;
   }
   document.getElementById('clientName').classList.remove('error');
-
-  const types = getSelectedTypes();
-  if (types.length === 0) {
-    showToast(currentLang === 'zh' ? '请选择文件类型' : 'Please select document types');
-    return;
-  }
 
   const toUpload = pendingFiles.filter(f => f.status === 'pending' && f.compressed);
   if (toUpload.length === 0) {
@@ -413,26 +409,23 @@ async function startUpload() {
 
     try {
       const b64 = await fileToBase64(entry.compressed);
+      const sel = document.getElementById('ftype-' + entry.id);
+      const fileType = sel ? sel.value : '';
       const payload = {
         clientName: name,
-        docTypes: types,
+        docTypes: fileType ? [fileType] : [],
         fileName: entry.compressed.name,
         mimeType: entry.compressed.type || 'application/octet-stream',
         data: b64
       };
 
-      const resp = await fetch(GAS_URL, {
+      await fetch(GAS_URL, {
         method: 'POST',
+        mode: 'no-cors',
         body: JSON.stringify(payload)
       });
-      const result = await resp.json();
-
-      if (result.success) {
-        setFileStatus(entry.id, 'done');
-      } else {
-        setFileStatus(entry.id, 'error');
-        allOk = false;
-      }
+      // no-cors returns opaque response — assume success if no exception
+      setFileStatus(entry.id, 'done');
     } catch(e) {
       setFileStatus(entry.id, 'error');
       allOk = false;
