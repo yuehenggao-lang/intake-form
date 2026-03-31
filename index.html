@@ -86,22 +86,6 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 @media(max-width:900px){.side-bar{display:none}}
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e293b;color:#fff;padding:11px 22px;border-radius:8px;font-size:14px;opacity:0;transition:all .35s;z-index:9999;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-/* File upload */
-.upload-drop{border:2px dashed var(--blue-mid);border-radius:var(--radius);padding:20px;background:var(--blue-light);text-align:center;cursor:pointer;transition:.2s;position:relative}
-.upload-drop:hover,.upload-drop.dragover{border-color:var(--blue);background:#dbeafe}
-.upload-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.upload-drop-icon{font-size:28px;margin-bottom:6px}
-.upload-drop-text{font-size:14px;color:var(--blue);font-weight:600}
-.upload-drop-hint{font-size:12px;color:var(--gray);margin-top:4px}
-.upload-file-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-.upload-file-item{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px}
-.upload-file-item .fi-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.upload-file-item .fi-size{color:var(--gray);font-size:12px;flex-shrink:0}
-.upload-file-item .fi-cat{font-size:12px;border:1px solid var(--border);border-radius:4px;padding:2px 6px;background:#f9fafb;flex-shrink:0;max-width:110px}
-.upload-file-item .fi-rm{cursor:pointer;color:var(--red);font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0;line-height:1}
-.upload-file-item .fi-rm:hover{background:#fee2e2}
-.upload-total{font-size:12px;color:var(--gray);text-align:right;margin-top:6px}
-.upload-total.over{color:var(--red);font-weight:600}
 .submit-error{display:none;background:#fee2e2;border:1px solid #fca5a5;border-radius:var(--radius);padding:12px 16px;font-size:14px;color:#991b1b;margin-bottom:14px}
 .submit-error.show{display:block}
 </style>
@@ -989,43 +973,6 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 </div>
 
 
-<!-- SECTION 15: Document Uploads -->
-<div class="section">
-  <div class="section-header">
-    <div class="section-num">15</div>
-    <div>
-      <div class="section-title zh">证件文件上传（可选）</div>
-      <div class="section-title en" style="display:none">Document Uploads (Optional)</div>
-    </div>
-  </div>
-  <div class="section-body">
-    <div class="section-note">
-      <span class="zh">📎 可上传护照、身份证、银行证明、录取信等扫描件。提交时将自动上传至顾问的 Google Drive，并发送邮件通知。每个文件不超过 <strong>10MB</strong>，总计不超过 <strong>20MB</strong>。</span>
-      <span class="en" style="display:none">📎 Upload passport scans, ID, bank statements, LOA, etc. On submission they will be uploaded to your consultant's Google Drive. Max <strong>10MB</strong> per file, <strong>20MB</strong> total.</span>
-    </div>
-    <div class="upload-drop" id="mainUploadDrop"
-         ondragover="uploadDragOver(event)"
-         ondragleave="uploadDragLeave()"
-         ondrop="uploadOnDrop(event)">
-      <input type="file" id="mainFileInput"
-             accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-             multiple
-             onchange="handleFileSelect(this.files)">
-      <div class="upload-drop-icon">📂</div>
-      <div class="upload-drop-text">
-        <span class="zh">点击选择文件，或将文件拖入此处</span>
-        <span class="en" style="display:none">Click to select, or drag & drop files here</span>
-      </div>
-      <div class="upload-drop-hint">
-        <span class="zh">支持 PDF / JPG / PNG / DOC，每个文件不超过 10MB</span>
-        <span class="en" style="display:none">PDF / JPG / PNG / DOC, max 10MB per file</span>
-      </div>
-    </div>
-    <div class="upload-file-list" id="uploadFileList"></div>
-    <div class="upload-total" id="uploadTotal"></div>
-  </div>
-</div>
-
 <!-- SUBMIT -->
 <div class="submit-area">
   <div class="submit-error" id="submitError"></div>
@@ -1075,114 +1022,6 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 // Leave empty to fall back to local JSON+Word download.
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbycvR7nQQkyKgagVUO0RE-8k9MLZFb6POYOBiBr77abyLj_9IwL_g_fqfecWmwh3viZ/exec';
 
-// ===== FILE UPLOAD =====
-const MAX_FILE_BYTES  = 10 * 1024 * 1024;  // 10 MB per file
-const MAX_TOTAL_BYTES = 20 * 1024 * 1024;  // 20 MB total
-
-let uploadedFiles = [];  // { id, name, size, type, category, base64 }
-
-const FILE_CAT_ZH = {
-  passport: '护照', idcard: '身份证', bank: '银行证明',
-  loa: '录取通知书', permit: '当前签证', diploma: '学历证书',
-  photo: '照片', other: '其他'
-};
-const FILE_CAT_EN = {
-  passport: 'Passport', idcard: 'ID Card', bank: 'Bank Statement',
-  loa: 'Acceptance Letter', permit: 'Current Permit', diploma: 'Diploma',
-  photo: 'Photo', other: 'Other'
-};
-
-function uploadDragOver(e) {
-  e.preventDefault();
-  document.getElementById('mainUploadDrop').classList.add('dragover');
-}
-function uploadDragLeave() {
-  document.getElementById('mainUploadDrop').classList.remove('dragover');
-}
-function uploadOnDrop(e) {
-  e.preventDefault();
-  document.getElementById('mainUploadDrop').classList.remove('dragover');
-  handleFileSelect(e.dataTransfer.files);
-}
-
-function handleFileSelect(files) {
-  for (const f of files) {
-    if (f.size > MAX_FILE_BYTES) {
-      showToast((currentLang === 'zh' ? '"' + f.name + '" 超过 10MB 限制' : '"' + f.name + '" exceeds 10MB limit'));
-      continue;
-    }
-    const id = Date.now() + '_' + Math.random().toString(36).slice(2);
-    const reader = new FileReader();
-    reader.onload = (function(fileId, fileName, fileSize, fileType) {
-      return function(ev) {
-        const base64 = ev.target.result.split(',')[1];
-        // Auto-guess category from filename
-        const lower = fileName.toLowerCase();
-        let cat = 'other';
-        if (/passport|护照/.test(lower)) cat = 'passport';
-        else if (/id.?card|身份证/.test(lower)) cat = 'idcard';
-        else if (/bank|银行|存款/.test(lower)) cat = 'bank';
-        else if (/loa|accept|offer|录取/.test(lower)) cat = 'loa';
-        else if (/permit|visa|签证/.test(lower)) cat = 'permit';
-        else if (/diploma|degree|学历|毕业/.test(lower)) cat = 'diploma';
-        uploadedFiles.push({ id: fileId, name: fileName, size: fileSize, type: fileType, category: cat, base64 });
-        renderUploadList();
-      };
-    })(id, f.name, f.size, f.type);
-    reader.readAsDataURL(f);
-  }
-  // reset so same file can be re-selected
-  document.getElementById('mainFileInput').value = '';
-}
-
-function renderUploadList() {
-  const list  = document.getElementById('uploadFileList');
-  const total = document.getElementById('uploadTotal');
-  if (!list) return;
-  const cats = currentLang === 'zh' ? FILE_CAT_ZH : FILE_CAT_EN;
-  const catOpts = Object.entries(FILE_CAT_ZH)
-    .map(([v]) => `<option value="${v}">${(currentLang==='zh'?FILE_CAT_ZH:FILE_CAT_EN)[v]}</option>`)
-    .join('');
-
-  list.innerHTML = uploadedFiles.map(f =>
-    `<div class="upload-file-item">
-      <span>${fileEmoji(f.name)}</span>
-      <span class="fi-name" title="${escHtml(f.name)}">${escHtml(f.name)}</span>
-      <span class="fi-size">${fmtFileSize(f.size)}</span>
-      <select class="fi-cat" onchange="setFileCat('${f.id}',this.value)">${
-        catOpts.replace(`value="${f.category}"`, `value="${f.category}" selected`)
-      }</select>
-      <span class="fi-rm" onclick="removeFile('${f.id}')">✕</span>
-    </div>`
-  ).join('');
-
-  const totalBytes = uploadedFiles.reduce((s, f) => s + f.size, 0);
-  if (uploadedFiles.length === 0) { total.textContent = ''; return; }
-  const over = totalBytes > MAX_TOTAL_BYTES;
-  total.textContent = (currentLang==='zh'?'总计: ':'Total: ') + fmtFileSize(totalBytes) + ' / 20MB';
-  total.className = 'upload-total' + (over ? ' over' : '');
-}
-
-function setFileCat(id, cat) {
-  const f = uploadedFiles.find(x => x.id === id);
-  if (f) f.category = cat;
-}
-function removeFile(id) {
-  uploadedFiles = uploadedFiles.filter(f => f.id !== id);
-  renderUploadList();
-}
-function fileEmoji(name) {
-  const ext = name.split('.').pop().toLowerCase();
-  if (['jpg','jpeg','png','gif','webp'].includes(ext)) return '🖼️';
-  if (ext === 'pdf') return '📄';
-  if (['doc','docx'].includes(ext)) return '📝';
-  return '📎';
-}
-function fmtFileSize(bytes) {
-  if (bytes < 1024)       return bytes + ' B';
-  if (bytes < 1024*1024)  return (bytes/1024).toFixed(1) + ' KB';
-  return (bytes/1024/1024).toFixed(1) + ' MB';
-}
 function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -1655,13 +1494,6 @@ async function submitForm() {
     return;
   }
 
-  // ── Validate total file size ─────────────────────────────────────────────
-  const totalBytes = uploadedFiles.reduce((s, f) => s + f.size, 0);
-  if (totalBytes > MAX_TOTAL_BYTES) {
-    showToast(currentLang === 'zh' ? '文件总大小超过 20MB，请移除部分文件' : 'Total file size exceeds 20MB, please remove some files');
-    return;
-  }
-
   // ── Disable button + show uploading state ───────────────────────────────
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
@@ -1672,7 +1504,7 @@ async function submitForm() {
   const payload = {
     clientName: name,
     formData:   data,
-    files:      uploadedFiles.map(f => ({ name: f.name, size: f.size, type: f.type, category: f.category, base64: f.base64 })),
+    files:      [],
     submittedAt: new Date().toISOString()
   };
 
