@@ -127,6 +127,26 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 </div>
 
 <!-- ===== SECTION 1: PERSONAL ===== -->
+<div class="section" style="border:2px solid var(--blue);background:var(--blue-light)">
+  <div class="section-header" style="background:var(--blue-light)">
+    <div class="section-num" style="background:var(--blue)">★</div>
+    <div>
+      <div class="section-title zh">填表人身份</div>
+      <div class="section-title en" style="display:none">Form Applicant Type</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="form-group">
+      <label><span class="zh">本表格填写的是谁的信息？</span><span class="en" style="display:none">This form is for:</span><span class="req">*</span></label>
+      <div class="radio-group">
+        <label><input type="radio" name="personType" value="Applicant" checked oninput="calcProgress()"> <span class="zh">主申请人</span><span class="en" style="display:none">Main Applicant</span></label>
+        <label><input type="radio" name="personType" value="Spouse" oninput="calcProgress()"> <span class="zh">配偶</span><span class="en" style="display:none">Spouse</span></label>
+        <label><input type="radio" name="personType" value="Dependent" oninput="calcProgress()"> <span class="zh">子女/受养人</span><span class="en" style="display:none">Child / Dependent</span></label>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="section">
   <div class="section-header">
     <div class="section-num">1</div>
@@ -705,12 +725,17 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
       </div>
     </div>
     <div class="form-group">
-      <label><span class="zh">父亲目前状态</span><span class="en" style="display:none">Father's current status</span><span class="req">*</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="fatherInCa" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
-        <label><input type="radio" name="fatherInCa" value="Yes"> <span class="zh">是（需填身份）</span><span class="en" style="display:none">Yes (include status)</span></label>
-        <label><input type="radio" name="fatherInCa" value="Deceased"> <span class="zh">已故</span><span class="en" style="display:none">Deceased</span></label>
-      </div>
+      <label><span class="zh">父亲婚姻状况</span><span class="en" style="display:none">Father's Marital Status</span><span class="req">*</span></label>
+      <select id="fatherMarital" required oninput="calcProgress()">
+        <option value="">— <span class="zh">请选择</span> / Select —</option>
+        <option value="Married">已婚 / Married</option>
+        <option value="Common-law">同居伴侣 / Common-law</option>
+        <option value="Annulled marriage">婚姻无效 / Annulled marriage</option>
+        <option value="Legally separated">法定分居 / Legally separated</option>
+        <option value="Divorced">离婚 / Divorced</option>
+        <option value="Single">单身 / Single</option>
+        <option value="Widowed">丧偶 / Widowed</option>
+      </select>
     </div>
     <hr class="divider">
     <div class="form-row cols-2">
@@ -734,12 +759,17 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
       </div>
     </div>
     <div class="form-group">
-      <label><span class="zh">母亲目前状态</span><span class="en" style="display:none">Mother's current status</span><span class="req">*</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="motherInCa" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
-        <label><input type="radio" name="motherInCa" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
-        <label><input type="radio" name="motherInCa" value="Deceased"> <span class="zh">已故</span><span class="en" style="display:none">Deceased</span></label>
-      </div>
+      <label><span class="zh">母亲婚姻状况</span><span class="en" style="display:none">Mother's Marital Status</span><span class="req">*</span></label>
+      <select id="motherMarital" required oninput="calcProgress()">
+        <option value="">— <span class="zh">请选择</span> / Select —</option>
+        <option value="Married">已婚 / Married</option>
+        <option value="Common-law">同居伴侣 / Common-law</option>
+        <option value="Annulled marriage">婚姻无效 / Annulled marriage</option>
+        <option value="Legally separated">法定分居 / Legally separated</option>
+        <option value="Divorced">离婚 / Divorced</option>
+        <option value="Single">单身 / Single</option>
+        <option value="Widowed">丧偶 / Widowed</option>
+      </select>
     </div>
     <hr class="divider">
     <div class="form-group">
@@ -1021,6 +1051,12 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 // Paste your deployed Google Apps Script /exec URL here.
 // Leave empty to fall back to local JSON+Word download.
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbycvR7nQQkyKgagVUO0RE-8k9MLZFb6POYOBiBr77abyLj_9IwL_g_fqfecWmwh3viZ/exec';
+
+// ===== PARTNER MODE =====
+const _partnerName = new URLSearchParams(window.location.search).get('partner');
+if (_partnerName) {
+  document.querySelectorAll('.brand-header').forEach(el => el.style.display = 'none');
+}
 
 function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1517,6 +1553,7 @@ async function submitForm() {
     // no-cors: response is opaque — assume success after fetch resolves
     localStorage.removeItem(DRAFT_KEY);
     document.getElementById('successMsg').classList.add('show');
+    btn.innerHTML = '<span>✅</span><span class="zh">已提交</span><span class="en" style="display:none">Submitted</span>';
     window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'});
   } catch (err) {
     btn.disabled = false;

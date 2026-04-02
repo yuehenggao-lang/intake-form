@@ -207,6 +207,12 @@ input[type=text].error{border-color:var(--red)}
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbw588dUZO-67p5pVapZ7kx9dN2-cGzfv1CkaK2QEICZDyT1aj61BCWB81aXsLC68lMU_w/exec';
 const MAX_BYTES = 4 * 1024 * 1024; // 4MB
 
+// ===== PARTNER MODE =====
+const _partnerName = new URLSearchParams(window.location.search).get('partner');
+if (_partnerName) {
+  document.querySelectorAll('.brand-header').forEach(el => el.style.display = 'none');
+}
+
 // ===== LANGUAGE =====
 let currentLang = 'zh';
 function setLang(lang) {
@@ -446,7 +452,8 @@ async function startUpload() {
         docTypes: fileType ? [fileType] : [],
         fileName: entry.compressed.name,
         mimeType: entry.compressed.type || 'application/octet-stream',
-        data: b64
+        data: b64,
+        ..._partnerName ? { partnerName: _partnerName } : {}
       };
 
       await fetch(GAS_URL, {
