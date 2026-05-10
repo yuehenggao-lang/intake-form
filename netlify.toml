@@ -1,0 +1,25 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# Friendly URLs: /api/intake -> /.netlify/functions/intake
+[[redirects]]
+  from = "/api/intake"
+  to   = "/.netlify/functions/intake"
+  status = 200
+
+[[redirects]]
+  from = "/api/upload"
+  to   = "/.netlify/functions/upload"
+  status = 200
+
+# Optional pretty paths for the two pages
+[[redirects]]
+  from = "/intake"
+  to   = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/upload"
+  to   = "/upload.html"
+  status = 200
