@@ -147,6 +147,42 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
   </div>
 </div>
 
+<!-- ===== APPLICATION TYPE (choose first) ===== -->
+<div class="section" style="border:2px solid var(--blue);background:var(--blue-light)">
+  <div class="section-header" style="background:var(--blue-light)">
+    <div class="section-num" style="background:var(--blue)">★</div>
+    <div>
+      <div class="section-title zh">申请类型</div>
+      <div class="section-title en" style="display:none">Application Type</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="form-group">
+      <label><span class="zh">申请类型</span><span class="en" style="display:none">Application Type</span><span class="req">*</span></label>
+      <select id="appType" required onchange="applySectionVisibility(this.value);calcProgress()">
+        <option value=""></option>
+        <option value="study-permit-outland">Study Permit (New) / 学签（新申请）</option>
+        <option value="study-permit-inland">Study Permit Extension / 学签续签</option>
+        <option value="work-permit-outland">Work Permit (LMIA) / 工签（LMIA）</option>
+        <option value="pgwp">Post-Graduation Work Permit / 毕业工签</option>
+        <option value="spouse-owp">Spouse Open Work Permit / 配偶开放工签</option>
+        <option value="work-permit-outland">Work Permit (Other) / 工签（其他）</option>
+        <option value="visitor-trv">Visitor Visa / 旅游签</option>
+        <option value="visitor-extension">Visitor Extension / 延长访客</option>
+        <option value="pr-economic">PR - Express Entry / 永居快速通道</option>
+        <option value="pnp">PR - Provincial Nominee / 省提名</option>
+        <option value="spousal-sponsorship">PR - Spousal Sponsorship / 配偶担保</option>
+        <option value="pr-card-renewal">PR Card Renewal / 永居卡续签</option>
+        <option value="citizenship-adult">Citizenship (Adult) / 入籍（成人）</option>
+        <option value="citizenship-minor">Citizenship (Minor) / 入籍（未成年）</option>
+        <option value="Other">Other / 其他</option>
+      </select>
+      <span class="hint zh">请先选择申请类型，下方将只显示该类型需要填写的栏目。</span>
+      <span class="hint en" style="display:none">Select your application type first — only the relevant sections will show below.</span>
+    </div>
+  </div>
+</div>
+
 <div class="section">
   <div class="section-header">
     <div class="section-num">1</div>
@@ -422,7 +458,7 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 </div>
 
 <!-- ===== SECTION 5: LANGUAGE TESTS ===== -->
-<div class="section">
+<div class="section" data-section="language-tests">
   <div class="section-header">
     <div class="section-num">5</div>
     <div>
@@ -460,7 +496,7 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 </div>
 
 <!-- ===== SECTION 6: CANADA ENTRY & VISA HISTORY ===== -->
-<div class="section">
+<div class="section" data-section="canada-history">
   <div class="section-header">
     <div class="section-num">6</div>
     <div>
@@ -578,17 +614,25 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 </div>
 
 <!-- ===== SECTION 8: EDUCATION ===== -->
-<div class="section">
+<div class="section" data-section="education">
   <div class="section-header">
     <div class="section-num">8</div>
     <div>
-      <div class="section-title zh">教育经历（从小学开始，按时间顺序）</div>
-      <div class="section-title en" style="display:none">Education History (start from primary school, chronological)</div>
+      <div class="section-title zh">教育经历（高中及以上）</div>
+      <div class="section-title en" style="display:none">Education (high school and above)</div>
     </div>
   </div>
   <div class="section-body">
-    <div class="section-note zh">请填写从小学开始的所有教育经历，时间不能有间断。</div>
-    <div class="section-note en" style="display:none">List all education from primary school. No gaps allowed.</div>
+    <div class="section-note zh">请填写高中及以上的教育经历，按时间顺序，时间不能有间断。</div>
+    <div class="section-note en" style="display:none">List education from high school onward, chronological, no gaps.</div>
+    <div class="form-group">
+      <label><span class="zh">是否有高等教育（大专/本科/研究生及以上）？</span><span class="en" style="display:none">Any post-secondary education (college/bachelor/graduate)?</span><span class="req">*</span></label>
+      <div class="radio-group">
+        <label><input type="radio" name="hasHigherEd" value="No" onchange="toggleHasHigherEd()"> <span class="zh">无</span><span class="en" style="display:none">No</span></label>
+        <label><input type="radio" name="hasHigherEd" value="Yes" onchange="toggleHasHigherEd()"> <span class="zh">有</span><span class="en" style="display:none">Yes</span></label>
+      </div>
+      <div id="hasHigherEdHint" style="display:none"><span class="hint zh">无高等教育时，下表只需填写高中阶段经历即可。</span><span class="hint en" style="display:none">No post-secondary: you only need to list your high-school education below.</span></div>
+    </div>
     <table class="dynamic-table" id="educationTable">
       <thead><tr>
         <th class="zh">开始年月<span style="color:#dc2626">*</span></th><th class="en" style="display:none">From<span style="color:#dc2626">*</span></th>
@@ -608,8 +652,45 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
   </div>
 </div>
 
+<!-- ===== SECTION 8b: EDUCATION YEARS BY LEVEL (PR economic only) ===== -->
+<div class="section" data-section="education-years">
+  <div class="section-header">
+    <div class="section-num">8b</div>
+    <div>
+      <div class="section-title zh">各阶段教育年限（用于 Express Entry 评估）</div>
+      <div class="section-title en" style="display:none">Years of education by level (for Express Entry assessment)</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="section-note zh">请填写每个阶段实际就读的年数（无则填 0）。</div>
+    <div class="section-note en" style="display:none">Enter the number of years actually studied at each level (enter 0 if none).</div>
+    <div class="form-row cols-3">
+      <div class="form-group">
+        <label><span class="zh">小学年数</span><span class="en" style="display:none">Primary (years)</span></label>
+        <input type="number" id="eduYearsPrimary" min="0" max="20" placeholder="6" oninput="calcProgress()">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">初中年数</span><span class="en" style="display:none">Junior high (years)</span></label>
+        <input type="number" id="eduYearsJuniorHigh" min="0" max="20" placeholder="3" oninput="calcProgress()">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">高中年数</span><span class="en" style="display:none">Senior high (years)</span></label>
+        <input type="number" id="eduYearsSeniorHigh" min="0" max="20" placeholder="3" oninput="calcProgress()">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">大专/本科年数</span><span class="en" style="display:none">College / Bachelor (years)</span></label>
+        <input type="number" id="eduYearsCollegeBachelor" min="0" max="20" placeholder="4" oninput="calcProgress()">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">研究生及以上年数</span><span class="en" style="display:none">Graduate and above (years)</span></label>
+        <input type="number" id="eduYearsGraduate" min="0" max="20" placeholder="0" oninput="calcProgress()">
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== SECTION 9: EMPLOYMENT ===== -->
-<div class="section">
+<div class="section" data-section="employment">
   <div class="section-header">
     <div class="section-num">9</div>
     <div>
@@ -640,7 +721,7 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 </div>
 
 <!-- ===== SECTION 10: ADDRESS HISTORY ===== -->
-<div class="section">
+<div class="section" data-section="address-history">
   <div class="section-header">
     <div class="section-num">10</div>
     <div>
@@ -668,7 +749,7 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 </div>
 
 <!-- ===== SECTION 11: TRAVEL HISTORY ===== -->
-<div class="section">
+<div class="section" data-section="travel-history">
   <div class="section-header">
     <div class="section-num">11</div>
     <div>
@@ -695,7 +776,7 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 </div>
 
 <!-- ===== SECTION 12: FAMILY ===== -->
-<div class="section">
+<div class="section" data-section="family-members">
   <div class="section-header">
     <div class="section-num">12</div>
     <div>
@@ -813,7 +894,7 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 </div>
 
 <!-- ===== SECTION 13: CANADA CONTACTS ===== -->
-<div class="section">
+<div class="section" data-section="canadian-contacts">
   <div class="section-header">
     <div class="section-num">13</div>
     <div>
@@ -850,27 +931,8 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
     </div>
   </div>
   <div class="section-body">
-    <div class="form-group">
-      <label><span class="zh">申请类型</span><span class="en" style="display:none">Application Type</span><span class="req">*</span></label>
-      <select id="appType" required onchange="toggleAppType();calcProgress()">
-        <option value=""></option>
-        <option value="Study Permit - New">Study Permit (New) / 学签（新申请）</option>
-        <option value="Study Permit - Extension">Study Permit Extension / 学签续签</option>
-        <option value="Work Permit - LMIA">Work Permit (LMIA) / 工签（LMIA）</option>
-        <option value="Work Permit - PGWP">Post-Graduation Work Permit / 毕业工签</option>
-        <option value="Work Permit - Spouse OWP">Spouse Open Work Permit / 配偶开放工签</option>
-        <option value="Work Permit - Other">Work Permit (Other) / 工签（其他）</option>
-        <option value="Visitor Visa">Visitor Visa / 旅游签</option>
-        <option value="Visitor Extension">Visitor Extension / 延长访客</option>
-        <option value="PR - Express Entry">PR - Express Entry / 永居快速通道</option>
-        <option value="PR - PNP">PR - Provincial Nominee / 省提名</option>
-        <option value="PR - Sponsorship">PR - Spousal Sponsorship / 配偶担保</option>
-        <option value="Other">Other / 其他</option>
-      </select>
-    </div>
-
     <!-- Study Permit Fields -->
-    <div class="conditional" id="studyFields">
+    <div class="conditional" id="studyFields" data-section="study-details">
       <div class="form-row cols-2">
         <div class="form-group">
           <label><span class="zh">学校名称</span><span class="en" style="display:none">Institution Name</span><span class="req">*</span></label>
@@ -912,24 +974,26 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
     </div>
 
     <!-- Work Permit (LMIA) Fields -->
-    <div class="conditional" id="workLmiaFields">
+    <div class="conditional" id="workLmiaFields" data-section="work-offer">
+      <div class="section-note zh">如暂无 job offer（如毕业工签 PGWP、配偶开放工签等开放类工签），以下雇主信息请填 N/A。</div>
+      <div class="section-note en" style="display:none">If you don't have a job offer yet (e.g. open work permits like PGWP or spousal open work permit), enter N/A for the employer fields below.</div>
       <div class="form-row cols-2">
         <div class="form-group">
-          <label><span class="zh">雇主名称</span><span class="en" style="display:none">Employer Name</span><span class="req">*</span></label>
+          <label><span class="zh">雇主名称</span><span class="en" style="display:none">Employer Name</span></label>
           <input type="text" id="workEmployer" placeholder="如：ABC Company Ltd.">
         </div>
         <div class="form-group">
-          <label><span class="zh">雇主地址</span><span class="en" style="display:none">Employer Address</span><span class="req">*</span></label>
+          <label><span class="zh">雇主地址</span><span class="en" style="display:none">Employer Address</span></label>
           <input type="text" id="workEmployerAddr" placeholder="如：100 Main St, Vancouver, BC V6B 1A1">
         </div>
       </div>
       <div class="form-row cols-3">
         <div class="form-group">
-          <label><span class="zh">职位名称</span><span class="en" style="display:none">Position / Job Title</span><span class="req">*</span></label>
+          <label><span class="zh">职位名称</span><span class="en" style="display:none">Position / Job Title</span></label>
           <input type="text" id="workPosition" placeholder="如：Cook, Truck Driver, Nanny">
         </div>
         <div class="form-group">
-          <label><span class="zh">时薪/月薪（CAD）</span><span class="en" style="display:none">Hourly/Monthly Wage (CAD)</span><span class="req">*</span></label>
+          <label><span class="zh">时薪/月薪（CAD）</span><span class="en" style="display:none">Hourly/Monthly Wage (CAD)</span></label>
           <input type="text" id="workWage" placeholder="如：$20/hour 或 $3,500/month">
         </div>
         <div class="form-group">
@@ -939,7 +1003,7 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
       </div>
       <div class="form-row cols-2">
         <div class="form-group">
-          <label><span class="zh">入职日期</span><span class="en" style="display:none">Start Date</span><span class="req">*</span></label>
+          <label><span class="zh">入职日期</span><span class="en" style="display:none">Start Date</span></label>
           <input type="date" id="workStart">
         </div>
         <div class="form-group">
@@ -1003,6 +1067,851 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
 </div>
 
 
+<!-- ===== RESIDENCY OBLIGATION (PR Card Renewal) ===== -->
+<div class="section" data-section="residency-obligation" style="display:none">
+  <div class="section-header">
+    <div class="section-num">R</div>
+    <div>
+      <div class="section-title zh">居住义务</div>
+      <div class="section-title en" style="display:none">Residency Obligation</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">5年内境内天数</span><span class="en" style="display:none">Days in Canada (5 yrs)</span></label>
+        <input type="number" id="daysInCanada5yr" min="0" placeholder="e.g. 730" oninput="calcProgress()">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">是否随加籍配偶/受雇加企等例外</span><span class="en" style="display:none">Accompanying / employment exception</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="accompanyingException" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          <label><input type="radio" name="accompanyingException" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label><span class="zh">5年地址史（按月）</span><span class="en" style="display:none">Address history (5 yrs)</span></label>
+      <table class="dynamic-table" id="addressHistory5yrTable">
+        <thead><tr>
+          <th class="zh">详细地址</th><th class="en" style="display:none">Full Address</th>
+          <th class="zh">开始日期</th><th class="en" style="display:none">From</th>
+          <th class="zh">结束日期</th><th class="en" style="display:none">To</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="addressHistory5yrBody"></tbody>
+      </table>
+      <button type="button" class="btn-add" onclick="addRow('addressHistory5yr')">
+        <span>＋</span><span class="zh">添加地址</span><span class="en" style="display:none">Add Address</span>
+      </button>
+    </div>
+    <div class="form-group">
+      <label><span class="zh">5年离境记录</span><span class="en" style="display:none">Absences (5 yrs)</span></label>
+      <table class="dynamic-table" id="absences5yrTable">
+        <thead><tr>
+          <th class="zh">离开日期</th><th class="en" style="display:none">Departure</th>
+          <th class="zh">返回日期</th><th class="en" style="display:none">Return</th>
+          <th class="zh">目的地</th><th class="en" style="display:none">Destination</th>
+          <th class="zh">天数</th><th class="en" style="display:none">Days</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="absences5yrBody"></tbody>
+      </table>
+      <button type="button" class="btn-add" onclick="addRow('absences5yr')">
+        <span>＋</span><span class="zh">添加离境记录</span><span class="en" style="display:none">Add Absence</span>
+      </button>
+    </div>
+    <div class="form-group">
+      <label><span class="zh">报税 (NOA) 备注</span><span class="en" style="display:none">Filed tax (NOA) note</span></label>
+      <input type="text" id="filedTaxNote" placeholder="e.g. 已报税 2021-2025 / Filed NOA 2021-2025">
+    </div>
+  </div>
+</div>
+
+<!-- ===== SPONSOR (Spousal Sponsorship) ===== -->
+<div class="section" data-section="sponsor" style="display:none">
+  <div class="section-header">
+    <div class="section-num">S</div>
+    <div>
+      <div class="section-title zh">担保人信息</div>
+      <div class="section-title en" style="display:none">Sponsor Information</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="section-note zh">担保人信息（对应 IMM1344 第1部分 + IMM5532 A 部分）。请如实填写，含身份、婚姻、居住及收入。</div>
+    <div class="section-note en" style="display:none">Sponsor details (IMM1344 Part 1 + IMM5532 Part A). Complete identity, marital, residence and income honestly.</div>
+
+    <!-- Identity -->
+    <div class="form-row cols-3">
+      <div class="form-group">
+        <label><span class="zh">担保人姓(拼音)</span><span class="en" style="display:none">Sponsor family name</span></label>
+        <input type="text" id="sponsorFamilyName" placeholder="Family name / 姓" oninput="calcProgress()">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">担保人名(拼音)</span><span class="en" style="display:none">Sponsor given name</span></label>
+        <input type="text" id="sponsorGivenName" placeholder="Given name / 名" oninput="calcProgress()">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">曾用名 (如有)</span><span class="en" style="display:none">Alias / other name (if any)</span></label>
+        <input type="text" id="sponsorAlias" placeholder="Other name used / 曾用名">
+      </div>
+    </div>
+    <div class="form-row cols-3">
+      <div class="form-group">
+        <label><span class="zh">性别</span><span class="en" style="display:none">Gender</span></label>
+        <select id="sponsorGender">
+          <option value=""></option>
+          <option value="Male">Male / 男</option>
+          <option value="Female">Female / 女</option>
+          <option value="Another gender">Another gender / 其他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">出生日期</span><span class="en" style="display:none">Date of birth</span></label>
+        <input type="date" id="sponsorDob">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">出生城市</span><span class="en" style="display:none">City of birth</span></label>
+        <input type="text" id="sponsorPobCity" placeholder="City / 城市">
+      </div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">出生国家</span><span class="en" style="display:none">Country of birth</span></label>
+        <input type="text" id="sponsorPobCountry" placeholder="Country / 国家">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">担保人姓名（合并，如填写则照用）</span><span class="en" style="display:none">Sponsor full name (legacy, optional)</span></label>
+        <input type="text" id="sponsorName" placeholder="Full name / 全名（可留空，优先用姓/名字段）">
+      </div>
+    </div>
+
+    <!-- Status in Canada -->
+    <div class="form-row cols-3">
+      <div class="form-group">
+        <label><span class="zh">担保人身份</span><span class="en" style="display:none">Sponsor status</span></label>
+        <select id="sponsorStatus">
+          <option value=""></option>
+          <option value="Canadian citizen">Canadian citizen / 加拿大公民</option>
+          <option value="Permanent Resident">Permanent Resident / 永久居民</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">UCI (如有)</span><span class="en" style="display:none">UCI (if any)</span></label>
+        <input type="text" id="sponsorUci" placeholder="UCI / 客户身份号">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">成为 PR / 公民日期</span><span class="en" style="display:none">Date became PR / citizen</span></label>
+        <input type="date" id="sponsorStatusDate">
+      </div>
+    </div>
+
+    <!-- Co-signer + marital -->
+    <div class="form-row cols-3">
+      <div class="form-group">
+        <label><span class="zh">是否有共签人</span><span class="en" style="display:none">Have co-signer</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="coSigner" value="No"> <span class="zh">无</span><span class="en" style="display:none">No</span></label>
+          <label><input type="radio" name="coSigner" value="Yes"> <span class="zh">有</span><span class="en" style="display:none">Yes</span></label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">担保人婚姻状况</span><span class="en" style="display:none">Sponsor marital status</span></label>
+        <select id="sponsorMaritalStatus">
+          <option value=""></option>
+          <option value="Married">Married / 已婚</option>
+          <option value="Common-law">Common-law / 同居</option>
+          <option value="Single">Single / 单身</option>
+          <option value="Divorced">Divorced / 离异</option>
+          <option value="Widowed">Widowed / 丧偶</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">结婚/同居开始日期</span><span class="en" style="display:none">Marriage / cohabitation date</span></label>
+        <input type="date" id="sponsorMarriageDate">
+      </div>
+    </div>
+
+    <!-- Previous relationships -->
+    <div class="form-group">
+      <label><span class="zh">担保人是否有过婚姻或同居关系？</span><span class="en" style="display:none">Any previous marriages or common-law relationships?</span></label>
+      <div class="radio-group">
+        <label><input type="radio" name="sponsorPrevMarried" value="No" onchange="toggleSponsorPrevMarried()"> <span class="zh">无</span><span class="en" style="display:none">No</span></label>
+        <label><input type="radio" name="sponsorPrevMarried" value="Yes" onchange="toggleSponsorPrevMarried()"> <span class="zh">有</span><span class="en" style="display:none">Yes</span></label>
+      </div>
+    </div>
+    <div class="conditional" id="sponsorPrevSpousesSection">
+      <table class="dynamic-table" id="sponsorPrevSpousesTable">
+        <thead><tr>
+          <th class="zh">姓</th><th class="en" style="display:none">Family</th>
+          <th class="zh">名</th><th class="en" style="display:none">Given</th>
+          <th class="zh">出生日期</th><th class="en" style="display:none">DOB</th>
+          <th class="zh">关系起</th><th class="en" style="display:none">From</th>
+          <th class="zh">关系止</th><th class="en" style="display:none">To</th>
+          <th class="zh">离婚/分居/丧偶日期</th><th class="en" style="display:none">End date</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="sponsorPrevSpousesBody"></tbody>
+      </table>
+      <button type="button" class="btn-add" onclick="addRow('sponsorPrevSpouses')">
+        <span>＋</span><span class="zh">添加</span><span class="en" style="display:none">Add</span>
+      </button>
+    </div>
+
+    <!-- Contact -->
+    <div class="form-group">
+      <label><span class="zh">邮寄地址</span><span class="en" style="display:none">Mailing address</span></label>
+      <input type="text" id="sponsorMailingAddress" placeholder="Full mailing address / 详细邮寄地址">
+    </div>
+    <div class="form-group">
+      <label><span class="zh">居住地址（如与邮寄地址不同）</span><span class="en" style="display:none">Residential address (if different)</span></label>
+      <input type="text" id="sponsorResidentialAddress" placeholder="Residential address / 居住地址">
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">电话</span><span class="en" style="display:none">Phone</span></label>
+        <input type="text" id="sponsorPhone" placeholder="+1 ...">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">邮箱</span><span class="en" style="display:none">Email</span></label>
+        <input type="text" id="sponsorEmail" placeholder="email@example.com">
+      </div>
+    </div>
+
+    <!-- Address history (5 yr) -->
+    <div class="form-group">
+      <label><span class="zh">近5年居住地址史</span><span class="en" style="display:none">Address history (past 5 years)</span></label>
+    </div>
+    <table class="dynamic-table" id="sponsorAddressHistoryTable">
+      <thead><tr>
+        <th class="zh">起</th><th class="en" style="display:none">From</th>
+        <th class="zh">止</th><th class="en" style="display:none">To</th>
+        <th class="zh">街道</th><th class="en" style="display:none">Street</th>
+        <th class="zh">城市</th><th class="en" style="display:none">City</th>
+        <th class="zh">省/州</th><th class="en" style="display:none">Province</th>
+        <th class="zh">邮编</th><th class="en" style="display:none">Postal</th>
+        <th class="zh">国家</th><th class="en" style="display:none">Country</th>
+        <th></th>
+      </tr></thead>
+      <tbody id="sponsorAddressHistoryBody"></tbody>
+    </table>
+    <button type="button" class="btn-add" onclick="addRow('sponsorAddressHistory')">
+      <span>＋</span><span class="zh">添加地址</span><span class="en" style="display:none">Add Address</span>
+    </button>
+
+    <!-- Employment & income -->
+    <div class="form-group" style="margin-top:12px">
+      <label><span class="zh">就业与收入</span><span class="en" style="display:none">Employment & income</span></label>
+    </div>
+    <table class="dynamic-table" id="sponsorEmployment2Table">
+      <thead><tr>
+        <th class="zh">起</th><th class="en" style="display:none">From</th>
+        <th class="zh">止</th><th class="en" style="display:none">To</th>
+        <th class="zh">雇主</th><th class="en" style="display:none">Employer</th>
+        <th class="zh">职位</th><th class="en" style="display:none">Occupation</th>
+        <th class="zh">月收入</th><th class="en" style="display:none">Monthly income</th>
+        <th></th>
+      </tr></thead>
+      <tbody id="sponsorEmployment2Body"></tbody>
+    </table>
+    <button type="button" class="btn-add" onclick="addRow('sponsorEmployment2')">
+      <span>＋</span><span class="zh">添加就业</span><span class="en" style="display:none">Add Employment</span>
+    </button>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">担保人在职情况（概述，可选）</span><span class="en" style="display:none">Sponsor employment (summary, optional)</span></label>
+        <input type="text" id="sponsorEmployment" placeholder="e.g. Software Engineer at ABC Inc.">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">担保人收入备注</span><span class="en" style="display:none">Sponsor income note</span></label>
+        <input type="text" id="sponsorIncomeNote" placeholder="e.g. 2025 NOA line 15000: $XX,XXX">
+      </div>
+    </div>
+
+    <!-- Education years (IMM5532) -->
+    <div class="form-group" style="margin-top:12px">
+      <label><span class="zh">各阶段教育年数 (IMM5532)</span><span class="en" style="display:none">Years of education by level (IMM5532)</span></label>
+    </div>
+    <div class="form-row cols-4">
+      <div class="form-group">
+        <label><span class="zh">小学年数</span><span class="en" style="display:none">Elementary (years)</span></label>
+        <input type="number" id="sponsorEduElementaryYears" min="0" max="20" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">中学年数</span><span class="en" style="display:none">Secondary (years)</span></label>
+        <input type="number" id="sponsorEduSecondaryYears" min="0" max="20" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">大专/本科年数</span><span class="en" style="display:none">College/University (years)</span></label>
+        <input type="number" id="sponsorEduCollegeYears" min="0" max="20" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">研究生年数</span><span class="en" style="display:none">Postgraduate (years)</span></label>
+        <input type="number" id="sponsorEduPostgradYears" min="0" max="20" placeholder="0">
+      </div>
+    </div>
+
+    <!-- Residency declaration -->
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">是否居住在加拿大境外？</span><span class="en" style="display:none">Living outside Canada?</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="sponsorLiveOutsideCanada" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          <label><input type="radio" name="sponsorLiveOutsideCanada" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">是否居住魁北克？</span><span class="en" style="display:none">Living in Quebec?</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="sponsorLiveQuebec" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          <label><input type="radio" name="sponsorLiveQuebec" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">上次在加居住时间</span><span class="en" style="display:none">Last lived in Canada (when)</span></label>
+        <input type="text" id="sponsorLastLivedCanada" placeholder="e.g. 2018-2021 / 最近一次在加居住">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">计划返加时间</span><span class="en" style="display:none">Plan to return to Canada (when)</span></label>
+        <input type="text" id="sponsorPlanReturnCanada" placeholder="e.g. upon approval / 获批后">
+      </div>
+    </div>
+
+    <!-- Eligibility self-check -->
+    <div class="form-group" style="margin-top:12px">
+      <label><span class="zh">担保资格自查</span><span class="en" style="display:none">Sponsorship eligibility self-check</span></label>
+      <div class="hint zh">以下若有「是」可能影响担保资格，请如实填写。</div>
+      <div class="hint en" style="display:none">A "Yes" below may affect sponsorship eligibility — please answer honestly.</div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">是否年满18岁？</span><span class="en" style="display:none">At least 18 years old?</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="eligOver18" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+          <label><input type="radio" name="eligOver18" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">是否为加拿大公民或永久居民？</span><span class="en" style="display:none">Canadian citizen or PR?</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="eligCitizenOrPR" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+          <label><input type="radio" name="eligCitizenOrPR" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">是否领取社会救济（残疾除外）？</span><span class="en" style="display:none">On social assistance (other than disability)?</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="eligSocialAssistance" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          <label><input type="radio" name="eligSocialAssistance" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">是否处于破产程序中？</span><span class="en" style="display:none">Currently in bankruptcy?</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="eligBankruptcy" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          <label><input type="radio" name="eligBankruptcy" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">过往担保是否违约 / 被担保人领救济？</span><span class="en" style="display:none">Prior sponsorship default / sponsored person on assistance?</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="eligPrevSponsorDefault" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          <label><input type="radio" name="eligPrevSponsorDefault" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">是否有未决的过往申请问题？</span><span class="en" style="display:none">Pending prior application issues?</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="eligPrevApplication" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          <label><input type="radio" name="eligPrevApplication" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RELATIONSHIP (Spousal Sponsorship) ===== -->
+<div class="section" data-section="relationship" style="display:none">
+  <div class="section-header">
+    <div class="section-num">RL</div>
+    <div>
+      <div class="section-title zh">关系真实性</div>
+      <div class="section-title en" style="display:none">Relationship</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="section-note"><span class="zh">以下问题对应 IMM5532《关系信息及担保人评估》第 C 部分（关系真实性，问题 1–11）。</span><span class="en" style="display:none">The following questions mirror IMM5532 (Relationship Information and Sponsorship Evaluation) Part C — Genuineness of the relationship, Questions 1–11.</span></div>
+
+    <!-- Relationship type (used downstream; kept) -->
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">关系类型</span><span class="en" style="display:none">Relationship type</span></label>
+        <select id="relationshipType">
+          <option value=""></option>
+          <option value="Spouse">Spouse / 配偶</option>
+          <option value="Common-law">Common-law / 同居伴侣</option>
+          <option value="Conjugal">Conjugal / 夫妻型 (Conjugal)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">结婚/开始同居日期</span><span class="en" style="display:none">Marriage / cohabitation date</span></label>
+        <input type="date" id="marriageOrCohabDate">
+      </div>
+    </div>
+
+    <!-- ===== Q1: First in-person meeting ===== -->
+    <div class="form-group">
+      <label><span class="zh">Q1. 你们何时、何地首次当面见面？</span><span class="en" style="display:none">Q1. When and where did you first meet your sponsor/applicant in person?</span></label>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">首次见面日期</span><span class="en" style="display:none">Date first met in person</span></label>
+        <input type="date" id="relFirstMetDate">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">首次见面地点</span><span class="en" style="display:none">Where you first met</span></label>
+        <input type="text" id="relFirstMetWhere" placeholder="城市/场所 / city, place">
+      </div>
+    </div>
+    <div class="form-group">
+      <label><span class="zh">请描述初次见面的经过</span><span class="en" style="display:none">Describe the circumstances of your first meeting</span></label>
+      <textarea id="relFirstMetCircumstances" rows="3" placeholder="初次见面的具体情形 / what happened when you first met..."></textarea>
+    </div>
+    <div class="form-group">
+      <label><span class="zh">是否有人介绍你们认识？</span><span class="en" style="display:none">Were you introduced by someone?</span></label>
+      <div class="radio-group">
+        <label><input type="radio" name="relIntroduced" value="No" onchange="toggleRelIntroduced()"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+        <label><input type="radio" name="relIntroduced" value="Yes" onchange="toggleRelIntroduced()"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+      </div>
+    </div>
+    <div class="conditional" id="relWhoIntroducedSection">
+      <div class="form-group">
+        <label><span class="zh">由谁介绍？</span><span class="en" style="display:none">Who introduced you?</span></label>
+        <input type="text" id="relWhoIntroduced" placeholder="介绍人姓名及与双方关系 / name and relationship">
+      </div>
+    </div>
+
+    <!-- ===== Q2: Contact before meeting ===== -->
+    <div class="form-group" style="margin-top:12px">
+      <label><span class="zh">Q2. 你们在当面见面前是否有过联系？</span><span class="en" style="display:none">Q2. Did you have any contact before you met in person?</span></label>
+      <div class="radio-group">
+        <label><input type="radio" name="relContactBefore" value="No" onchange="toggleRelContactBefore()"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+        <label><input type="radio" name="relContactBefore" value="Yes" onchange="toggleRelContactBefore()"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+      </div>
+    </div>
+    <div class="conditional" id="relContactDetailsSection">
+      <div class="form-group">
+        <label><span class="zh">请说明：谁先联系、首次联系日期、联系方式（电话/信件/邮件/社交媒体等）</span><span class="en" style="display:none">Explain: who contacted whom first, date of first contact, and method (phone/letter/email/social media, etc.)</span></label>
+        <textarea id="relContactDetails" rows="3" placeholder="谁先联系、首次联系日期、方式 / who, when, how..."></textarea>
+      </div>
+    </div>
+
+    <!-- ===== Q3: Living together now ===== -->
+    <div class="form-group" style="margin-top:12px">
+      <label><span class="zh">Q3. 你们现在是否同住？</span><span class="en" style="display:none">Q3. Are you currently living together?</span></label>
+      <div class="radio-group">
+        <label><input type="radio" name="relLivingTogether" value="Yes" onchange="toggleRelLivingTogether()"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        <label><input type="radio" name="relLivingTogether" value="No" onchange="toggleRelLivingTogether()"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+      </div>
+    </div>
+    <div class="conditional" id="relCohabDurationSection">
+      <div class="form-group">
+        <label><span class="zh">同居时长 / 起止期间</span><span class="en" style="display:none">How long / period you have lived together</span></label>
+        <input type="text" id="relCohabDuration" placeholder="e.g. 自 2024-05 起，约 1 年 / since 2024-05, ~1 year">
+      </div>
+    </div>
+    <div class="conditional" id="relCohabExplainNoSection">
+      <div class="form-group">
+        <label><span class="zh">请解释为何未同住；曾同住过的时间与地点；若任一方与他人同住，请注明其姓名与关系</span><span class="en" style="display:none">Explain why not; any past period/place you lived together; if either of you lives with anyone else, give their name and relationship</span></label>
+        <textarea id="relCohabExplainNo" rows="3" placeholder="原因 + 过往同居 + 同住他人姓名/关系 / reason, past cohabitation, others living with you..."></textarea>
+      </div>
+    </div>
+
+    <!-- ===== Q4: Visits if not living together ===== -->
+    <div class="form-group" style="margin-top:12px">
+      <label><span class="zh">Q4. 若未同住，你们是否互相探访？</span><span class="en" style="display:none">Q4. If you are not living together, have you visited each other?</span></label>
+      <div class="radio-group">
+        <label><input type="radio" name="relVisited" value="Yes" onchange="toggleRelVisited()"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        <label><input type="radio" name="relVisited" value="No" onchange="toggleRelVisited()"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+      </div>
+    </div>
+    <div class="conditional" id="relVisitExplainSection">
+      <div class="form-group">
+        <label><span class="zh">请解释为何未互访</span><span class="en" style="display:none">Explain why you have not visited each other</span></label>
+        <input type="text" id="relVisitExplain" placeholder="原因 / reason">
+      </div>
+    </div>
+    <div class="conditional" id="relationshipVisitsSection">
+      <div class="form-group">
+        <label><span class="zh">探访/见面记录</span><span class="en" style="display:none">Visits history</span></label>
+      </div>
+      <table class="dynamic-table" id="relationshipVisitsTable">
+        <thead><tr>
+          <th class="zh">起</th><th class="en" style="display:none">From</th>
+          <th class="zh">止</th><th class="en" style="display:none">To</th>
+          <th class="zh">谁探访谁</th><th class="en" style="display:none">Who visited whom</th>
+          <th class="zh">是否同住</th><th class="en" style="display:none">Stayed together</th>
+          <th class="zh">在何处居住</th><th class="en" style="display:none">Where stayed</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="relationshipVisitsBody"></tbody>
+      </table>
+      <button type="button" class="btn-add" onclick="addRow('relationshipVisits')">
+        <span>＋</span><span class="zh">添加探访</span><span class="en" style="display:none">Add Visit</span>
+      </button>
+    </div>
+
+    <!-- ===== Q5: Languages used ===== -->
+    <div class="form-group" style="margin-top:12px">
+      <label><span class="zh">Q5. 你们沟通时使用的语言</span><span class="en" style="display:none">Q5. What language(s) do you use to communicate with each other?</span></label>
+      <input type="text" id="relCommLanguages" placeholder="e.g. 普通话、英语 / Mandarin, English">
+    </div>
+
+    <!-- ===== Q6: Communication frequency & method when apart ===== -->
+    <div class="form-group">
+      <label><span class="zh">Q6. 当你们分隔两地时，多久、以何种方式沟通？</span><span class="en" style="display:none">Q6. When you are apart, how often and how do you communicate?</span></label>
+      <textarea id="relCommFrequency" rows="3" placeholder="频率 + 方式（微信/视频/电话/邮件等）/ how often and how (WeChat, video, phone, email)..."></textarea>
+    </div>
+
+    <!-- ===== Q7: Do close friends, family, children know ===== -->
+    <div class="form-group" style="margin-top:12px">
+      <label><span class="zh">Q7. 你们的密友、家人和子女是否知晓此关系？</span><span class="en" style="display:none">Q7. Do your close friends, family members and children know about your relationship?</span></label>
+      <div class="radio-group">
+        <label><input type="radio" name="relOthersKnow" value="Yes" onchange="toggleRelOthersKnow()"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        <label><input type="radio" name="relOthersKnow" value="No" onchange="toggleRelOthersKnow()"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+      </div>
+    </div>
+    <div class="conditional" id="relOthersKnowExplainSection">
+      <div class="form-group">
+        <label><span class="zh">请解释为何他们不知晓</span><span class="en" style="display:none">Explain why they do not know</span></label>
+        <input type="text" id="relOthersKnowExplain" placeholder="原因 / reason">
+      </div>
+    </div>
+    <div class="conditional" id="relationshipWitnessesSection">
+      <div class="form-group">
+        <label><span class="zh">了解此关系的人</span><span class="en" style="display:none">People who know the relationship</span></label>
+      </div>
+      <table class="dynamic-table" id="relationshipWitnessesTable">
+        <thead><tr>
+          <th class="zh">姓</th><th class="en" style="display:none">Family</th>
+          <th class="zh">名</th><th class="en" style="display:none">Given</th>
+          <th class="zh">与谁有关</th><th class="en" style="display:none">Related to</th>
+          <th class="zh">关系</th><th class="en" style="display:none">Relationship</th>
+          <th class="zh">认识日期</th><th class="en" style="display:none">Date met</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="relationshipWitnessesBody"></tbody>
+      </table>
+      <button type="button" class="btn-add" onclick="addRow('relationshipWitnesses')">
+        <span>＋</span><span class="zh">添加</span><span class="en" style="display:none">Add</span>
+      </button>
+    </div>
+
+    <!-- ===== Q8: Was the marriage arranged (if married) ===== -->
+    <div class="form-group" style="margin-top:12px">
+      <label><span class="zh">Q8. 若已婚，此婚姻是否为包办婚姻？</span><span class="en" style="display:none">Q8. If you are married, was your marriage arranged?</span></label>
+      <div class="radio-group">
+        <label><input type="radio" name="relMarriageArranged" value="No" onchange="toggleRelMarriageArranged()"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+        <label><input type="radio" name="relMarriageArranged" value="Yes" onchange="toggleRelMarriageArranged()"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        <label><input type="radio" name="relMarriageArranged" value="N/A" onchange="toggleRelMarriageArranged()"> <span class="zh">不适用</span><span class="en" style="display:none">N/A</span></label>
+      </div>
+    </div>
+    <div class="conditional" id="relArrangedDetailsSection">
+      <div class="form-group">
+        <label><span class="zh">请说明：由谁安排、何时、何地</span><span class="en" style="display:none">Explain: who arranged it, when, and where</span></label>
+        <textarea id="relArrangedDetails" rows="2" placeholder="由谁、何时、何地安排 / who, when, where..."></textarea>
+      </div>
+    </div>
+
+    <!-- ===== Q9: Ceremonies or celebrations ===== -->
+    <div class="form-group" style="margin-top:12px">
+      <label><span class="zh">Q9. 是否举办过正式仪式、典礼或庆祝活动来认定此关系？</span><span class="en" style="display:none">Q9. Were there any formal ceremonies, rituals or events to recognize your relationship?</span></label>
+      <div class="radio-group">
+        <label><input type="radio" name="relCeremonies" value="Yes" onchange="toggleRelCeremonies()"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        <label><input type="radio" name="relCeremonies" value="No" onchange="toggleRelCeremonies()"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+      </div>
+    </div>
+    <div class="conditional" id="relCeremoniesExplainSection">
+      <div class="form-group">
+        <label><span class="zh">请解释为何没有仪式</span><span class="en" style="display:none">Explain why there were no ceremonies</span></label>
+        <input type="text" id="relCeremoniesExplain" placeholder="原因 / reason">
+      </div>
+    </div>
+    <div class="conditional" id="relationshipCeremoniesSection">
+      <div class="form-group">
+        <label><span class="zh">仪式 / 活动记录</span><span class="en" style="display:none">Ceremonies / events</span></label>
+      </div>
+      <table class="dynamic-table" id="relationshipCeremoniesTable">
+        <thead><tr>
+          <th class="zh">日期</th><th class="en" style="display:none">Date</th>
+          <th class="zh">描述</th><th class="en" style="display:none">Description</th>
+          <th class="zh">地点</th><th class="en" style="display:none">Location</th>
+          <th class="zh">宾客数</th><th class="en" style="display:none">Guests</th>
+          <th class="zh">主持人</th><th class="en" style="display:none">Who performed</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="relationshipCeremoniesBody"></tbody>
+      </table>
+      <button type="button" class="btn-add" onclick="addRow('relationshipCeremonies')">
+        <span>＋</span><span class="zh">添加仪式</span><span class="en" style="display:none">Add Ceremony</span>
+      </button>
+      <div class="form-group" style="margin-top:12px">
+        <label><span class="zh">以下人员是否出席了仪式/活动？</span><span class="en" style="display:none">Did the following attend the ceremony/event?</span></label>
+      </div>
+      <div class="form-row cols-3">
+        <div class="form-group">
+          <label><span class="zh">主申父母</span><span class="en" style="display:none">Applicant's parents</span></label>
+          <div class="radio-group">
+            <label><input type="radio" name="relAttendPaParents" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+            <label><input type="radio" name="relAttendPaParents" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><span class="zh">主申子女</span><span class="en" style="display:none">Applicant's children</span></label>
+          <div class="radio-group">
+            <label><input type="radio" name="relAttendPaChildren" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+            <label><input type="radio" name="relAttendPaChildren" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><span class="zh">主申其他亲属</span><span class="en" style="display:none">Applicant's other family</span></label>
+          <div class="radio-group">
+            <label><input type="radio" name="relAttendPaOtherFamily" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+            <label><input type="radio" name="relAttendPaOtherFamily" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="form-row cols-3">
+        <div class="form-group">
+          <label><span class="zh">担保人父母</span><span class="en" style="display:none">Sponsor's parents</span></label>
+          <div class="radio-group">
+            <label><input type="radio" name="relAttendSponsorParents" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+            <label><input type="radio" name="relAttendSponsorParents" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><span class="zh">担保人子女</span><span class="en" style="display:none">Sponsor's children</span></label>
+          <div class="radio-group">
+            <label><input type="radio" name="relAttendSponsorChildren" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+            <label><input type="radio" name="relAttendSponsorChildren" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><span class="zh">担保人其他亲属</span><span class="en" style="display:none">Sponsor's other family</span></label>
+          <div class="radio-group">
+            <label><input type="radio" name="relAttendSponsorOtherFamily" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+            <label><input type="radio" name="relAttendSponsorOtherFamily" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">若上述任何人未出席，请解释原因</span><span class="en" style="display:none">If any of the above did not attend, explain why</span></label>
+        <textarea id="relAttendExplain" rows="2" placeholder="未出席原因 / reason for absence..."></textarea>
+      </div>
+    </div>
+
+    <!-- ===== Q10: Pregnant ===== -->
+    <div class="form-group" style="margin-top:12px">
+      <label><span class="zh">Q10. 是否怀孕？</span><span class="en" style="display:none">Q10. Are you (or is the applicant) pregnant?</span></label>
+      <div class="radio-group">
+        <label><input type="radio" name="relPregnant" value="No" onchange="toggleRelPregnant()"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+        <label><input type="radio" name="relPregnant" value="Yes" onchange="toggleRelPregnant()"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+      </div>
+    </div>
+    <div class="conditional" id="relDueDateSection">
+      <div class="form-group">
+        <label><span class="zh">预产期</span><span class="en" style="display:none">Due date</span></label>
+        <input type="date" id="relDueDate">
+      </div>
+    </div>
+
+    <!-- ===== Q11: More info ===== -->
+    <div class="form-group" style="margin-top:12px">
+      <label><span class="zh">Q11. 是否有其他信息可支持此关系的真实性？</span><span class="en" style="display:none">Q11. Is there any other information you would like to provide to support your relationship?</span></label>
+      <textarea id="relMoreInfo" rows="3" placeholder="补充说明 / additional supporting details..."></textarea>
+    </div>
+
+    <!-- Supporting-evidence notes (kept; supplemental to Part C) -->
+    <div class="form-group">
+      <label><span class="zh">如何相识、关系发展（叙述）</span><span class="en" style="display:none">How you met / relationship development (narrative)</span></label>
+      <textarea id="howMet" rows="3" placeholder="请描述相识经过及关系发展 / Describe how you met and how the relationship developed..."></textarea>
+    </div>
+    <div class="form-row cols-3">
+      <div class="form-group">
+        <label><span class="zh">同居证明备注（≥2组）</span><span class="en" style="display:none">Cohabitation proof note</span></label>
+        <input type="text" id="cohabProofNote" placeholder="e.g. 联名租约、共同账单 / joint lease, shared bills">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">沟通记录备注</span><span class="en" style="display:none">Communication proof note</span></label>
+        <input type="text" id="communicationProofNote" placeholder="e.g. 微信/通话记录 / WeChat, call logs">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">亲友/雇主认可备注</span><span class="en" style="display:none">Recognized by note</span></label>
+        <input type="text" id="recognizedByNote" placeholder="e.g. 亲友合照、声明 / photos, declarations">
+      </div>
+    </div>
+
+    <!-- Genuineness questions -->
+    <div class="form-row cols-3" style="margin-top:12px">
+      <div class="form-group">
+        <label><span class="zh">本关系真实且非主要为移民目的？</span><span class="en" style="display:none">Genuine and not primarily for immigration?</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="relGenuine" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+          <label><input type="radio" name="relGenuine" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">双方家人是否知晓并支持？</span><span class="en" style="display:none">Families know and support?</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="relFamiliesKnow" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+          <label><input type="radio" name="relFamiliesKnow" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">此关系是否曾被移民拒签或调查？</span><span class="en" style="display:none">Ever refused / investigated by immigration?</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="relPriorRefusalOrInvestigation" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          <label><input type="radio" name="relPriorRefusalOrInvestigation" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Principal applicant's previous marriages -->
+    <div class="form-group">
+      <label><span class="zh">主申请人是否有过往婚姻或同居关系？</span><span class="en" style="display:none">Principal applicant: any previous marriages/common-law?</span></label>
+      <div class="radio-group">
+        <label><input type="radio" name="paPrevMarried" value="No" onchange="togglePaPrevMarried()"> <span class="zh">无</span><span class="en" style="display:none">No</span></label>
+        <label><input type="radio" name="paPrevMarried" value="Yes" onchange="togglePaPrevMarried()"> <span class="zh">有</span><span class="en" style="display:none">Yes</span></label>
+      </div>
+    </div>
+    <div class="conditional" id="paPrevSpousesSection">
+      <table class="dynamic-table" id="paPrevSpousesTable">
+        <thead><tr>
+          <th class="zh">姓</th><th class="en" style="display:none">Family</th>
+          <th class="zh">名</th><th class="en" style="display:none">Given</th>
+          <th class="zh">出生日期</th><th class="en" style="display:none">DOB</th>
+          <th class="zh">关系起</th><th class="en" style="display:none">From</th>
+          <th class="zh">关系止</th><th class="en" style="display:none">To</th>
+          <th class="zh">结束日期</th><th class="en" style="display:none">End date</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="paPrevSpousesBody"></tbody>
+      </table>
+      <button type="button" class="btn-add" onclick="addRow('paPrevSpouses')">
+        <span>＋</span><span class="zh">添加</span><span class="en" style="display:none">Add</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CITIZENSHIP MINOR ROUTING (Minor) ===== -->
+<div class="section" data-section="citizenship-minor-routing" style="display:none">
+  <div class="section-header">
+    <div class="section-num">CM</div>
+    <div>
+      <div class="section-title zh">未成年入籍分支</div>
+      <div class="section-title en" style="display:none">Minor Citizenship Routing</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">父母是否为加拿大公民</span><span class="en" style="display:none">Parent is Canadian citizen</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="parentIsCitizen" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+          <label><input type="radio" name="parentIsCitizen" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+        </div>
+        <div class="hint zh">若选「否」，请同时填写下方「公民居住天数」区块（5(1) 分支）。</div>
+        <div class="hint en" style="display:none">If "No", also complete the "Physical Presence" section below (5(1) branch).</div>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">签字日期</span><span class="en" style="display:none">Signature date</span></label>
+        <input type="date" id="minorSignDate">
+      </div>
+    </div>
+    <div class="form-group">
+      <label><span class="zh">监护情况备注</span><span class="en" style="display:none">Custody note</span></label>
+      <input type="text" id="custodyNote" placeholder="e.g. 双方监护 / joint custody">
+    </div>
+  </div>
+</div>
+
+<!-- ===== CITIZENSHIP PRESENCE (Adult 5(1) + Minor 5(1) branch) ===== -->
+<div class="section" data-section="citizenship-presence" style="display:none">
+  <div class="section-header">
+    <div class="section-num">CP</div>
+    <div>
+      <div class="section-title zh">公民居住天数</div>
+      <div class="section-title en" style="display:none">Physical Presence</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">是否有 PR 身份</span><span class="en" style="display:none">Have PR status</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="prStatus" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          <label><input type="radio" name="prStatus" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">5年内境内天数（需≥1,095）</span><span class="en" style="display:none">Days in Canada (need &gt;=1,095)</span></label>
+        <input type="number" id="daysInCanada1095" min="0" placeholder="e.g. 1100" oninput="calcProgress()">
+      </div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">5年中是否报税满3年</span><span class="en" style="display:none">Filed tax 3 of 5 years</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="filedTax3of5" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          <label><input type="radio" name="filedTax3of5" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">是否有语言证明 (18-54)</span><span class="en" style="display:none">Have language proof (18-54)</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="languageProof" value="N/A"> <span class="zh">不适用</span><span class="en" style="display:none">N/A</span></label>
+          <label><input type="radio" name="languageProof" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
+          <label><input type="radio" name="languageProof" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">居住计算备注</span><span class="en" style="display:none">Presence calculation note</span></label>
+        <input type="text" id="presenceCalcNote" placeholder="e.g. PR 前以临时居民身份计半天上限365">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">签字日期（锚定5年窗口）</span><span class="en" style="display:none">Signature date</span></label>
+        <input type="date" id="signDate">
+      </div>
+    </div>
+    <div class="form-group">
+      <label><span class="zh">5年内全部护照</span><span class="en" style="display:none">Passports (past 5 yrs)</span></label>
+      <table class="dynamic-table" id="citizenPrevPassportsTable">
+        <thead><tr>
+          <th class="zh">护照号码</th><th class="en" style="display:none">Passport No.</th>
+          <th class="zh">签发日期</th><th class="en" style="display:none">Issue Date</th>
+          <th class="zh">到期日期</th><th class="en" style="display:none">Expiry Date</th>
+          <th class="zh">签发国</th><th class="en" style="display:none">Country</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="citizenPrevPassportsBody"></tbody>
+      </table>
+      <button type="button" class="btn-add" onclick="addRow('citizenPrevPassports')">
+        <span>＋</span><span class="zh">添加护照</span><span class="en" style="display:none">Add Passport</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+
 <!-- SUBMIT -->
 <div class="submit-area">
   <div class="submit-error" id="submitError"></div>
@@ -1046,6 +1955,23 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
   <div class="side-bar-tip" id="autosaveIndicatorSticky"></div>
 </div>
 
+<script id="intake-schema" type="application/json">{"app_types": {"study-permit-outland": {"label_zh": "学签·境外新申请", "label_en": "Study Permit (Outland)", "form_map_key": "study-permit-outland", "sections": ["core", "language-tests", "education", "employment", "travel-history", "family-members", "canada-history", "canadian-contacts", "funds", "background-risk", "consent-disclaimer"]}, "study-permit-inland": {"label_zh": "学签·境内续签", "label_en": "Study Permit (Inland)", "form_map_key": "study-permit-inland", "sections": ["core", "inland-status", "language-tests", "education", "employment", "canada-history", "canadian-contacts", "study-progress", "funds", "background-risk", "consent-disclaimer"]}, "work-permit-outland": {"label_zh": "工签·境外新申请", "label_en": "Work Permit (Outland)", "form_map_key": "work-permit-outland", "sections": ["core", "work-offer", "employment", "education", "language-tests", "travel-history", "family-members", "canada-history", "work-stream", "work-history", "background-risk", "consent-disclaimer"]}, "work-permit-inland": {"label_zh": "工签·境内续签", "label_en": "Work Permit (Inland)", "form_map_key": "work-permit-inland", "sections": ["core", "work-offer", "employment", "education", "language-tests", "canada-history", "inland-status", "work-stream", "work-history", "background-risk", "consent-disclaimer"]}, "visitor-trv": {"label_zh": "访客·旅游签 (TRV)", "label_en": "Visitor (TRV)", "form_map_key": "visitor-trv", "sections": ["core", "employment", "education", "travel-history", "family-members", "canadian-contacts", "canada-history", "visit-purpose", "funds", "super-visa", "background-risk", "consent-disclaimer"]}, "visitor-extension": {"label_zh": "访客·延期 (境内)", "label_en": "Visitor Extension (Inland)", "form_map_key": "visitor-extension", "sections": ["core", "canada-history", "inland-status", "visit-purpose", "funds", "education", "employment", "background-risk", "consent-disclaimer"]}, "pr-card-renewal": {"label_zh": "PR 卡·续签/换发", "label_en": "PR Card Renewal", "form_map_key": "pr-card-renewal", "sections": ["core", "residency-obligation", "address-history", "travel-history", "employment", "education", "canada-history", "background-risk", "consent-disclaimer"]}, "spousal-sponsorship": {"label_zh": "夫妻/同居担保", "label_en": "Spousal Sponsorship", "form_map_key": "spousal-sponsorship", "sections": ["core", "sponsor", "relationship", "family-members", "education", "employment", "address-history", "travel-history", "canada-history", "background-risk", "consent-disclaimer"]}, "pr-economic": {"label_zh": "PR·经济类 (Express Entry/PNP)", "label_en": "PR - Economic", "form_map_key": "pr-economic", "sections": ["core", "education", "education-years", "employment", "language-tests", "address-history", "travel-history", "family-members", "canada-history", "ee-profile", "funds", "background-risk", "consent-disclaimer"]}, "citizenship-adult": {"label_zh": "入籍·成人 (5(1))", "label_en": "Citizenship (Adult)", "form_map_key": "citizenship-adult", "sections": ["core", "citizenship-presence", "address-history", "travel-history", "language-tests", "canada-history", "background-risk", "consent-disclaimer"]}, "citizenship-minor": {"label_zh": "入籍·未成年", "label_en": "Citizenship (Minor)", "form_map_key": "citizenship-minor", "sections": ["core", "citizenship-minor-routing", "citizenship-presence", "address-history", "travel-history", "consent-disclaimer"]}}, "sections": {"core": {"label_zh": "基本信息", "label_en": "Basic Information", "always": true, "fields": [{"id": "familyName", "zh": "姓(拼音)", "en": "Family name", "type": "text", "required": true}, {"id": "givenName", "zh": "名(拼音)", "en": "Given name", "type": "text", "required": true}, {"id": "chineseName", "zh": "中文姓名", "en": "Chinese name", "type": "text"}, {"id": "dob", "zh": "出生日期", "en": "Date of birth", "type": "date", "required": true}, {"id": "birthCity", "zh": "出生城市", "en": "City of birth", "type": "text"}, {"id": "birthCountry", "zh": "出生国家", "en": "Country of birth", "type": "text"}, {"id": "gender", "zh": "性别", "en": "Gender", "type": "select", "options": ["Male", "Female", "Another gender"]}, {"id": "nationality", "zh": "国籍", "en": "Nationality", "type": "text"}, {"id": "currentAddress", "zh": "现居住地址", "en": "Current address", "type": "text"}, {"id": "phone", "zh": "电话", "en": "Phone", "type": "text"}, {"id": "email", "zh": "邮箱", "en": "Email", "type": "text"}, {"id": "wechat", "zh": "微信", "en": "WeChat", "type": "text"}, {"id": "usCard", "zh": "是否持有美国绿卡/签证", "en": "Hold US green card / visa", "type": "radio", "options": ["Yes", "No"]}, {"id": "passportNum", "zh": "护照号", "en": "Passport number", "type": "text"}, {"id": "passportIssue", "zh": "护照签发日", "en": "Passport issue date", "type": "date"}, {"id": "passportExpiry", "zh": "护照失效日", "en": "Passport expiry date", "type": "date"}, {"id": "passportAuthority", "zh": "护照签发机关", "en": "Passport issuing authority", "type": "text"}, {"id": "maritalStatus", "zh": "婚姻状况", "en": "Marital status", "type": "select", "options": ["Single", "Married", "Common-law", "Divorced", "Separated", "Widowed"], "triggers": {"Married": "family-members", "Common-law": "family-members"}}, {"id": "uci", "zh": "UCI (如有)", "en": "UCI (if any)", "type": "text"}]}, "language-tests": {"label_zh": "语言测试成绩", "label_en": "Language Test Results", "fields": []}, "canada-history": {"label_zh": "入境及签证历史", "label_en": "Canada Entry & Visa/Permit History", "fields": []}, "education": {"label_zh": "教育经历", "label_en": "Education History", "fields": []}, "education-years": {"label_zh": "各阶段教育年限", "label_en": "Years of Education by Level", "fields": []}, "employment": {"label_zh": "工作经历", "label_en": "Employment History", "fields": []}, "address-history": {"label_zh": "居住地址历史", "label_en": "Residential Address History", "fields": []}, "travel-history": {"label_zh": "出行记录", "label_en": "Travel History", "fields": []}, "canadian-contacts": {"label_zh": "加拿大联系人", "label_en": "Canadian Contacts", "fields": []}, "family-members": {"label_zh": "家庭成员", "label_en": "Family Members", "fields": [{"id": "spouseFamilyName", "zh": "配偶姓(拼音)", "en": "Spouse family name", "type": "text"}, {"id": "spouseGivenName", "zh": "配偶名(拼音)", "en": "Spouse given name", "type": "text"}, {"id": "spouseChineseName", "zh": "配偶中文姓名", "en": "Spouse Chinese name", "type": "text"}, {"id": "spouseDob", "zh": "配偶出生日期", "en": "Spouse date of birth", "type": "date"}, {"id": "spousePassport", "zh": "配偶护照号", "en": "Spouse passport number", "type": "text"}, {"id": "spouseNationality", "zh": "配偶国籍", "en": "Spouse nationality", "type": "text"}, {"id": "spouseInCa", "zh": "配偶是否在加拿大", "en": "Spouse in Canada", "type": "radio", "options": ["Yes", "No"]}, {"id": "children", "zh": "子女信息", "en": "Children", "type": "rows"}, {"id": "parents", "zh": "父母信息", "en": "Parents", "type": "rows"}]}, "inland-status": {"label_zh": "境内身份", "label_en": "Status in Canada", "fields": [{"id": "currentStatus", "zh": "当前移民身份", "en": "Current immigration status", "type": "select", "options": ["Study Permit", "Work Permit", "Visitor Record", "Visitor", "Implied Status", "Restoration", "Other"]}, {"id": "currentDocNumber", "zh": "当前身份文件号", "en": "Current document number", "type": "text"}, {"id": "lastEntryDate", "zh": "最近入境日期", "en": "Last entry date", "type": "date"}, {"id": "statusExpiry", "zh": "身份到期日", "en": "Status expiry date", "type": "date"}]}, "study-details": {"label_zh": "学习信息", "label_en": "Study Details", "fields": [{"id": "schoolName", "zh": "学校名称", "en": "School name", "type": "text"}, {"id": "dliNumber", "zh": "DLI 编号", "en": "DLI number", "type": "text"}, {"id": "program", "zh": "专业/课程", "en": "Program", "type": "text"}, {"id": "studyLevel", "zh": "学习层级", "en": "Study level", "type": "select", "options": ["Secondary", "Language", "College/Diploma", "Bachelor", "Master", "Doctorate", "Other"]}, {"id": "tuition", "zh": "学费 (CAD)", "en": "Tuition (CAD)", "type": "number"}, {"id": "studyStart", "zh": "课程开始日", "en": "Study start date", "type": "date"}, {"id": "studyEnd", "zh": "课程结束日", "en": "Study end date", "type": "date"}, {"id": "palTal", "zh": "是否有 PAL/TAL 省证明", "en": "Have PAL/TAL", "type": "radio", "options": ["Yes", "No", "N/A"]}, {"id": "quebecCaq", "zh": "是否有魁北克 CAQ", "en": "Have Quebec CAQ", "type": "radio", "options": ["Yes", "No", "N/A"]}]}, "study-plan-inputs": {"label_zh": "学习计划要点", "label_en": "Study Plan Inputs", "fields": [{"id": "studyBackground", "zh": "教育背景概述", "en": "Study background", "type": "textarea"}, {"id": "whyProgram", "zh": "为何选择该专业", "en": "Why this program", "type": "textarea"}, {"id": "whyCanada", "zh": "为何选择加拿大", "en": "Why Canada", "type": "textarea"}, {"id": "careerPlan", "zh": "毕业后职业规划", "en": "Career plan", "type": "textarea"}]}, "study-progress": {"label_zh": "在读进度", "label_en": "Study Progress", "fields": [{"id": "enrolmentProof", "zh": "是否有在读/录取证明", "en": "Have enrolment proof", "type": "radio", "options": ["Yes", "No"]}, {"id": "academicStanding", "zh": "学术状态 (GPA/出勤)", "en": "Academic standing", "type": "text"}, {"id": "transcriptNote", "zh": "成绩单备注", "en": "Transcript note", "type": "text"}]}, "funds": {"label_zh": "资金证明", "label_en": "Proof of Funds", "fields": [{"id": "fundAmount", "zh": "可用资金金额 (CAD)", "en": "Available funds (CAD)", "type": "number"}, {"id": "fundSource", "zh": "资金来源", "en": "Source of funds", "type": "select", "options": ["Self", "Parents", "Spouse", "Scholarship", "Loan", "Other"]}, {"id": "fundProofNote", "zh": "资金证明文件备注", "en": "Proof of funds note", "type": "text"}]}, "visit-purpose": {"label_zh": "访问目的", "label_en": "Purpose of Visit", "fields": [{"id": "visitReason", "zh": "访问原因", "en": "Reason for visit", "type": "select", "options": ["Tourism", "Family visit", "Business", "Medical", "Conference/Event", "Other"]}, {"id": "inviterName", "zh": "邀请人姓名", "en": "Inviter name", "type": "text"}, {"id": "inviterRelation", "zh": "与邀请人关系", "en": "Relationship to inviter", "type": "text"}, {"id": "itinerary", "zh": "行程安排", "en": "Itinerary", "type": "textarea"}, {"id": "tiesHome", "zh": "与母国的牵绊 (会按期离境)", "en": "Ties to home country", "type": "textarea"}, {"id": "travelHistory", "zh": "旅行史", "en": "Travel history", "type": "rows"}]}, "super-visa": {"label_zh": "超级签证 (父母祖父母)", "label_en": "Super Visa", "fields": [{"id": "isParentGrandparent", "zh": "是否父母/祖父母 (超级签证)", "en": "Parent/grandparent (super visa)", "type": "radio", "options": ["Yes", "No"]}, {"id": "hostName", "zh": "加方接待人姓名", "en": "Host name", "type": "text"}, {"id": "hostIncomeNote", "zh": "接待人最低收入备注", "en": "Host income note", "type": "text"}, {"id": "medicalInsurance", "zh": "是否有 ≥$100k 加拿大认可医疗保险", "en": "Have qualifying medical insurance", "type": "radio", "options": ["Yes", "No"]}]}, "work-offer": {"label_zh": "工作 Offer", "label_en": "Work Offer", "fields": [{"id": "employerName", "zh": "雇主名称", "en": "Employer name", "type": "text"}, {"id": "jobTitle", "zh": "职位", "en": "Job title", "type": "text"}, {"id": "nocCode", "zh": "NOC 2021 代码", "en": "NOC 2021 code", "type": "text"}, {"id": "teer", "zh": "TEER 等级", "en": "TEER level", "type": "select", "options": ["0", "1", "2", "3", "4", "5"]}, {"id": "duties", "zh": "工作职责", "en": "Duties", "type": "textarea"}, {"id": "lmiaNumber", "zh": "LMIA 号 (LMIA 类)", "en": "LMIA number", "type": "text"}, {"id": "offerNumber", "zh": "Offer 号 \"A\"+7位 (LMIA 豁免)", "en": "Offer of employment number", "type": "text"}]}, "work-stream": {"label_zh": "工签流派", "label_en": "Work Permit Stream", "fields": [{"id": "workStream", "zh": "工签类别", "en": "Work permit stream", "type": "select", "options": ["LMIA", "PGWP", "ICT", "SOWP", "BOWP"]}, {"id": "graduationProof", "zh": "是否有毕业证明 (PGWP)", "en": "Have graduation proof (PGWP)", "type": "radio", "options": ["Yes", "No", "N/A"]}, {"id": "principalStatus", "zh": "主申请人身份 (SOWP)", "en": "Principal applicant status (SOWP)", "type": "text"}, {"id": "principalTeer", "zh": "主申请人 TEER (SOWP)", "en": "Principal TEER (SOWP)", "type": "select", "options": ["0", "1", "2", "3", "4", "5", "N/A"]}, {"id": "relationProof", "zh": "与主申请人关系证明 (SOWP)", "en": "Relationship proof (SOWP)", "type": "text"}, {"id": "ictCategory", "zh": "ICT 类别", "en": "ICT category", "type": "select", "options": ["Executive", "Senior Manager", "Specialized Knowledge", "N/A"]}, {"id": "overseasEmployment", "zh": "海外任职证明 (ICT)", "en": "Overseas employment (ICT)", "type": "text"}, {"id": "prAorNumber", "zh": "PR 申请 AOR 号 (BOWP)", "en": "PR application AOR number (BOWP)", "type": "text"}]}, "work-history": {"label_zh": "工作经历", "label_en": "Work History", "fields": [{"id": "pastEmployers", "zh": "过往雇主", "en": "Past employers", "type": "rows"}, {"id": "referenceLetterNote", "zh": "推荐信备注", "en": "Reference letter note", "type": "text"}, {"id": "experienceProofNote", "zh": "工作经历证明备注", "en": "Experience proof note", "type": "text"}]}, "residency-obligation": {"label_zh": "居住义务", "label_en": "Residency Obligation", "fields": [{"id": "daysInCanada5yr", "zh": "5年内境内天数", "en": "Days in Canada (5 yrs)", "type": "number"}, {"id": "addressHistory5yr", "zh": "5年地址史 (按月)", "en": "Address history (5 yrs)", "type": "rows"}, {"id": "absences5yr", "zh": "5年离境记录", "en": "Absences (5 yrs)", "type": "rows"}, {"id": "filedTaxNote", "zh": "报税 (NOA) 备注", "en": "Filed tax (NOA) note", "type": "text"}, {"id": "accompanyingException", "zh": "是否随加籍配偶/受雇加企等例外", "en": "Accompanying / employment exception", "type": "radio", "options": ["Yes", "No"]}]}, "sponsor": {"label_zh": "担保人信息", "label_en": "Sponsor Information", "fields": [{"id": "sponsorName", "zh": "担保人姓名", "en": "Sponsor name", "type": "text"}, {"id": "sponsorStatus", "zh": "担保人身份", "en": "Sponsor status", "type": "select", "options": ["Citizen", "Permanent Resident"]}, {"id": "sponsorEmployment", "zh": "担保人在职情况", "en": "Sponsor employment", "type": "text"}, {"id": "sponsorIncomeNote", "zh": "担保人收入备注", "en": "Sponsor income note", "type": "text"}, {"id": "coSigner", "zh": "是否有共签人", "en": "Have co-signer", "type": "radio", "options": ["Yes", "No"]}]}, "relationship": {"label_zh": "关系真实性", "label_en": "Relationship", "fields": [{"id": "howMet", "zh": "如何相识、关系发展", "en": "How you met", "type": "textarea"}, {"id": "marriageOrCohabDate", "zh": "结婚/开始同居日期", "en": "Marriage / cohabitation date", "type": "date"}, {"id": "cohabProofNote", "zh": "同居证明备注 (≥2组)", "en": "Cohabitation proof note", "type": "text"}, {"id": "communicationProofNote", "zh": "沟通记录备注", "en": "Communication proof note", "type": "text"}, {"id": "recognizedByNote", "zh": "亲友/雇主认可备注", "en": "Recognized by note", "type": "text"}]}, "ee-profile": {"label_zh": "Express Entry 档案", "label_en": "Express Entry Profile", "fields": [{"id": "education", "zh": "最高学历", "en": "Highest education", "type": "select", "options": ["Secondary", "One-year post-secondary", "Two-year post-secondary", "Bachelor", "Two or more credentials", "Master", "Doctoral"]}, {"id": "ecaReport", "zh": "是否有学历认证 (ECA)", "en": "Have ECA report", "type": "radio", "options": ["Yes", "No", "N/A"]}, {"id": "langTest", "zh": "语言考试", "en": "Language test", "type": "select", "options": ["IELTS-GT", "CELPIP-G", "PTE Core", "TEF Canada", "TCF Canada", "None"]}, {"id": "langScores", "zh": "语言成绩 (R/W/L/S)", "en": "Language scores", "type": "text"}, {"id": "nocCode2", "zh": "技术工作 NOC 代码", "en": "Skilled work NOC code", "type": "text"}, {"id": "teer2", "zh": "TEER 等级", "en": "TEER level", "type": "select", "options": ["0", "1", "2", "3", "4", "5"]}, {"id": "workMonths", "zh": "技术工作经历 (月)", "en": "Skilled work experience (months)", "type": "number"}, {"id": "canadianExp", "zh": "是否有加拿大工作/学习经历", "en": "Have Canadian experience", "type": "radio", "options": ["Yes", "No"]}, {"id": "jobOffer", "zh": "是否有 job offer/LMIA", "en": "Have job offer/LMIA", "type": "radio", "options": ["Yes", "No"]}, {"id": "pnpNomination", "zh": "是否有省提名 (PNP)", "en": "Have PNP nomination", "type": "radio", "options": ["Yes", "No"]}]}, "citizenship-presence": {"label_zh": "公民居住天数", "label_en": "Physical Presence", "fields": [{"id": "prStatus", "zh": "是否有 PR 身份", "en": "Have PR status", "type": "radio", "options": ["Yes", "No"]}, {"id": "daysInCanada1095", "zh": "5年内境内天数 (需≥1,095)", "en": "Days in Canada (need >=1,095)", "type": "number"}, {"id": "presenceCalcNote", "zh": "居住计算备注", "en": "Presence calculation note", "type": "text"}, {"id": "filedTax3of5", "zh": "5年中是否报税满3年", "en": "Filed tax 3 of 5 years", "type": "radio", "options": ["Yes", "No"]}, {"id": "languageProof", "zh": "是否有语言证明 (18-54)", "en": "Have language proof (18-54)", "type": "radio", "options": ["Yes", "No", "N/A"]}, {"id": "prevPassports", "zh": "5年内全部护照", "en": "Passports (past 5 yrs)", "type": "rows"}, {"id": "signDate", "zh": "签字日期 (锚定5年窗口)", "en": "Signature date", "type": "date"}]}, "citizenship-minor-routing": {"label_zh": "未成年入籍分支", "label_en": "Minor Citizenship Routing", "fields": [{"id": "parentIsCitizen", "zh": "父母是否为加拿大公民", "en": "Parent is Canadian citizen", "type": "radio", "options": ["Yes", "No"], "triggers": {"No": "citizenship-presence"}}, {"id": "custodyNote", "zh": "监护情况备注", "en": "Custody note", "type": "text"}, {"id": "minorSignDate", "zh": "签字日期", "en": "Signature date", "type": "date"}]}, "background-risk": {"label_zh": "背景与历史", "label_en": "Background & History", "always": true, "fields": [{"id": "everRefused", "zh": "是否曾被任何国家拒签", "en": "Ever refused a visa", "type": "radio", "options": ["Yes", "No"], "triggers": {"Yes": "background-risk"}}, {"id": "refusalDetail", "zh": "拒签详情", "en": "Refusal details", "type": "textarea"}, {"id": "prevCaApp", "zh": "是否曾申请过加拿大签证/身份", "en": "Prior Canadian application", "type": "radio", "options": ["Yes", "No"]}, {"id": "prevCaAppDetail", "zh": "过往加拿大申请详情", "en": "Prior Canadian application details", "type": "textarea"}, {"id": "prevMarriage", "zh": "是否有过往婚姻", "en": "Previous marriage", "type": "radio", "options": ["Yes", "No"]}, {"id": "criminalNote", "zh": "刑事/违法记录备注", "en": "Criminal record note", "type": "textarea"}, {"id": "medicalNote", "zh": "重大病史备注", "en": "Medical note", "type": "textarea"}]}, "consent-disclaimer": {"label_zh": "同意与声明", "label_en": "Consent & Disclaimer", "always": true, "fields": [{"id": "consent", "zh": "我已阅读并同意隐私说明，理解本工具仅协助准备、不构成法律意见，由我自行提交", "en": "I consent to the privacy notice and understand this tool only assists preparation and is not legal advice.", "type": "checkbox", "required": true}, {"id": "privacyAck", "zh": "我确认所填信息真实准确", "en": "I confirm the information provided is true and accurate.", "type": "checkbox", "required": true}]}}}</script>
+<script>
+  // sync-intake-form.sh replaces the __INTAKE_SCHEMA__ placeholder with real JSON at deploy.
+  // Tests override window.__SCHEMA__ directly. Fall back to parsing the inlined <script> tag.
+  if (typeof window.__SCHEMA__ === 'undefined') {
+    try { window.__SCHEMA__ = JSON.parse(document.getElementById('intake-schema').textContent); }
+    catch (e) { window.__SCHEMA__ = { app_types: {}, sections: {} }; }
+  }
+  window.selectSections = function (appType) {
+    const schema = window.__SCHEMA__ || { app_types: {}, sections: {} };
+    const cfg = schema.app_types[appType];
+    const always = Object.entries(schema.sections || {})
+      .filter(([, s]) => s && s.always).map(([id]) => id);
+    if (!cfg) return Array.from(new Set(['core', ...always]));
+    return Array.from(new Set([...(cfg.sections || []), ...always]));
+  };
+</script>
 <script>
 // ===== CONFIGURATION =====
 // Paste your deployed Google Apps Script /exec URL here.
@@ -1097,6 +2023,10 @@ function toggleLangTest() {
   document.getElementById('langTestSection').classList.toggle('show', val==='Yes');
   if (val==='Yes' && document.getElementById('langTestBody').children.length===0) addRow('langTest');
 }
+function toggleHasHigherEd() {
+  const val = document.querySelector('input[name=hasHigherEd]:checked')?.value;
+  document.getElementById('hasHigherEdHint').style.display = (val === 'No') ? '' : 'none';
+}
 function togglePrevCa() {
   const val = document.querySelector('input[name=prevCaApp]:checked')?.value;
   document.getElementById('prevCaSection').classList.toggle('show', val==='Yes');
@@ -1106,10 +2036,95 @@ function toggleRefused() {
   document.getElementById('refusalSection').classList.toggle('show', val==='Yes');
   if (val==='Yes' && document.getElementById('refusalBody').children.length===0) addRow('refusal');
 }
-function toggleAppType() {
-  const v = document.getElementById('appType').value;
-  document.getElementById('studyFields').classList.toggle('show', v.startsWith('Study'));
-  document.getElementById('workLmiaFields').classList.toggle('show', v.startsWith('Work Permit - LMIA') || v.startsWith('Work Permit - PG') || v.startsWith('Work Permit - Spouse') || v.startsWith('Work Permit - Other'));
+function toggleSponsorPrevMarried() {
+  const val = document.querySelector('input[name=sponsorPrevMarried]:checked')?.value;
+  document.getElementById('sponsorPrevSpousesSection').classList.toggle('show', val==='Yes');
+  if (val==='Yes' && document.getElementById('sponsorPrevSpousesBody').children.length===0) addRow('sponsorPrevSpouses');
+}
+function togglePaPrevMarried() {
+  const val = document.querySelector('input[name=paPrevMarried]:checked')?.value;
+  document.getElementById('paPrevSpousesSection').classList.toggle('show', val==='Yes');
+  if (val==='Yes' && document.getElementById('paPrevSpousesBody').children.length===0) addRow('paPrevSpouses');
+}
+// ===== IMM5532 Part C (Q1-Q11) reveal toggles =====
+function toggleRelIntroduced() {
+  const val = document.querySelector('input[name=relIntroduced]:checked')?.value;
+  document.getElementById('relWhoIntroducedSection').classList.toggle('show', val==='Yes');
+}
+function toggleRelContactBefore() {
+  const val = document.querySelector('input[name=relContactBefore]:checked')?.value;
+  document.getElementById('relContactDetailsSection').classList.toggle('show', val==='Yes');
+}
+function toggleRelLivingTogether() {
+  const val = document.querySelector('input[name=relLivingTogether]:checked')?.value;
+  document.getElementById('relCohabDurationSection').classList.toggle('show', val==='Yes');
+  document.getElementById('relCohabExplainNoSection').classList.toggle('show', val==='No');
+}
+function toggleRelVisited() {
+  const val = document.querySelector('input[name=relVisited]:checked')?.value;
+  document.getElementById('relVisitExplainSection').classList.toggle('show', val==='No');
+  document.getElementById('relationshipVisitsSection').classList.toggle('show', val==='Yes');
+  if (val==='Yes' && document.getElementById('relationshipVisitsBody').children.length===0) addRow('relationshipVisits');
+}
+function toggleRelOthersKnow() {
+  const val = document.querySelector('input[name=relOthersKnow]:checked')?.value;
+  document.getElementById('relOthersKnowExplainSection').classList.toggle('show', val==='No');
+  document.getElementById('relationshipWitnessesSection').classList.toggle('show', val==='Yes');
+  if (val==='Yes' && document.getElementById('relationshipWitnessesBody').children.length===0) addRow('relationshipWitnesses');
+}
+function toggleRelMarriageArranged() {
+  const val = document.querySelector('input[name=relMarriageArranged]:checked')?.value;
+  document.getElementById('relArrangedDetailsSection').classList.toggle('show', val==='Yes');
+}
+function toggleRelCeremonies() {
+  const val = document.querySelector('input[name=relCeremonies]:checked')?.value;
+  document.getElementById('relCeremoniesExplainSection').classList.toggle('show', val==='No');
+  document.getElementById('relationshipCeremoniesSection').classList.toggle('show', val==='Yes');
+  if (val==='Yes' && document.getElementById('relationshipCeremoniesBody').children.length===0) addRow('relationshipCeremonies');
+}
+function toggleRelPregnant() {
+  const val = document.querySelector('input[name=relPregnant]:checked')?.value;
+  document.getElementById('relDueDateSection').classList.toggle('show', val==='Yes');
+}
+// Granular #appType option values (preserved verbatim in submitted
+// application.type) map to canonical schema section keys for visibility only.
+const APPTYPE_VISIBILITY_ALIAS = {
+  'pgwp': 'work-permit-inland',
+  'spouse-owp': 'work-permit-inland',
+  'owp-spouse-student': 'work-permit-inland',
+  'pnp': 'pr-economic'
+};
+// Show/hide app-type-specific sections (tagged with data-section) based on the
+// selected application type. Untagged sections are universal and always visible.
+function applySectionVisibility(appType) {
+  const sel = typeof appType === 'string' ? appType : document.getElementById('appType').value;
+  const key = APPTYPE_VISIBILITY_ALIAS[sel] || sel;
+  const show = new Set((window.selectSections || (() => []))(key));
+  document.querySelectorAll('[data-section]').forEach(el => {
+    el.style.display = show.has(el.getAttribute('data-section')) ? 'block' : 'none';
+  });
+  renumberVisibleSections();
+}
+
+// Renumber ALL visible content sections sequentially (1..N) so the badges
+// form an unbroken sequence regardless of their authored value. Letter/sentinel
+// badges (e.g. "8b", "R", "S", "RL", "CM", "CP") get replaced by their proper
+// running number. The top identity/type blocks (填表人身份 personType, 申请类型
+// appType) carry a "★" badge and are NOT content sections, so they are skipped.
+function renumberVisibleSections() {
+  let n = 0;
+  document.querySelectorAll('.section').forEach(sec => {
+    // A section is hidden if its inline display is 'none' or it has no
+    // layout box (offsetParent null and not fixed-positioned).
+    const hidden = sec.style.display === 'none' ||
+      (sec.offsetParent === null && getComputedStyle(sec).position !== 'fixed');
+    if (hidden) return;
+    const badge = sec.querySelector('.section-num');
+    if (!badge) return;
+    if (badge.textContent.trim() === '★') return; // skip identity/type blocks
+    n += 1;
+    badge.textContent = String(n);
+  });
 }
 
 // ===== BACKGROUND QUESTIONS =====
@@ -1308,6 +2323,106 @@ const rowConfigs = {
       {type:'text',placeholder:'Address / 地址'},
       {type:'email',placeholder:'email@example.com'}
     ]
+  },
+  addressHistory5yr: {
+    body:'addressHistory5yrBody',
+    fields: [
+      {type:'text',placeholder:'Full address / 详细地址'},
+      {type:'date'},
+      {type:'date'}
+    ]
+  },
+  absences5yr: {
+    body:'absences5yrBody',
+    fields: [
+      {type:'date'},
+      {type:'date'},
+      {type:'text',placeholder:'Destination / 目的地'},
+      {type:'number',placeholder:'0',min:0}
+    ]
+  },
+  citizenPrevPassports: {
+    body:'citizenPrevPassportsBody',
+    fields: [
+      {type:'text',placeholder:'Passport No.'},
+      {type:'date'},
+      {type:'date'},
+      {type:'text',placeholder:'China / 中国'}
+    ]
+  },
+  sponsorPrevSpouses: {
+    body:'sponsorPrevSpousesBody',
+    fields: [
+      {type:'text',placeholder:'Family / 姓'},
+      {type:'text',placeholder:'Given / 名'},
+      {type:'date'},
+      {type:'date'},
+      {type:'date'},
+      {type:'date'}
+    ]
+  },
+  sponsorAddressHistory: {
+    body:'sponsorAddressHistoryBody',
+    fields: [
+      {type:'date'},
+      {type:'date'},
+      {type:'text',placeholder:'Street / 街道'},
+      {type:'text',placeholder:'City / 城市'},
+      {type:'text',placeholder:'Province / 省州'},
+      {type:'text',placeholder:'A1B 2C3'},
+      {type:'text',placeholder:'Country / 国家'}
+    ]
+  },
+  sponsorEmployment2: {
+    body:'sponsorEmployment2Body',
+    fields: [
+      {type:'date'},
+      {type:'date'},
+      {type:'text',placeholder:'Employer / 雇主'},
+      {type:'text',placeholder:'Occupation / 职位'},
+      {type:'text',placeholder:'e.g. CAD 4,500'}
+    ]
+  },
+  relationshipVisits: {
+    body:'relationshipVisitsBody',
+    fields: [
+      {type:'date'},
+      {type:'date'},
+      {type:'text',placeholder:'Who visited whom / 谁探访谁'},
+      {type:'select',options:['Yes/同住','No/未同住']},
+      {type:'text',placeholder:'Where stayed / 居住地点'}
+    ]
+  },
+  relationshipWitnesses: {
+    body:'relationshipWitnessesBody',
+    fields: [
+      {type:'text',placeholder:'Family / 姓'},
+      {type:'text',placeholder:'Given / 名'},
+      {type:'select',options:['Sponsor/担保人','Principal applicant/主申']},
+      {type:'text',placeholder:'Relationship / 关系'},
+      {type:'date'}
+    ]
+  },
+  relationshipCeremonies: {
+    body:'relationshipCeremoniesBody',
+    fields: [
+      {type:'date'},
+      {type:'text',placeholder:'Description / 描述'},
+      {type:'text',placeholder:'Location / 地点'},
+      {type:'number',min:0,placeholder:'Guests / 宾客数'},
+      {type:'text',placeholder:'Who performed / 主持人'}
+    ]
+  },
+  paPrevSpouses: {
+    body:'paPrevSpousesBody',
+    fields: [
+      {type:'text',placeholder:'Family / 姓'},
+      {type:'text',placeholder:'Given / 名'},
+      {type:'date'},
+      {type:'date'},
+      {type:'date'},
+      {type:'date'}
+    ]
   }
 };
 
@@ -1348,7 +2463,11 @@ function addRow(type) {
 
 // ===== PROGRESS =====
 function calcProgress() {
-  const required = document.querySelectorAll('[required]');
+  // Only count required fields that are actually visible (skip fields inside
+  // app-type sections that are hidden via display:none). offsetParent is null
+  // when the element or an ancestor is display:none.
+  const isVisible = el => el.offsetParent !== null || el.type === 'hidden';
+  const required = Array.from(document.querySelectorAll('[required]')).filter(isVisible);
   let filled = 0;
   required.forEach(el => {
     if (el.type==='radio') {
@@ -1426,6 +2545,13 @@ function collectData() {
       details: document.getElementById(q.id+'Text')?.value.trim() || ''
     }])),
     education: getRows('educationBody'),
+    educationYears: {
+      eduYearsPrimary: getVal('eduYearsPrimary'),
+      eduYearsJuniorHigh: getVal('eduYearsJuniorHigh'),
+      eduYearsSeniorHigh: getVal('eduYearsSeniorHigh'),
+      eduYearsCollegeBachelor: getVal('eduYearsCollegeBachelor'),
+      eduYearsGraduate: getVal('eduYearsGraduate')
+    },
     employment: getRows('employmentBody'),
     addressHistory: getRows('addressBody'),
     travelHistory: getRows('travelBody'),
@@ -1442,6 +2568,123 @@ function collectData() {
       work: { employer: getVal('workEmployer'), employerAddr: getVal('workEmployerAddr'), position: getVal('workPosition'), wage: getVal('workWage'), lmiaNum: getVal('lmiaNum'), startDate: getVal('workStart'), contractType: getVal('workContractType') },
       currentStatus: { type: getVal('currentStatus'), permitNum: getVal('currentPermitNum'), expiryDate: getVal('currentPermitExpiry') },
       fundSource: getRadio('fundSource'), totalFunds: getVal('totalFunds'), notes: getVal('notes')
+    },
+    residency: {
+      daysInCanada5yr: getVal('daysInCanada5yr'),
+      addressHistory5yr: getRows('addressHistory5yrBody'),
+      absences5yr: getRows('absences5yrBody'),
+      filedTaxNote: getVal('filedTaxNote'),
+      accompanyingException: getRadio('accompanyingException')
+    },
+    sponsor: {
+      sponsorName: getVal('sponsorName'),
+      sponsorFamilyName: getVal('sponsorFamilyName'),
+      sponsorGivenName: getVal('sponsorGivenName'),
+      sponsorAlias: getVal('sponsorAlias'),
+      sponsorGender: getVal('sponsorGender'),
+      sponsorDob: getVal('sponsorDob'),
+      sponsorPobCity: getVal('sponsorPobCity'),
+      sponsorPobCountry: getVal('sponsorPobCountry'),
+      sponsorStatus: getVal('sponsorStatus'),
+      sponsorUci: getVal('sponsorUci'),
+      sponsorStatusDate: getVal('sponsorStatusDate'),
+      coSigner: getRadio('coSigner'),
+      sponsorMaritalStatus: getVal('sponsorMaritalStatus'),
+      sponsorMarriageDate: getVal('sponsorMarriageDate'),
+      sponsorPrevMarried: getRadio('sponsorPrevMarried'),
+      sponsorPrevSpouses: getRows('sponsorPrevSpousesBody'),
+      sponsorMailingAddress: getVal('sponsorMailingAddress'),
+      sponsorResidentialAddress: getVal('sponsorResidentialAddress'),
+      sponsorPhone: getVal('sponsorPhone'),
+      sponsorEmail: getVal('sponsorEmail'),
+      sponsorAddressHistory: getRows('sponsorAddressHistoryBody'),
+      sponsorEmployment: getVal('sponsorEmployment'),
+      sponsorEmployment2: getRows('sponsorEmployment2Body'),
+      sponsorIncomeNote: getVal('sponsorIncomeNote'),
+      sponsorEduElementaryYears: getVal('sponsorEduElementaryYears'),
+      sponsorEduSecondaryYears: getVal('sponsorEduSecondaryYears'),
+      sponsorEduCollegeYears: getVal('sponsorEduCollegeYears'),
+      sponsorEduPostgradYears: getVal('sponsorEduPostgradYears'),
+      sponsorLiveOutsideCanada: getRadio('sponsorLiveOutsideCanada'),
+      sponsorLiveQuebec: getRadio('sponsorLiveQuebec'),
+      sponsorLastLivedCanada: getVal('sponsorLastLivedCanada'),
+      sponsorPlanReturnCanada: getVal('sponsorPlanReturnCanada'),
+      eligOver18: getRadio('eligOver18'),
+      eligCitizenOrPR: getRadio('eligCitizenOrPR'),
+      eligSocialAssistance: getRadio('eligSocialAssistance'),
+      eligBankruptcy: getRadio('eligBankruptcy'),
+      eligPrevSponsorDefault: getRadio('eligPrevSponsorDefault'),
+      eligPrevApplication: getRadio('eligPrevApplication')
+    },
+    relationship: {
+      relationshipType: getVal('relationshipType'),
+      marriageOrCohabDate: getVal('marriageOrCohabDate'),
+      // IMM5532 Part C — Q1: first in-person meeting
+      relFirstMetDate: getVal('relFirstMetDate'),
+      relFirstMetWhere: getVal('relFirstMetWhere'),
+      relFirstMetCircumstances: getVal('relFirstMetCircumstances'),
+      relIntroduced: getRadio('relIntroduced'),
+      relWhoIntroduced: getVal('relWhoIntroduced'),
+      // Q2: contact before meeting
+      relContactBefore: getRadio('relContactBefore'),
+      relContactDetails: getVal('relContactDetails'),
+      // Q3: living together now
+      relLivingTogether: getRadio('relLivingTogether'),
+      relCohabDuration: getVal('relCohabDuration'),
+      relCohabExplainNo: getVal('relCohabExplainNo'),
+      // Q4: visits if not living together
+      relVisited: getRadio('relVisited'),
+      relVisitExplain: getVal('relVisitExplain'),
+      relationshipVisits: getRows('relationshipVisitsBody'),
+      // Q5: languages used
+      relCommLanguages: getVal('relCommLanguages'),
+      // Q6: communication frequency & method when apart
+      relCommFrequency: getVal('relCommFrequency'),
+      // Q7: do close friends/family/children know
+      relOthersKnow: getRadio('relOthersKnow'),
+      relOthersKnowExplain: getVal('relOthersKnowExplain'),
+      relationshipWitnesses: getRows('relationshipWitnessesBody'),
+      // Q8: was the marriage arranged
+      relMarriageArranged: getRadio('relMarriageArranged'),
+      relArrangedDetails: getVal('relArrangedDetails'),
+      // Q9: ceremonies / events + attendance
+      relCeremonies: getRadio('relCeremonies'),
+      relCeremoniesExplain: getVal('relCeremoniesExplain'),
+      relationshipCeremonies: getRows('relationshipCeremoniesBody'),
+      relAttendPaParents: getRadio('relAttendPaParents'),
+      relAttendPaChildren: getRadio('relAttendPaChildren'),
+      relAttendPaOtherFamily: getRadio('relAttendPaOtherFamily'),
+      relAttendSponsorParents: getRadio('relAttendSponsorParents'),
+      relAttendSponsorChildren: getRadio('relAttendSponsorChildren'),
+      relAttendSponsorOtherFamily: getRadio('relAttendSponsorOtherFamily'),
+      relAttendExplain: getVal('relAttendExplain'),
+      // Q10: pregnancy
+      relPregnant: getRadio('relPregnant'),
+      relDueDate: getVal('relDueDate'),
+      // Q11: more info
+      relMoreInfo: getVal('relMoreInfo'),
+      // Supplemental supporting-evidence notes (kept)
+      howMet: getVal('howMet'),
+      cohabProofNote: getVal('cohabProofNote'),
+      communicationProofNote: getVal('communicationProofNote'),
+      recognizedByNote: getVal('recognizedByNote'),
+      relGenuine: getRadio('relGenuine'),
+      relFamiliesKnow: getRadio('relFamiliesKnow'),
+      relPriorRefusalOrInvestigation: getRadio('relPriorRefusalOrInvestigation'),
+      paPrevMarried: getRadio('paPrevMarried'),
+      paPrevSpouses: getRows('paPrevSpousesBody')
+    },
+    citizenship: {
+      prStatus: getRadio('prStatus'),
+      daysInCanada1095: getVal('daysInCanada1095'),
+      presenceCalcNote: getVal('presenceCalcNote'),
+      filedTax3of5: getRadio('filedTax3of5'),
+      languageProof: getRadio('languageProof'),
+      prevPassports: getRows('citizenPrevPassportsBody'),
+      signDate: getVal('signDate'),
+      parentIsCitizen: getRadio('parentIsCitizen'),
+      custodyNote: getVal('custodyNote'),
+      minorSignDate: getVal('minorSignDate')
     }
   };
 }
@@ -1482,14 +2725,20 @@ function validate() {
   ];
   bgQs.forEach(q => radioRequired.push({name:q.id, zh:q.zh.slice(0,10)+'...', en:q.en.slice(0,30)+'...'}));
 
+  // A field is skipped if it lives in an app-type section currently hidden via
+  // display:none (offsetParent is null). Visible required fields are unaffected.
+  const isHidden = el => el && el.offsetParent === null && el.type !== 'hidden';
   requiredFields.forEach(f => {
     const el = document.getElementById(f.id);
+    if (el && isHidden(el)) { el.classList.remove('error'); return; }
     if (el && !el.value.trim()) {
       el.classList.add('error');
       errors.push(currentLang==='zh' ? f.zh : f.en);
     } else if (el) el.classList.remove('error');
   });
   radioRequired.forEach(r => {
+    const first = document.querySelector(`input[name="${r.name}"]`);
+    if (first && isHidden(first)) return;
     if (!document.querySelector(`input[name="${r.name}"]:checked`)) {
       errors.push(currentLang==='zh' ? r.zh : r.en);
     }
@@ -1657,8 +2906,8 @@ function loadDraft() {
     });
   });
   // Now trigger all conditional sections
-  toggleMarital(); togglePrevMarriage(); toggleLangTest();
-  togglePrevCa(); toggleRefused(); toggleAppType();
+  toggleMarital(); togglePrevMarriage(); toggleLangTest(); toggleHasHigherEd();
+  togglePrevCa(); toggleRefused(); applySectionVisibility();
   bgQs.forEach(q => toggleBgDetail(q.id));
   calcProgress();
 
@@ -1866,6 +3115,7 @@ function generateWordDoc(data, baseName) {
 }
 
 // Init
+applySectionVisibility();
 calcProgress();
 loadDraft();
 </script>
