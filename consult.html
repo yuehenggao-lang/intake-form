@@ -62,6 +62,14 @@ textarea{resize:vertical;min-height:80px}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:#111827;color:#fff;padding:12px 22px;border-radius:24px;font-size:14px;transition:.3s;z-index:99}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .err{border-color:var(--red)!important}
+.resume-banner{display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius);padding:12px 16px;margin:14px 0;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.resume-banner.show{display:flex}
+.rb-text{font-size:13.5px;color:#92630a}.rb-time{display:block;font-size:12px;opacity:.8;font-weight:400}
+.rb-actions{display:flex;gap:8px}
+.rb-continue{background:var(--blue);color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer}
+.rb-discard{background:#fff;color:var(--gray);border:1px solid var(--border);padding:8px 14px;border-radius:6px;font-size:13px;cursor:pointer}
+.saved-tag{text-align:center;font-size:12px;color:var(--green);margin-top:10px;height:16px;opacity:0;transition:opacity .3s}
+.saved-tag.show{opacity:1}
 [data-en]{display:none}
 body.en [data-zh]{display:none}
 body.en [data-en]{display:inline}
@@ -89,6 +97,17 @@ body.en [data-en-block]{display:block}
       <span data-zh>为了让我们的免费咨询更高效、切中你的问题，请在咨询前花几分钟填写。信息仅用于本次咨询准备，严格保密。</span>
       <span data-en>To make our free consultation efficient and on-point, please take a few minutes to fill this out before we meet. Your information is used only to prepare for the consultation and kept strictly confidential.</span>
     </p>
+  </div>
+
+  <div class="resume-banner" id="resumeBanner">
+    <div class="rb-text">
+      <b><span data-zh>检测到你上次未填完的内容</span><span data-en>You have an unfinished draft</span></b>
+      <span class="rb-time" id="resumeTime"></span>
+    </div>
+    <div class="rb-actions">
+      <button type="button" class="rb-continue" onclick="resumeDraft()"><span data-zh>继续填写</span><span data-en>Continue</span></button>
+      <button type="button" class="rb-discard" onclick="discardDraft()"><span data-zh>重新开始</span><span data-en>Start over</span></button>
+    </div>
   </div>
 
   <form id="form" onsubmit="return false">
@@ -202,6 +221,7 @@ body.en [data-en-block]{display:block}
 
     <button class="submit-btn" id="submitBtn" onclick="submitForm()" disabled>
       <span data-zh>提交</span><span data-en>Submit</span></button>
+    <div class="saved-tag" id="savedTag"></div>
   </form>
 
   <div class="success" id="success">
@@ -395,6 +415,7 @@ async function submitForm(){
     let ok = resp.ok;
     try { const j = await resp.json(); ok = j.success !== false; } catch(e){}
     if (!ok) throw new Error('server');
+    clearDraft();
     document.getElementById('form').style.display='none';
     document.getElementById('success').classList.add('show');
     window.scrollTo({top:0,behavior:'smooth'});
@@ -432,9 +453,107 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'), 3000);
 }
 
+// ===== 草稿自动保存（localStorage，不含文件） =====
+const DRAFT_KEY = 'novastage_consult_draft_v1';
+let saveTimer = null;
+function scheduleSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveDraft, 700); }
+function buildDraft(){
+  const d = collectData();          // 全部文字字段 + appTypes + refusals/overstays + everRefused/everOverstay
+  d.noODN = document.getElementById('noODN').checked;
+  d.agree = document.getElementById('agree').checked;
+  return { v:1, ts: Date.now(), data: d };
+}
+function hasContent(d){
+  return !!(d.clientName || d.mainQuestions || d.background || d.timeline || d.goals ||
+           (d.appTypes && d.appTypes.length) || d.everRefused || d.everOverstay || d.currentStatus);
+}
+function saveDraft(){
+  const draft = buildDraft();
+  if (!hasContent(draft.data)) return;        // 空表不存
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    const tag = document.getElementById('savedTag');
+    const t = new Date(draft.ts);
+    tag.textContent = (currentLang==='zh'?'已自动保存 ':'Saved ') + String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+    tag.classList.add('show');
+  } catch(e){ /* 超额/隐私模式忽略 */ }
+}
+function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+function loadDraft(){ try{ return JSON.parse(localStorage.getItem(DRAFT_KEY)); }catch(e){ return null; } }
+
+function maybeShowResume(){
+  const draft = loadDraft();
+  if (!draft || !draft.data || !hasContent(draft.data)) return;
+  const t = new Date(draft.ts);
+  document.getElementById('resumeTime').textContent =
+    (currentLang==='zh'?'保存于 ':'Saved at ') +
+    `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')} ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('resumeBanner').classList.add('show');
+}
+function resumeDraft(){
+  const draft = loadDraft();
+  document.getElementById('resumeBanner').classList.remove('show');
+  if (!draft || !draft.data) return;
+  restoreDraft(draft.data);
+  if (draft.data.everRefused === 'yes'){
+    showToast(currentLang==='zh' ? '已恢复文字内容，请重新选择拒签信/ODN 文件' : 'Text restored — please re-select your refusal letter / ODN files');
+  }
+}
+function discardDraft(){
+  clearDraft();
+  document.getElementById('resumeBanner').classList.remove('show');
+}
+function setRow(container, k, v){ // 给最后一行的指定 data-k 输入框赋值
+  const item = container.lastElementChild;
+  const el = item && item.querySelector('input[data-k="'+k+'"]');
+  if (el) el.value = v || '';
+}
+function restoreDraft(d){
+  const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.value = v||''; };
+  set('clientName', d.clientName); set('email', d.email); set('phone', d.phone);
+  set('location', d.location); set('locationCountry', d.locationCountry);
+  set('currentStatus', d.currentStatus); set('mainQuestions', d.mainQuestions);
+  set('background', d.background); set('timeline', d.timeline); set('goals', d.goals);
+  toggleCountry();
+  // app types
+  (d.appTypes||[]).forEach(v=>{
+    const cb = [...document.querySelectorAll('#appTypes input')].find(c=>c.value===v);
+    if (cb){ cb.checked = true; cb.closest('.chk').classList.add('on'); }
+  });
+  // 拒签
+  if (d.everRefused === 'yes'){
+    const r = [...document.querySelectorAll('input[name=everRefused]')].find(x=>x.value==='yes');
+    r.checked = true; toggleRefused();
+    const cont = document.getElementById('refusalRows'); cont.innerHTML='';
+    const rows = (d.refusals && d.refusals.length) ? d.refusals : [{}];
+    rows.forEach(row=>{ addRefusal(); setRow(cont,'type',row.type); setRow(cont,'date',row.date); setRow(cont,'office',row.office); setRow(cont,'reason',row.reason); });
+    if (d.noODN){ document.getElementById('noODN').checked = true; toggleNoODN(); set('noODNReason', d.noODNReason); }
+  } else if (d.everRefused === 'no'){
+    const r = [...document.querySelectorAll('input[name=everRefused]')].find(x=>x.value==='no');
+    r.checked = true; toggleRefused();
+  }
+  // 逾期
+  if (d.everOverstay === 'yes'){
+    const o = [...document.querySelectorAll('input[name=everOverstay]')].find(x=>x.value==='yes');
+    o.checked = true; toggleOverstay();
+    const cont = document.getElementById('overstayRows'); cont.innerHTML='';
+    const rows = (d.overstays && d.overstays.length) ? d.overstays : [{}];
+    rows.forEach(row=>{ addOverstay(); setRow(cont,'from',row.from); setRow(cont,'to',row.to); setRow(cont,'status',row.status); setRow(cont,'reason',row.reason); setRow(cont,'restored',row.restored); });
+  } else if (d.everOverstay === 'no'){
+    const o = [...document.querySelectorAll('input[name=everOverstay]')].find(x=>x.value==='no');
+    o.checked = true; toggleOverstay();
+  }
+  if (d.agree){ document.getElementById('agree').checked = true; }
+  updateSubmit();
+}
+
 // init
 renderAppTypes();
 ['clientName','mainQuestions'].forEach(id=>document.getElementById(id).addEventListener('input', updateSubmit));
+// 任何输入/勾选都触发自动保存（事件委托覆盖动态添加的行）
+document.getElementById('form').addEventListener('input', scheduleSave);
+document.getElementById('form').addEventListener('change', scheduleSave);
+maybeShowResume();
 </script>
 </body>
 </html>
