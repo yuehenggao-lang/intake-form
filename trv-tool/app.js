@@ -277,38 +277,12 @@ export const SPEC = [
         num: '1',
         title: '教育',
         fields: [
-          { id: 'eduInd', label: '高中毕业后是否上过大专或大学？', type: 'yn', req: true,
+          // Answered from the education rows on step 5 -- asking twice is how the
+          // two forms end up contradicting each other.
+          { id: 'eduInd', label: '高中毕业后是否上过大专或大学？',
+            hint: '由第 5 步「教育经历」自动作答，在那里填就行', type: 'yn', readonly: true,
             paths: (v) => ({ 'form1/Page3/Education/EducationIndicator': v }) },
         ],
-      },
-      {
-        num: '1',
-        title: '工作经历',
-        hint: '填写过去十年的工作。退休或无业也请如实填写。',
-        fields: [1, 2, 3].flatMap((n) => {
-          const R = `form1/Page3/Occupation/OccupationRow${n}`;
-          const only1 = (s) => n === 1 || s[`occ${n}Show`] === 'Y';
-          return [
-            ...(n > 1
-              ? [{ id: `occ${n}Show`, label: `填写第 ${n} 段工作经历？`, type: 'yn',
-                  paths: () => ({}) }]
-              : []),
-            { id: `occ${n}From`, label: '起始（年-月）', type: 'month', req: n === 1, row: 'two', showIf: only1,
-              paths: (v) => (v ? { [`${R}/FromYear`]: v.split('-')[0], [`${R}/FromMonth`]: v.split('-')[1] } : {}) },
-            { id: `occ${n}To`, label: '结束（年-月）', hint: '至今填当前月份', type: 'month', row: 'two', showIf: only1,
-              paths: (v) => (v ? { [`${R}/ToYear`]: v.split('-')[0], [`${R}/ToMonth`]: v.split('-')[1] } : {}) },
-            { id: `occ${n}Title`, label: '职位', type: 'occupation', req: n === 1, row: 'two', showIf: only1,
-              paths: (v) => ({ [`${R}/Occupation/Occupation`]: v }) },
-            { id: `occ${n}Employer`, romanize: 'company', label: '雇主 / 公司', type: 'text', req: n === 1, row: 'two', showIf: only1,
-              paths: (v) => ({ [`${R}/Employer`]: v }) },
-            { id: `occ${n}City`, romanize: 'address', label: '城市', type: 'text', row: 'three', showIf: only1,
-              paths: (v) => ({ [`${R}/CityTown/CityTown`]: v }) },
-            { id: `occ${n}Prov`, romanize: 'address', label: '省 / 州', type: 'text', row: 'three', showIf: only1,
-              paths: (v) => ({ [`${R}/ProvState`]: v }) },
-            { id: `occ${n}Country`, label: '国家或地区', type: 'select', lov: 'CountryList', row: 'three', showIf: only1,
-              paths: (v) => ({ [`${R}/Country/Country`]: v }) },
-          ];
-        }),
       },
       {
         num: '1-6',
@@ -383,9 +357,9 @@ function fieldHtml(f) {
   if (f.type === 'yn') {
     return `<div class="q" data-fid="${f.id}">
       <div class="qt">${req}${esc(f.label)} ${hint}</div>
-      <div class="yn" role="radiogroup" aria-label="${esc(f.label)}">
-        <label><input type="radio" name="${f.id}" value="N" ${v === 'N' ? 'checked' : ''}>否 No</label>
-        <label><input type="radio" name="${f.id}" value="Y" ${v === 'Y' ? 'checked' : ''}>是 Yes</label>
+      <div class="yn${f.readonly ? ' ro' : ''}" role="radiogroup" aria-label="${esc(f.label)}">
+        <label><input type="radio" name="${f.id}" value="N" ${v === 'N' ? 'checked' : ''}${f.readonly ? ' disabled' : ''}>否 No</label>
+        <label><input type="radio" name="${f.id}" value="Y" ${v === 'Y' ? 'checked' : ''}${f.readonly ? ' disabled' : ''}>是 Yes</label>
       </div>
       <span class="err">请选择</span>
     </div>`;
@@ -475,6 +449,8 @@ function boxHtml(b) {
 }
 
 function render() {
+  // keep derived answers in step with their source
+  state.eduInd = (state.education || []).some((r) => r.name || r.position) ? 'Y' : 'N';
   document.querySelectorAll('.step').forEach((el, i) => {
     el.hidden = i !== step;
     if (i === step) el.innerHTML = SPEC[i].boxes.map(boxHtml).join('');
@@ -578,7 +554,13 @@ function buildTables() {
           let v = row[f.id] || '';
           if (typeof v === 'string') v = v.replace(/[—–]/g, '-');
           if (hasCJK(v)) throw new Error(`「${box.title} · ${f.label}」还是中文，请改成英文或拼音`);
-          out[f.cell] = v;
+          if (f.cell) out[f.cell] = v;
+        }
+        // IMM0104 wants employer, city and country in one column; IMM5257 wants
+        // them apart. We collect the parts and join them here.
+        if (box.repeat.table === 'EmploymentTbl') {
+          out.name = [row.employer, row.city, row.prov, lovLabel('CountryList', row.country)]
+            .filter(Boolean).join(', ');
         }
         return out;
       });
@@ -611,24 +593,58 @@ const titleCase = (w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : ''
 
 const blankOf = async (file) => new Uint8Array(await (await fetch('./' + file)).arrayBuffer());
 
-/** Carry the answers IMM5645 asks for again over from the IMM5257 steps, so the
- *  user isn't retyping their own name and address. */
+const lovLabel = (list, code) => (LOV[list] || []).find((o) => o.code === code)?.label || '';
+
+/** IMM5257's marital codes -> IMM5645's 8-option codes. Married splits into
+ *  physically present / not, which the form asks and 5257 doesn't, so it lands on
+ *  "physically present" and the user can change it. */
+const MARITAL_5257_TO_5645 = { '01': '5', '02': '7', '03': '2', '04': '3', '05': '4', '06': '8', '09': '1' };
+
+/** Everything IMM5645 asks that the earlier steps already answered. Prefill only
+ *  (never overwrite), so the user stays in charge of anything they edited. */
 function prefill5645() {
   const map = {
     f5645AppName: state.familyName ? `${state.familyName.toUpperCase()}, ${titleCase(state.givenName)}` : '',
     f5645AppDOB: state.dob,
+    f5645AppCOB: lovLabel('CountryOfBirthList', state.birthCountry),
+    f5645AppMStatus: MARITAL_5257_TO_5645[state.marital] || '',
     f5645AppAddress: [state.streetNum, state.streetName, state.city, state.province]
       .filter(Boolean).join(', '),
-    f5645AppOcc: state.occ1Title,
+    f5645AppOcc: (state.employment || [])[0]?.position || '',
+    // a spouse named on IMM5257 is the same spouse IMM5645 asks about
+    hasSpouse: ['01', '03'].includes(state.marital) ? 'Y' : state.hasSpouse,
+    spouse5645Name: state.spouseFamily ? `${state.spouseFamily.toUpperCase()}, ${titleCase(state.spouseGiven)}` : '',
   };
   for (const [k, v] of Object.entries(map)) if (!state[k] && v) state[k] = v;
+}
+
+/** IMM5257 asks for the same employment IMM0104 does, in its own shape. Derive it
+ *  rather than asking twice -- two inputs is two chances to disagree, and an
+ *  officer reading both forms is exactly who would notice. */
+function occupationRows5257() {
+  const out = {};
+  (state.employment || []).filter((r) => r.employer || r.position).slice(0, 3).forEach((r, i) => {
+    const R = `form1/Page3/Occupation/OccupationRow${i + 1}`;
+    const [fy, fm] = String(r.from || '').split('-');
+    const [ty, tm] = String(r.to || '').split('-');
+    if (fy) { out[`${R}/FromYear`] = fy; out[`${R}/FromMonth`] = fm || ''; }
+    if (ty) { out[`${R}/ToYear`] = ty; out[`${R}/ToMonth`] = tm || ''; }
+    if (r.position) out[`${R}/Occupation/Occupation`] = r.position;
+    if (r.employer) out[`${R}/Employer`] = r.employer;
+    if (r.city) out[`${R}/CityTown/CityTown`] = r.city;
+    if (r.prov) out[`${R}/ProvState`] = r.prov;
+    if (r.country) out[`${R}/Country/Country`] = r.country;
+  });
+  return out;
 }
 
 async function generateAll() {
   const out = [];
 
+  // eduInd is answered by the education rows, not asked twice
+  state.eduInd = (state.education || []).some((r) => r.name || r.position) ? 'Y' : 'N';
   const v5257 = valuesFor(0);
-  Object.assign(v5257, valuesFor(1), valuesFor(2));
+  Object.assign(v5257, valuesFor(1), valuesFor(2), occupationRows5257());
   const printed = [state.givenName, state.familyName].filter(Boolean).join(' ').toUpperCase();
   if (printed) v5257['form1/Page3/Signature/TextField2'] = printed;
   const r1 = await fillForm('IMM5257', await blankOf(FORMS.IMM5257.file), v5257);
@@ -845,13 +861,10 @@ const DEMO = {
   phoneType: '01', phoneCC: '86', phoneNum: '8651267889012', email: 'demo@example.com',
   purpose: '08', stayFrom: '2026-11-01', stayTo: '2027-01-25', funds: '80000',
   hostName: 'ZHAO Min', hostRel: 'Daughter', hostAddr: '77 King Street West, Toronto, ON',
-  eduInd: 'N',
-  occ1From: '1985-09', occ1To: '2019-03', occ1Title: 'Retired',
-  occ1Employer: 'Suzhou Sample Textile Factory', occ1City: 'Suzhou', occ1Prov: 'Jiangsu', occ1Country: '202',
   bg1a: 'N', bg1b: 'N', vc1: 'N', vc2: 'Y', vc3: 'Y',
   refusedDetails: 'Canadian TRV refused 14 Aug 2023 (V123456789, IRPR 179(b)).',
   bg3: 'N', military: 'N', orgs: 'N', govPos: 'N', consent: 'N',
-  f5645AppCOB: 'China', f5645AppMStatus: '8', f5645AppZh: '王秀兰',
+  f5645AppZh: '王秀兰',
   // Deceased people keep the marital status they had; "Deceased" goes in the
   // address column (that is what the portal-accepted submissions do).
   hasSpouse: 'Y', spouse5645Name: 'ZHAO, Guoqiang', spouse5645Zh: '赵国强', spouse5645DOB: '1960-01-09',
@@ -867,8 +880,10 @@ const DEMO_ROWS = {
                occ: 'Engineer', addr: '77 King Street West, Toronto, ON, Canada', acc: 'N' }],
   siblings: [],
   employment: [
-    { from: '2009-04-01', to: '2019-03-31', name: 'Suzhou Sample Textile Factory, Suzhou, Jiangsu, China', position: 'Worker' },
-    { from: '1985-09-01', to: '2009-03-31', name: 'Suzhou Example Garment Co., Ltd., Suzhou, Jiangsu, China', position: 'Worker' },
+    { from: '2009-04-01', to: '2019-03-31', position: 'Worker',
+      employer: 'Suzhou Sample Textile Factory', city: 'Suzhou', prov: 'Jiangsu', country: '202' },
+    { from: '1985-09-01', to: '2009-03-31', position: 'Worker',
+      employer: 'Suzhou Example Garment Co., Ltd.', city: 'Suzhou', prov: 'Jiangsu', country: '202' },
   ],
   education: [],
   travel: [],

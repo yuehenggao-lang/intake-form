@@ -16,7 +16,7 @@ export const SPEC_0104 = {
     {
       num: '1',
       title: '工作经历',
-      hint: '按时间倒序填，最近的在最上面。行数写不下时被截掉的是最旧的那些。退休/待业也如实填。',
+      hint: '按时间倒序填，最近的在最上面。这里填一次，IMM5257 和 IMM0104 都会用到。退休/待业也如实填。',
       repeat: {
         key: 'employment',
         max: 8,
@@ -25,15 +25,18 @@ export const SPEC_0104 = {
         fields: [
           { id: 'from', label: '起始日期', type: 'date', row: 'two', cell: 'from' },
           { id: 'to', label: '结束日期', hint: '至今填今天的日期', type: 'date', row: 'two', cell: 'to' },
-          { id: 'name', romanize: 'company', label: '雇主 / 公司，城市，国家', hint: '不要写街道地址', type: 'text', cell: 'name' },
-          { id: 'position', label: '职位', type: 'occupation', cell: 'position' },
+          { id: 'position', label: '职位', type: 'occupation', row: 'two', cell: 'position' },
+          { id: 'employer', romanize: 'company', label: '雇主 / 公司', hint: '不要写街道地址', type: 'text', row: 'two' },
+          { id: 'city', romanize: 'address', label: '城市', type: 'text', row: 'three' },
+          { id: 'prov', romanize: 'address', label: '省 / 州', type: 'text', row: 'three' },
+          { id: 'country', label: '国家或地区', type: 'select', lov: 'CountryList', row: 'three' },
         ],
       },
     },
     {
       num: '2',
       title: '教育经历',
-      hint: '只填高中之后的（大学 / 大专 / 职业培训）。初中高中不要填。没有就不加。',
+      hint: '只填高中之后的（大学 / 大专 / 职业培训）。初中高中不要填。没有就不加 —— IMM5257 上「是否上过大专或大学」会据此自动作答。',
       repeat: {
         key: 'education',
         max: 6,

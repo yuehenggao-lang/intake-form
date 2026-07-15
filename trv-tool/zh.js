@@ -104,12 +104,44 @@ export const OCCUPATIONS = [
 
 /** Company-name suffixes. Everything else in a company name becomes pinyin, which
  *  is what Chinese companies' own English names usually do anyway. */
+/** Ordinals in institution names: 第三 is "No. 3", not "Disan". */
+const ORDINALS = [
+  ['第一', 'No. 1 '], ['第二', 'No. 2 '], ['第三', 'No. 3 '], ['第四', 'No. 4 '],
+  ['第五', 'No. 5 '], ['第六', 'No. 6 '], ['第七', 'No. 7 '], ['第八', 'No. 8 '],
+  ['第九', 'No. 9 '], ['第十', 'No. 10 '],
+];
+
 const COMPANY_TERMS = [
+  // Longest first: 职业技术学院 must beat 学院, 有限责任公司 must beat 公司.
+  ['中国科学院', ' Chinese Academy of Sciences'], ['社会科学院', ' Academy of Social Sciences'],
+  ['科学院', ' Academy of Sciences'],
+  ['职业技术学院', ' Vocational and Technical College'],
+  ['职业技术学校', ' Vocational and Technical School'],
+  ['职业学院', ' Vocational College'], ['技术学院', ' Institute of Technology'],
+  ['师范大学', ' Normal University'], ['理工大学', ' University of Technology'],
+  ['工业大学', ' University of Technology'], ['科技大学', ' University of Science and Technology'],
+  ['财经大学', ' University of Finance and Economics'],
+  ['医科大学', ' Medical University'], ['农业大学', ' Agricultural University'],
+  ['交通大学', ' Jiaotong University'], ['外国语大学', ' International Studies University'],
   ['有限责任公司', ' Co., Ltd.'], ['股份有限公司', ' Co., Ltd.'], ['有限公司', ' Co., Ltd.'],
-  ['集团', ' Group'], ['公司', ' Company'], ['厂', ' Factory'], ['医院', ' Hospital'],
-  ['学校', ' School'], ['大学', ' University'], ['中学', ' Middle School'], ['小学', ' Primary School'],
-  ['银行', ' Bank'], ['酒店', ' Hotel'], ['科技', ' Technology'], ['贸易', ' Trading'],
-  ['建筑', ' Construction'], ['商店', ' Store'], ['餐厅', ' Restaurant'],
+  ['研究所', ' Research Institute'], ['研究院', ' Research Academy'],
+  ['设计院', ' Design Institute'], ['事务所', ' Firm'],
+  ['人民医院', " People's Hospital"], ['中医院', ' Hospital of Traditional Chinese Medicine'],
+  ['卫生院', ' Health Centre'], ['疾控中心', ' Centre for Disease Control'],
+  ['高级中学', ' Senior High School'], ['初级中学', ' Junior High School'],
+  ['职业高中', ' Vocational High School'], ['技工学校', ' Technical School'],
+  ['幼儿园', ' Kindergarten'], ['培训中心', ' Training Centre'], ['进修学校', ' Continuing Education School'],
+  ['分公司', ' Branch'], ['办事处', ' Office'], ['管理局', ' Administration'],
+  ['管理处', ' Management Office'], ['委员会', ' Committee'], ['开发公司', ' Development Company'],
+  ['集团', ' Group'], ['公司', ' Company'], ['工厂', ' Factory'], ['厂', ' Factory'],
+  ['医院', ' Hospital'], ['学院', ' College'], ['大学', ' University'],
+  ['中学', ' Middle School'], ['小学', ' Primary School'], ['学校', ' School'],
+  ['银行', ' Bank'], ['酒店', ' Hotel'], ['宾馆', ' Hotel'], ['科技', ' Technology'],
+  ['贸易', ' Trading'], ['实业', ' Industrial'], ['建筑', ' Construction'],
+  ['商店', ' Store'], ['超市', ' Supermarket'], ['餐厅', ' Restaurant'], ['饭店', ' Restaurant'],
+  ['物流', ' Logistics'], ['纺织', ' Textile'], ['机械', ' Machinery'], ['电子', ' Electronics'],
+  ['化工', ' Chemical'], ['食品', ' Food'], ['服装', ' Garment'], ['汽车', ' Automobile'],
+  ['地产', ' Real Estate'], ['保险', ' Insurance'], ['证券', ' Securities'], ['传媒', ' Media'],
 ];
 
 /** Pinyin for a run of Han characters, joined into one capitalised word.
@@ -173,7 +205,7 @@ function translate(s, terms) {
 }
 
 export const romanizeAddress = (s) => translate(s, ADDRESS_TERMS);
-export const romanizeCompany = (s) => translate(s, COMPANY_TERMS);
+export const romanizeCompany = (s) => translate(s, [...ORDINALS, ...COMPANY_TERMS]);
 
 /** Plain pinyin, for free text with no useful vocabulary (city names etc). */
 export const romanize = (s) => translate(s, []);

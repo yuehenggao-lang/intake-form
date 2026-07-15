@@ -130,6 +130,8 @@
   .yn input { position: absolute; opacity: 0; pointer-events: none; }
   .yn label:has(input:checked) { background: var(--gov); color: #fff; }
   .yn label:has(input:focus-visible) { outline: 3px solid var(--flag); outline-offset: -3px; }
+  .yn.ro { opacity: .75; }
+  .yn.ro label { cursor: default; }
 
   .q { display: grid; gap: 8px; }
   .q .qt { font-size: 14px; }
@@ -260,7 +262,7 @@
     <ol class="steps-todo">
       <li><b>用 Adobe Acrobat Reader 打开</b>这个 PDF。用浏览器或 Mac「预览」打开会显示空白，这是这类政府表格的正常现象，不是文件坏了。<a href="https://get.adobe.com/reader/" target="_blank" rel="noopener">免费下载 Reader</a></li>
       <li><b>在 Reader 里打开 IMM5257，点表格顶部的 Validate 按钮。</b>这一步会生成页脚的条形码。跳过它，IRCC 系统不会接受你的表格。（另外两张表没有这个按钮，不需要这一步。）</li>
-      <li><b>用 GCKey 登录 IRCC 账户递交</b>，在那里上传这三张 PDF。IRCC 另有一个直接在线填写的访问签证入口，那条路不上传 PDF，这三张表在那儿用不上。具体入口以 IRCC 网站当时的指引为准。</li>
+      <li><b>用 GCKey 登录 IRCC 账户递交</b>，在那里上传这三张 PDF 和你自己准备的材料。<a href="https://www.canada.ca/en/immigration-refugees-citizenship/services/application/account.html" target="_blank" rel="noopener">去 IRCC 账户登录 / 注册 →</a><br>IRCC 另有一个直接在线填写的访问签证入口，那条路不上传 PDF，这三张表在那儿用不上。入口以 IRCC 网站当时的指引为准。</li>
       <li><b>逐页核对一遍，再自己递交。</b>本工具只负责把你填的内容写进表格，不检查内容对错。</li>
     </ol>
 
