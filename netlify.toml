@@ -33,3 +33,8 @@
   from = "/consult"
   to   = "/consult.html"
   status = 200
+
+[[redirects]]
+  from = "/trv"
+  to   = "/trv-tool/index.html"
+  status = 200

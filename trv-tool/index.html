@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>加拿大旅游签 IMM5257 在线填表工具（免费）</title>
+<meta name="description" content="免费填写加拿大访问签证申请表 IMM5257。全程在你的浏览器里完成，信息不上传任何服务器。" />
+<style>
+  /* The palette is lifted from the IMM5257 itself: the pale periwinkle field
+     fill, the hairline black rules, the Canada red used only for mandatory
+     markers, and the navy of the form's own Validate button. */
+  :root {
+    --paper: #ffffff;
+    --wash: #eef0f7;
+    --field: #e1e3f5;
+    --field-edge: #b9bdd8;
+    --ink: #12131a;
+    --ink-soft: #5c6072;
+    --rule: #0a0a0a;
+    --flag: #d8232a;
+    --gov: #1b4d7e;
+    --gov-hi: #26374a;
+    --ok: #1c6b4a;
+
+    --zh: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    --mono: "SF Mono", "Menlo", "Consolas", "Courier New", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--wash);
+    color: var(--ink);
+    font: 16px/1.65 var(--zh);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px 96px; }
+
+  /* ── masthead: quotes the form's own header bar ─────────────────────── */
+  header.mast {
+    background: var(--paper);
+    border-bottom: 3px solid var(--rule);
+    padding: 28px 0 22px;
+    margin-bottom: 34px;
+  }
+  .mast .wrap { padding-bottom: 0; }
+  .mast-top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--rule); padding-bottom: 10px; margin-bottom: 20px;
+    font: 600 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .mast-top .leaf { color: var(--flag); font-size: 15px; }
+  h1 { font-size: clamp(24px, 4vw, 34px); line-height: 1.25; margin: 0 0 10px; letter-spacing: -.01em; }
+  h1 .en { display: block; font: 400 13px/1.5 var(--mono); color: var(--ink-soft); letter-spacing: .04em; margin-top: 8px; }
+  .lede { margin: 0; color: var(--ink-soft); max-width: 62ch; }
+  .privacy {
+    display: inline-block; margin-top: 18px;
+    background: var(--field); border: 1px solid var(--field-edge);
+    padding: 7px 12px; font-size: 13px; color: var(--gov-hi);
+  }
+  .privacy b { font-weight: 600; }
+
+  /* ── step rail ──────────────────────────────────────────────────────── */
+  .rail { display: flex; gap: 0; margin-bottom: 26px; border: 1px solid var(--rule); background: var(--paper); }
+  .rail button {
+    flex: 1; appearance: none; background: none; border: 0; border-right: 1px solid var(--rule);
+    padding: 11px 8px; font: 500 13px/1.3 var(--zh); color: var(--ink-soft); cursor: pointer; text-align: center;
+  }
+  .rail button:last-child { border-right: 0; }
+  .rail button .n { display: block; font: 600 10px/1 var(--mono); letter-spacing: .1em; margin-bottom: 4px; opacity: .6; }
+  .rail button[aria-current="true"] { background: var(--gov); color: #fff; }
+  .rail button[aria-current="true"] .n { opacity: .8; }
+  .rail button:focus-visible { outline: 3px solid var(--flag); outline-offset: -3px; }
+
+  /* ── the signature: a field box that quotes the real form ───────────── */
+  fieldset.box {
+    border: 1px solid var(--rule); background: var(--paper);
+    margin: 0 0 18px; padding: 0; position: relative;
+  }
+  fieldset.box > legend {
+    display: block; float: left; width: 100%; margin: 0; padding: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .box-hd { display: flex; align-items: stretch; }
+  .box-hd .num {
+    flex: 0 0 auto; min-width: 34px; display: grid; place-items: center;
+    border-right: 1px solid var(--rule); font: 600 13px/1 var(--mono); background: var(--paper);
+  }
+  .box-hd .t { padding: 9px 12px; font-weight: 600; font-size: 14px; }
+  .box-body { clear: both; padding: 14px; display: grid; gap: 14px; }
+
+  .row { display: grid; gap: 14px; }
+  @media (min-width: 620px) {
+    .row.two { grid-template-columns: 1fr 1fr; }
+    .row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .row.date { grid-template-columns: 1.2fr .8fr .8fr; }
+  }
+
+  label.f { display: block; }
+  label.f .lab { display: block; font-size: 13px; margin-bottom: 5px; color: var(--ink); }
+  label.f .lab .req { color: var(--flag); margin-right: 3px; font-weight: 700; }
+  label.f .lab .hint { color: var(--ink-soft); font-size: 12px; margin-left: 6px; }
+
+  /* Inputs are monospace on the form's own field colour: what you type here is
+     what lands in the PDF, which renders these fields in a monospace too. */
+  input[type=text], input[type=email], input[type=number],
+  input[type=date], input[type=month], select, textarea {
+    width: 100%; padding: 9px 10px; background: var(--field);
+    border: 1px solid var(--field-edge); border-radius: 0;
+    font: 14px/1.4 var(--mono); color: var(--ink);
+  }
+  select { font-family: var(--zh); }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--gov); outline-offset: 0; border-color: var(--gov); }
+  input[aria-invalid="true"], select[aria-invalid="true"] { border: 2px solid var(--flag); background: #fdf0f0; }
+  .err { color: var(--flag); font-size: 12px; margin-top: 4px; display: none; }
+  input[aria-invalid="true"] ~ .err, select[aria-invalid="true"] ~ .err { display: block; }
+
+  /* Y/N pairs mirror the form's own two-box radio */
+  .yn { display: inline-flex; border: 1px solid var(--rule); justify-self: start; }
+  .yn label {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+    font-size: 13px; cursor: pointer; background: var(--field); border-right: 1px solid var(--rule);
+  }
+  .yn label:last-child { border-right: 0; }
+  .yn input { position: absolute; opacity: 0; pointer-events: none; }
+  .yn label:has(input:checked) { background: var(--gov); color: #fff; }
+  .yn label:has(input:focus-visible) { outline: 3px solid var(--flag); outline-offset: -3px; }
+
+  .q { display: grid; gap: 8px; }
+  .q .qt { font-size: 14px; }
+  .q .qt .req { color: var(--flag); font-weight: 700; margin-right: 3px; }
+
+  .nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 22px; }
+  .btn {
+    appearance: none; border: 1px solid var(--rule); background: var(--paper); color: var(--ink);
+    padding: 11px 20px; font: 500 15px/1 var(--zh); cursor: pointer; border-radius: 0;
+  }
+  .btn.primary { background: var(--gov); border-color: var(--gov); color: #fff; }
+  .btn.primary:hover { background: var(--gov-hi); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn:focus-visible { outline: 3px solid var(--flag); outline-offset: 2px; }
+
+  .step[hidden] { display: none; }
+
+  /* ── result ─────────────────────────────────────────────────────────── */
+  .result { background: var(--paper); border: 1px solid var(--rule); padding: 26px; }
+  .result h2 { margin: 0 0 6px; font-size: 22px; }
+  .steps-todo { counter-reset: s; list-style: none; padding: 0; margin: 18px 0 0; }
+  .steps-todo li {
+    counter-increment: s; position: relative; padding: 0 0 14px 40px; font-size: 14px;
+    border-left: 1px solid var(--field-edge); margin-left: 12px;
+  }
+  .steps-todo li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .steps-todo li::before {
+    content: counter(s); position: absolute; left: -12px; top: -2px; width: 24px; height: 24px;
+    display: grid; place-items: center; background: var(--gov); color: #fff;
+    font: 600 11px/1 var(--mono); border-radius: 50%;
+  }
+  .steps-todo li b { display: block; margin-bottom: 2px; }
+  .steps-todo li a { color: var(--gov); }
+
+  .warn { border-left: 3px solid var(--flag); background: #fdf2f2; padding: 12px 14px; font-size: 14px; margin: 18px 0 0; }
+  .warn b { color: var(--flag); }
+
+  .cta { margin-top: 30px; border: 1px solid var(--rule); background: var(--gov-hi); color: #fff; padding: 22px; }
+  .cta h3 { margin: 0 0 8px; font-size: 18px; }
+  .cta p { margin: 0 0 16px; font-size: 14px; opacity: .88; }
+  .cta a {
+    display: inline-block; background: #fff; color: var(--gov-hi); text-decoration: none;
+    padding: 11px 20px; font-weight: 600; font-size: 15px;
+  }
+  .cta a:hover { background: var(--field); }
+  .cta a:focus-visible { outline: 3px solid var(--flag); outline-offset: 2px; }
+
+  footer.disc {
+    margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--field-edge);
+    font-size: 12px; color: var(--ink-soft); line-height: 1.7;
+  }
+  footer.disc b { color: var(--ink); }
+
+  .busy { font: 13px/1 var(--mono); color: var(--ink-soft); align-self: center; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .step { animation: in .22s ease-out; }
+    @keyframes in { from { opacity: 0; transform: translateY(4px); } }
+  }
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <div class="mast-top">
+      <span><span class="leaf">&#127809;</span> IMM 5257 &middot; 访问签证申请表</span>
+      <span>免费工具</span>
+    </div>
+    <h1>加拿大旅游签在线填表
+      <span class="en">Application for Visitor Visa (Temporary Resident Visa)</span>
+    </h1>
+    <p class="lede">用中文填一遍，导出可提交的官方 PDF 表格。题号与官方表格一一对应，方便你对照检查。</p>
+    <p class="privacy"><b>信息不出你的浏览器</b>：填表和生成 PDF 全在本机完成，不上传任何服务器。</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="rail" id="rail" aria-label="填表步骤"></nav>
+
+  <form id="form" novalidate>
+    <div class="step" data-step="0"></div>
+    <div class="step" data-step="1" hidden></div>
+    <div class="step" data-step="2" hidden></div>
+
+    <div class="nav">
+      <button type="button" class="btn" id="prev">上一步</button>
+      <span class="busy" id="busy"></span>
+      <button type="button" class="btn primary" id="next">下一步</button>
+    </div>
+  </form>
+
+  <section class="result" id="result" hidden>
+    <h2>表格已生成</h2>
+    <p class="lede">下载后还有两步必须由你完成，否则递交会被系统退回。</p>
+
+    <ol class="steps-todo">
+      <li><b>用 Adobe Acrobat Reader 打开</b>这个 PDF。用浏览器或 Mac「预览」打开会显示空白，这是这类政府表格的正常现象，不是文件坏了。<a href="https://get.adobe.com/reader/" target="_blank" rel="noopener">免费下载 Reader</a></li>
+      <li><b>在 Reader 里点表格顶部的 Validate 按钮。</b>这一步会生成页脚的条形码。跳过它，IRCC 系统不会接受你的表格。</li>
+      <li><b>逐页核对一遍，再自己递交。</b>本工具只负责把你填的内容写进表格，不检查内容对错。</li>
+    </ol>
+
+    <p class="warn"><b>请注意：</b>本工具不判断你是否符合申请条件、不替你选表、不代为递交。表格内容与递交结果由你本人负责。</p>
+
+    <div class="nav">
+      <button type="button" class="btn" id="back">返回修改</button>
+      <button type="button" class="btn primary" id="download">下载填好的 IMM5257</button>
+    </div>
+
+    <div class="cta">
+      <h3>想让持牌顾问帮你把关？</h3>
+      <p>填表是机械活，能不能过是另一回事。资格评估、拒签风险、材料清单这些需要专业判断的部分，可以约一次付费咨询。</p>
+      <a href="https://www.nova-stage.ca/immigration#consult" target="_blank" rel="noopener">预约咨询 · Nova Stage</a>
+    </div>
+  </section>
+
+  <footer class="disc">
+    <p><b>免责声明：</b>本工具由持牌顾问 Yueheng Gao（RCIC R534273，Nova Stage Immigration）免费提供，仅将你输入的内容机械填写进 IRCC 官方 IMM5257 表格，<b>不构成移民建议</b>。表格模板取自 canada.ca 公开发布的官方文件。你的任何信息都不会离开本机、不会被本站或任何第三方收集。递交前请自行核对每一项内容。</p>
+  </footer>
+</div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
