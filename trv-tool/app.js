@@ -547,7 +547,7 @@ function buildRepeatValues(box, out) {
       if (!f.path) continue;  // e.g. the 中文名 column, folded into the name below
       let v = row[f.id];
       if (v == null || v === '') continue;
-      if (f.latin) v = String(v).toUpperCase();
+      if (f.upper) v = String(v).toUpperCase();
       if (f.joinZh) v = joinName(v, row[f.joinZh]);
       if (typeof v === 'string') v = v.replace(/[—–]/g, '-');
       if (!f.cjk && !f.joinZh && hasCJK(v)) {
@@ -594,7 +594,7 @@ function valuesFor(stepIdx) {
       if (f.showIf && !f.showIf(state)) continue;
       let v = state[f.id];
       if (v == null || v === '') continue;
-      if (f.upper || f.latin) v = String(v).toUpperCase();
+      if (f.upper) v = String(v).toUpperCase();
       if (typeof v === 'string') v = v.replace(/[—–]/g, '-');
       // f.cjk marks the fields that are SUPPOSED to be Chinese (IMM5645 names).
       if (!f.cjk && hasCJK(v)) throw new Error(`「${f.label}」还是中文，请改成英文或拼音`);
@@ -607,13 +607,15 @@ function valuesFor(stepIdx) {
 // ── events ───────────────────────────────────────────────────────────────
 /** All DOM wiring lives here so importing this module has no side effects and
  *  the pure parts (SPEC, buildValues) stay testable without a page. */
+const titleCase = (w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : '');
+
 const blankOf = async (file) => new Uint8Array(await (await fetch('./' + file)).arrayBuffer());
 
 /** Carry the answers IMM5645 asks for again over from the IMM5257 steps, so the
  *  user isn't retyping their own name and address. */
 function prefill5645() {
   const map = {
-    f5645AppName: [state.givenName, state.familyName].filter(Boolean).join(' ').toUpperCase(),
+    f5645AppName: state.familyName ? `${state.familyName.toUpperCase()}, ${titleCase(state.givenName)}` : '',
     f5645AppDOB: state.dob,
     f5645AppAddress: [state.streetNum, state.streetName, state.city, state.province]
       .filter(Boolean).join(', '),
@@ -633,7 +635,16 @@ async function generateAll() {
   if (r1.missing.length) console.warn('IMM5257 paths not found:', r1.missing);
   out.push({ id: 'IMM5257', name: '访问签证申请表 IMM5257', pdf: r1.pdf });
 
-  const v5645 = { ...valuesFor(3), ...visaTypeBoxes(state.visaType), ...dates5645(state.signDate) };
+  const v5645 = {
+    ...valuesFor(3),
+    ...visaTypeBoxes(state.visaType),
+    // section dates are negative declarations -- only when that section is empty
+    ...dates5645(state.signDate, {
+      hasSpouse: state.hasSpouse === 'Y',
+      children: (state.children || []).some((r) => r.name),
+      siblings: (state.siblings || []).some((r) => r.name),
+    }),
+  };
   const r2 = await fillForm('IMM5645', await blankOf(FORMS.IMM5645.file), v5645);
   if (r2.missing.length) console.warn('IMM5645 paths not found:', r2.missing);
   out.push({ id: 'IMM5645', name: '家庭信息表 IMM5645', pdf: r2.pdf });
@@ -843,16 +854,16 @@ const DEMO = {
   f5645AppCOB: 'China', f5645AppMStatus: '8', f5645AppZh: '王秀兰',
   // Deceased people keep the marital status they had; "Deceased" goes in the
   // address column (that is what the portal-accepted submissions do).
-  hasSpouse: 'Y', spouse5645Name: 'GUOQIANG ZHAO', spouse5645Zh: '赵国强', spouse5645DOB: '1960-01-09',
+  hasSpouse: 'Y', spouse5645Name: 'ZHAO, Guoqiang', spouse5645Zh: '赵国强', spouse5645DOB: '1960-01-09',
   spouse5645COB: 'China', spouse5645MStatus: '6', spouse5645Address: 'Deceased, Suzhou, China, 2019-11-30',
   spouse5645Occupation: 'Retired', spouse5645Acc: 'N',
-  motherName: 'FENGYING GU', motherZh: '顾凤英', motherDOB: '1938-06-01', motherCOB: 'China', motherMStatus: '5',
+  motherName: 'GU, Fengying', motherZh: '顾凤英', motherDOB: '1938-06-01', motherCOB: 'China', motherMStatus: '5',
   motherAddress: 'Deceased, Suzhou, China, 2011-04-18', motherOccupation: 'Retired', motherAcc: 'N',
-  fatherName: 'DEHAI WANG', fatherZh: '王德海', fatherDOB: '1935-02-18', fatherCOB: 'China', fatherMStatus: '5',
+  fatherName: 'WANG, Dehai', fatherZh: '王德海', fatherDOB: '1935-02-18', fatherCOB: 'China', fatherMStatus: '5',
   fatherAddress: 'Deceased, Suzhou, China, 2008-09-02', fatherOccupation: 'Retired', fatherAcc: 'N',
 };
 const DEMO_ROWS = {
-  children: [{ name: 'MIN ZHAO', zh: '赵敏', rel: 'Daughter', dob: '1990-09-14', mstatus: '5', cob: 'China',
+  children: [{ name: 'ZHAO, Min', zh: '赵敏', rel: 'Daughter', dob: '1990-09-14', mstatus: '5', cob: 'China',
                occ: 'Engineer', addr: '77 King Street West, Toronto, ON, Canada', acc: 'N' }],
   siblings: [],
   employment: [

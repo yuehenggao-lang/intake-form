@@ -49,11 +49,15 @@ export const MSTATUS_7 = [
  *  exclGroup, so both have to be written. */
 const acc = (yesPath, noPath) => (v) => ({ [yesPath]: v === 'Y' ? '1' : '0', [noPath]: v === 'Y' ? '0' : '1' });
 
-/** "Hongyang Ren 任红阳" -- pinyin, space, Chinese name. */
+/** "WANG, Xiulan 王秀兰" -- Steven's convention: SURNAME, Given, then the Chinese
+ *  characters. The form asks for names "in English AND in your native language",
+ *  so English alone is wrong. */
 export const joinName = (pinyin, zh) => [String(pinyin || '').trim(), String(zh || '').trim()].filter(Boolean).join(' ');
 
 const person = (id, zh, base, opts = {}) => [
-  { id: `${id}Name`, latin: true, label: `${zh}姓名（拼音）`, type: 'text', row: 'two',
+  // no `upper` here: the convention is "SURNAME, Given", so upper-casing the lot
+  // would give "SURNAME, GIVEN".
+  { id: `${id}Name`, latin: true, label: `${zh}姓名（拼音）`, hint: '写成 SURNAME, Given', type: 'text', row: 'two',
     req: opts.req, showIf: opts.showIf,
     paths: (v, s) => ({ [`${base}/${opts.nameField}`]: joinName(v, s[`${id}Zh`]) }) },
   { id: `${id}Zh`, cjk: true, label: `${zh}中文名`, hint: '5645 要求写中文名', type: 'text', row: 'two',
@@ -84,7 +88,7 @@ export const SPEC_5645 = {
       title: '申请人本人',
       hint: '这几项从前面自动带过来，核对即可。',
       fields: [
-        { id: 'f5645AppName', latin: true, label: '姓名（拼音）', type: 'text', req: true, row: 'two',
+        { id: 'f5645AppName', latin: true, label: '姓名（拼音）', hint: '写成 SURNAME, Given', type: 'text', req: true, row: 'two',
           paths: (v, s) => ({ [`${P}/SectionA/Applicant/AppName`]: joinName(v, s.f5645AppZh) }) },
         { id: 'f5645AppZh', cjk: true, label: '中文名', hint: '5645 要求写中文名', type: 'text', req: true, row: 'two',
           paths: () => ({}) },
@@ -143,7 +147,7 @@ export const SPEC_5645 = {
         addLabel: '添加子女',
         base: (i) => `${P}/SectionB/Child${i ? `[${i}]` : ''}`,
         fields: [
-          { id: 'name', latin: true, label: '姓名（拼音）', type: 'text', row: 'two', path: 'ChildName', joinZh: 'zh' },
+          { id: 'name', latin: true, label: '姓名（拼音）', hint: 'SURNAME, Given', type: 'text', row: 'two', path: 'ChildName', joinZh: 'zh' },
           { id: 'zh', cjk: true, label: '中文名', type: 'text', row: 'two' },
           { id: 'rel', label: '关系', type: 'select', row: 'two', path: 'ChildRelationship',
             options: [
@@ -170,7 +174,7 @@ export const SPEC_5645 = {
         addLabel: '添加兄弟姐妹',
         base: (i) => `${P}/SectionC/Child${i ? `[${i}]` : ''}`,
         fields: [
-          { id: 'name', latin: true, label: '姓名（拼音）', type: 'text', row: 'two', path: 'ChildName', joinZh: 'zh' },
+          { id: 'name', latin: true, label: '姓名（拼音）', hint: 'SURNAME, Given', type: 'text', row: 'two', path: 'ChildName', joinZh: 'zh' },
           { id: 'zh', cjk: true, label: '中文名', type: 'text', row: 'two' },
           { id: 'rel', label: '关系', type: 'select', row: 'two', path: 'ChildRelationship',
             options: [
@@ -191,12 +195,24 @@ export const SPEC_5645 = {
   ],
 };
 
-/** Signature dates. The drawn signature stays empty for the applicant. */
-export const dates5645 = (d) => ({
-  'IMM_5645/page1/SectionA/SectionAdate': d,
-  'IMM_5645/page1/SectionB/SectionBdate': d,
-  'IMM_5645/page1/SectionC/SectionCdate': d,
-});
+/**
+ * The three section dates are NEGATIVE declarations, not "I filled this in" dates.
+ *
+ * Each section footer reads "I certify that I do NOT have a spouse / any children
+ * / any brothers or sisters", with a signature and date under it. So the date goes
+ * in ONLY when that section is empty. Dating Section A while a spouse is listed
+ * above it certifies the opposite of what the form says.
+ *
+ * (Filling all three unconditionally is a known way to get this wrong -- it comes
+ * from copying a values.json that had them all filled.)
+ */
+export const dates5645 = (d, { hasSpouse, children, siblings }) => {
+  const out = {};
+  if (!hasSpouse) out['IMM_5645/page1/SectionA/SectionAdate'] = d;
+  if (!children) out['IMM_5645/page1/SectionB/SectionBdate'] = d;
+  if (!siblings) out['IMM_5645/page1/SectionC/SectionCdate'] = d;
+  return out;
+};
 
 /** The application-type checkboxes at the top of the form. */
 export const visaTypeBoxes = (visaType) => ({
