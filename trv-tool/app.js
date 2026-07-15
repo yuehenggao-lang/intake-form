@@ -11,6 +11,7 @@ import { fillForm, FORMS } from './xfa-fill.js';
 import { hasCJK, romanizeAddress, romanizeCompany, OCCUPATIONS } from './zh.js';
 import { SPEC_5645, visaTypeBoxes } from './spec-5645.js';
 import { SPEC_0104, signature0104 } from './spec-0104.js';
+import { riskFlags } from './risk.js';
 
 const P1 = 'form1/Page1/PersonalDetails';
 const P1M = 'form1/Page1/MaritalStatus/SectionA';
@@ -687,6 +688,7 @@ document.getElementById('next').addEventListener('click', async () => {
   next.disabled = true;
   try {
     generated = await generateAll();
+    renderRadar();
     document.getElementById('form').hidden = true;
     document.getElementById('rail').hidden = true;
     document.getElementById('result').hidden = false;
@@ -736,6 +738,22 @@ async function generateAll() {
   out.push({ id: 'IMM0104', name: '教育/工作/旅行史 IMM0104', pdf: r3.pdf });
 
   return out;
+}
+
+/** Name the factors an officer weighs that the user's own answers touch. Flags
+ *  only -- there is deliberately no "looks fine" branch; see risk.js. */
+function renderRadar() {
+  const flags = riskFlags(state, { children: state.children, travel: state.travel });
+  const box = document.getElementById('radar');
+  if (!flags.length) { box.hidden = true; return; }
+  document.getElementById('radar-h').textContent = `有 ${flags.length} 项值得你留意`;
+  document.getElementById('radar-list').innerHTML = flags
+    .map((f) => `<li><b>${esc(f.title)}</b><span>${esc(f.why)}</span></li>`)
+    .join('');
+  box.hidden = false;
+  document.getElementById('cta-h').textContent = '这几项要不要紧？找持牌顾问看一次';
+  document.getElementById('cta-p').textContent =
+    '上面这些是签证官会看的地方，但每一项要不要紧、该怎么用材料回应，得看你的完整情况才能判断——这正是付费咨询在做的事。表格本身你已经填好了。';
 }
 
 function renderDownloads() {
