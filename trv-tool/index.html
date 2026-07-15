@@ -200,11 +200,9 @@
   .radar { border: 1px solid var(--rule); border-left: 4px solid var(--flag); background: var(--paper); padding: 18px 20px; margin: 26px 0 0; }
   .radar h3 { margin: 0 0 8px; font-size: 17px; }
   .radar-lede { margin: 0 0 14px; font-size: 13px; color: var(--ink-soft); }
-  .radar-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-  .radar-list li { border-top: 1px solid var(--field-edge); padding-top: 12px; }
-  .radar-list li:first-child { border-top: 0; padding-top: 0; }
-  .radar-list b { display: block; font-size: 14px; margin-bottom: 3px; }
-  .radar-list span { font-size: 13px; color: var(--ink-soft); }
+  .radar-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+  .radar-list li { font-size: 14px; padding-left: 18px; position: relative; }
+  .radar-list li::before { content: '—'; position: absolute; left: 0; color: var(--flag); }
   .radar-foot { margin: 16px 0 0; padding-top: 12px; border-top: 1px solid var(--field-edge); font-size: 12px; color: var(--ink-soft); }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -254,14 +252,15 @@
 
     <section id="radar" class="radar" hidden>
       <h3 id="radar-h"></h3>
-      <p class="radar-lede">签证官在判断「你会不会按时离境」时，通常会看下面这些方面（IRPR 179(b)）。你的回答触及了其中几项，列在这里供你自己核对。</p>
+      <p class="radar-lede">下面这几项来自你自己的回答，列在这里供你核对。</p>
       <ul id="radar-list" class="radar-list"></ul>
-      <p class="radar-foot"><b>这不是评估结论。</b>触及这些项<b>不代表会被拒</b>；没被列出来<b>也不代表没问题</b>——这个工具只看你填进表格的内容，判断一份申请要看完整材料和背景。</p>
+      <p class="radar-foot"><b>这不是评估，也不是建议。</b>列出<b>不代表会被拒</b>，没列出<b>也不代表没问题</b>。判断一份申请要看完整材料和背景。</p>
     </section>
 
     <ol class="steps-todo">
       <li><b>用 Adobe Acrobat Reader 打开</b>这个 PDF。用浏览器或 Mac「预览」打开会显示空白，这是这类政府表格的正常现象，不是文件坏了。<a href="https://get.adobe.com/reader/" target="_blank" rel="noopener">免费下载 Reader</a></li>
       <li><b>在 Reader 里打开 IMM5257，点表格顶部的 Validate 按钮。</b>这一步会生成页脚的条形码。跳过它，IRCC 系统不会接受你的表格。（另外两张表没有这个按钮，不需要这一步。）</li>
+      <li><b>用 GCKey 登录 IRCC 账户递交</b>，在那里上传这三张 PDF。IRCC 另有一个直接在线填写的访问签证入口，那条路不上传 PDF，这三张表在那儿用不上。具体入口以 IRCC 网站当时的指引为准。</li>
       <li><b>逐页核对一遍，再自己递交。</b>本工具只负责把你填的内容写进表格，不检查内容对错。</li>
     </ol>
 

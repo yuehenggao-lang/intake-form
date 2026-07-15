@@ -9,7 +9,7 @@
  */
 import { fillForm, FORMS } from './xfa-fill.js';
 import { hasCJK, romanizeAddress, romanizeCompany, OCCUPATIONS } from './zh.js';
-import { SPEC_5645, visaTypeBoxes, dates5645 } from './spec-5645.js';
+import { SPEC_5645, visaTypeBoxes, dates5645, joinName } from './spec-5645.js';
 import { SPEC_0104, signature0104 } from './spec-0104.js';
 import { riskFlags } from './risk.js';
 
@@ -544,11 +544,15 @@ function buildRepeatValues(box, out) {
   (state[r.key] || []).forEach((row, i) => {
     const base = r.base(i);
     for (const f of r.fields) {
+      if (!f.path) continue;  // e.g. the 中文名 column, folded into the name below
       let v = row[f.id];
       if (v == null || v === '') continue;
       if (f.latin) v = String(v).toUpperCase();
+      if (f.joinZh) v = joinName(v, row[f.joinZh]);
       if (typeof v === 'string') v = v.replace(/[—–]/g, '-');
-      if (hasCJK(v)) throw new Error(`「${box.title} ${i + 1} · ${f.label}」还是中文，请改成英文或拼音`);
+      if (!f.cjk && !f.joinZh && hasCJK(v)) {
+        throw new Error(`「${box.title} ${i + 1} · ${f.label}」还是中文，请改成英文或拼音`);
+      }
       if (f.kind === 'acc') {
         // Accompanying is two independent 0/1 checkboxes, not an exclGroup.
         const [yes, no] = f.path.split('/');
@@ -592,7 +596,8 @@ function valuesFor(stepIdx) {
       if (v == null || v === '') continue;
       if (f.upper || f.latin) v = String(v).toUpperCase();
       if (typeof v === 'string') v = v.replace(/[—–]/g, '-');
-      if (hasCJK(v)) throw new Error(`「${f.label}」还是中文，请改成英文或拼音`);
+      // f.cjk marks the fields that are SUPPOSED to be Chinese (IMM5645 names).
+      if (!f.cjk && hasCJK(v)) throw new Error(`「${f.label}」还是中文，请改成英文或拼音`);
       Object.assign(out, f.paths(v, state));
     }
   }
@@ -608,7 +613,7 @@ const blankOf = async (file) => new Uint8Array(await (await fetch('./' + file)).
  *  user isn't retyping their own name and address. */
 function prefill5645() {
   const map = {
-    f5645AppName: [state.familyName, state.givenName].filter(Boolean).join(' ').toUpperCase(),
+    f5645AppName: [state.givenName, state.familyName].filter(Boolean).join(' ').toUpperCase(),
     f5645AppDOB: state.dob,
     f5645AppAddress: [state.streetNum, state.streetName, state.city, state.province]
       .filter(Boolean).join(', '),
@@ -649,7 +654,7 @@ function renderRadar() {
   if (!flags.length) { box.hidden = true; return; }
   document.getElementById('radar-h').textContent = `有 ${flags.length} 项值得你留意`;
   document.getElementById('radar-list').innerHTML = flags
-    .map((f) => `<li><b>${esc(f.title)}</b><span>${esc(f.why)}</span></li>`)
+    .map((f) => `<li>${esc(f.title)}</li>`)
     .join('');
   box.hidden = false;
   document.getElementById('cta-h').textContent = '这几项要不要紧？找持牌顾问看一次';
@@ -835,17 +840,19 @@ const DEMO = {
   bg1a: 'N', bg1b: 'N', vc1: 'N', vc2: 'Y', vc3: 'Y',
   refusedDetails: 'Canadian TRV refused 14 Aug 2023 (V123456789, IRPR 179(b)).',
   bg3: 'N', military: 'N', orgs: 'N', govPos: 'N', consent: 'N',
-  f5645AppCOB: 'China', f5645AppMStatus: '8',
-  hasSpouse: 'Y', spouse5645Name: 'ZHAO GUOQIANG', spouse5645DOB: '1960-01-09',
-  spouse5645COB: 'China', spouse5645MStatus: '5', spouse5645Address: 'Deceased',
+  f5645AppCOB: 'China', f5645AppMStatus: '8', f5645AppZh: '王秀兰',
+  // Deceased people keep the marital status they had; "Deceased" goes in the
+  // address column (that is what the portal-accepted submissions do).
+  hasSpouse: 'Y', spouse5645Name: 'GUOQIANG ZHAO', spouse5645Zh: '赵国强', spouse5645DOB: '1960-01-09',
+  spouse5645COB: 'China', spouse5645MStatus: '6', spouse5645Address: 'Deceased, Suzhou, China, 2019-11-30',
   spouse5645Occupation: 'Retired', spouse5645Acc: 'N',
-  motherName: 'GU FENGYING', motherDOB: '1938-06-01', motherCOB: 'China', motherMStatus: '7',
-  motherAddress: 'Deceased', motherOccupation: 'Retired', motherAcc: 'N',
-  fatherName: 'WANG DEHAI', fatherDOB: '1935-02-18', fatherCOB: 'China', fatherMStatus: '7',
-  fatherAddress: 'Deceased', fatherOccupation: 'Retired', fatherAcc: 'N',
+  motherName: 'FENGYING GU', motherZh: '顾凤英', motherDOB: '1938-06-01', motherCOB: 'China', motherMStatus: '5',
+  motherAddress: 'Deceased, Suzhou, China, 2011-04-18', motherOccupation: 'Retired', motherAcc: 'N',
+  fatherName: 'DEHAI WANG', fatherZh: '王德海', fatherDOB: '1935-02-18', fatherCOB: 'China', fatherMStatus: '5',
+  fatherAddress: 'Deceased, Suzhou, China, 2008-09-02', fatherOccupation: 'Retired', fatherAcc: 'N',
 };
 const DEMO_ROWS = {
-  children: [{ name: 'ZHAO MIN', rel: 'Daughter', dob: '1990-09-14', mstatus: '5', cob: 'China',
+  children: [{ name: 'MIN ZHAO', zh: '赵敏', rel: 'Daughter', dob: '1990-09-14', mstatus: '5', cob: 'China',
                occ: 'Engineer', addr: '77 King Street West, Toronto, ON, Canada', acc: 'N' }],
   siblings: [],
   employment: [
@@ -864,6 +871,7 @@ export async function boot() {
   if (new URLSearchParams(location.search).get('demo')) {
     Object.assign(state, DEMO);
     Object.assign(state, DEMO_ROWS);
+    prefill5645();   // the demo never walks the steps, so carry the answers over by hand
     try {
       generated = await generateAll();
       renderRadar();

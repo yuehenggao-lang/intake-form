@@ -1,6 +1,12 @@
 /**
  * IMM5645 (Family Information) form definition.
  *
+ * Names here are NOT the same rule as IMM5257. 5257 must match the passport, so
+ * it refuses Chinese. 5645 wants the Chinese characters as well: 98% of 104
+ * portal-accepted submissions write the name as "Hongyang Ren 任红阳" -- pinyin
+ * then the Chinese name. So each person here has a separate 中文名 field, and
+ * that one field is exempt from the CJK guard.
+ *
  * Formats verified against 112 Acrobat-filled, portal-accepted copies rather than
  * against fill_forms.py output -- that pipeline is the same one that wrote
  * "CAD 17,000" into a numeric field for years.
@@ -43,10 +49,16 @@ export const MSTATUS_7 = [
  *  exclGroup, so both have to be written. */
 const acc = (yesPath, noPath) => (v) => ({ [yesPath]: v === 'Y' ? '1' : '0', [noPath]: v === 'Y' ? '0' : '1' });
 
+/** "Hongyang Ren 任红阳" -- pinyin, space, Chinese name. */
+export const joinName = (pinyin, zh) => [String(pinyin || '').trim(), String(zh || '').trim()].filter(Boolean).join(' ');
+
 const person = (id, zh, base, opts = {}) => [
   { id: `${id}Name`, latin: true, label: `${zh}姓名（拼音）`, type: 'text', row: 'two',
     req: opts.req, showIf: opts.showIf,
-    paths: (v) => ({ [`${base}/${opts.nameField}`]: v }) },
+    paths: (v, s) => ({ [`${base}/${opts.nameField}`]: joinName(v, s[`${id}Zh`]) }) },
+  { id: `${id}Zh`, cjk: true, label: `${zh}中文名`, hint: '5645 要求写中文名', type: 'text', row: 'two',
+    showIf: opts.showIf,
+    paths: () => ({}) },  // folded into the name field above
   { id: `${id}DOB`, label: `${zh}出生日期`, type: 'date', row: 'two', showIf: opts.showIf,
     paths: (v) => ({ [`${base}/${opts.dobField}`]: v }) },
   { id: `${id}COB`, romanize: 'address', label: `${zh}出生国家`, type: 'text', row: 'two', showIf: opts.showIf,
@@ -54,7 +66,7 @@ const person = (id, zh, base, opts = {}) => [
   { id: `${id}MStatus`, label: `${zh}婚姻状况`, type: 'select', row: 'two', showIf: opts.showIf,
     options: opts.mstatus,
     paths: (v) => ({ [`${base}/ChildMStatus`]: v }) },
-  { id: `${id}Address`, romanize: 'address', label: `${zh}现居地址`, hint: '已故填 Deceased', type: 'text', showIf: opts.showIf,
+  { id: `${id}Address`, romanize: 'address', label: `${zh}现居地址`, hint: '已故按表头要求填：Deceased + 城市, 国家, 日期', type: 'text', showIf: opts.showIf,
     paths: (v) => ({ [`${base}/${opts.addrField}`]: v }) },
   { id: `${id}Occupation`, label: `${zh}职业`, type: 'occupation', row: 'two', showIf: opts.showIf,
     paths: (v) => ({ [`${base}/${opts.occField}`]: v }) },
@@ -73,7 +85,9 @@ export const SPEC_5645 = {
       hint: '这几项从前面自动带过来，核对即可。',
       fields: [
         { id: 'f5645AppName', latin: true, label: '姓名（拼音）', type: 'text', req: true, row: 'two',
-          paths: (v) => ({ [`${P}/SectionA/Applicant/AppName`]: v }) },
+          paths: (v, s) => ({ [`${P}/SectionA/Applicant/AppName`]: joinName(v, s.f5645AppZh) }) },
+        { id: 'f5645AppZh', cjk: true, label: '中文名', hint: '5645 要求写中文名', type: 'text', req: true, row: 'two',
+          paths: () => ({}) },
         { id: 'f5645AppDOB', label: '出生日期', type: 'date', req: true, row: 'two',
           paths: (v) => ({ [`${P}/SectionA/Applicant/AppDOB`]: v }) },
         { id: 'f5645AppCOB', romanize: 'address', label: '出生国家', type: 'text', req: true, row: 'two',
@@ -93,7 +107,7 @@ export const SPEC_5645 = {
         // A widow answering "no" here would drop her late spouse off the form,
         // and IRCC wants him listed. Ask it as "is there a spouse to record".
         { id: 'hasSpouse', label: '需要填写配偶 / 同居伴侣吗？',
-          hint: '已故配偶也要填 —— 选「是」，地址栏写 Deceased', type: 'yn', req: true, paths: () => ({}) },
+          hint: '已故配偶也要填 —— 选「是」', type: 'yn', req: true, paths: () => ({}) },
         ...person('spouse5645', '配偶', `${P}/SectionA/Spouse`, {
           showIf: (s) => s.hasSpouse === 'Y',
           nameField: 'SpouseName', dobField: 'SpouseDOB', cobField: 'SpouseCOB',
@@ -105,7 +119,7 @@ export const SPEC_5645 = {
     {
       num: 'A',
       title: '父母',
-      hint: '已故的也要填，婚姻状况选对应项、地址写 Deceased。',
+      hint: '已故的也要填。婚姻状况按生前的填，地址栏按表头要求写：Deceased + 城市, 国家, 去世日期。',
       fields: [
         ...person('mother', '母亲', `${P}/SectionA/Mother`, {
           nameField: 'MotherName', dobField: 'MotherDOB', cobField: 'MotherCOB',
@@ -129,7 +143,8 @@ export const SPEC_5645 = {
         addLabel: '添加子女',
         base: (i) => `${P}/SectionB/Child${i ? `[${i}]` : ''}`,
         fields: [
-          { id: 'name', latin: true, label: '姓名（拼音）', type: 'text', row: 'two', path: 'ChildName' },
+          { id: 'name', latin: true, label: '姓名（拼音）', type: 'text', row: 'two', path: 'ChildName', joinZh: 'zh' },
+          { id: 'zh', cjk: true, label: '中文名', type: 'text', row: 'two' },
           { id: 'rel', label: '关系', type: 'select', row: 'two', path: 'ChildRelationship',
             options: [
               { code: 'Son', label: '儿子 Son' }, { code: 'Daughter', label: '女儿 Daughter' },
@@ -155,7 +170,8 @@ export const SPEC_5645 = {
         addLabel: '添加兄弟姐妹',
         base: (i) => `${P}/SectionC/Child${i ? `[${i}]` : ''}`,
         fields: [
-          { id: 'name', latin: true, label: '姓名（拼音）', type: 'text', row: 'two', path: 'ChildName' },
+          { id: 'name', latin: true, label: '姓名（拼音）', type: 'text', row: 'two', path: 'ChildName', joinZh: 'zh' },
+          { id: 'zh', cjk: true, label: '中文名', type: 'text', row: 'two' },
           { id: 'rel', label: '关系', type: 'select', row: 'two', path: 'ChildRelationship',
             options: [
               { code: 'Brother', label: '兄弟 Brother' }, { code: 'Sister', label: '姐妹 Sister' },
