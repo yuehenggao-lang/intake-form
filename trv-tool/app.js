@@ -84,7 +84,7 @@ export const SPEC = [
             paths: (v) => ({ [`${P1}/CurrentCOR/Row2/Country`]: v }) },
           { id: 'corStatus', label: '在该国的身份', type: 'select', req: true, lov: 'ImmigrationStatusList', row: 'two',
             paths: (v) => ({ [`${P1}/CurrentCOR/Row2/Status`]: v }) },
-          { id: 'corOther', label: '其他身份说明', type: 'text', showIf: (s) => s.corStatus === '06',
+          { id: 'corOther', label: '其他身份说明', hint: '请用英文填写', type: 'text', showIf: (s) => s.corStatus === '06',
             paths: (v) => ({ [`${P1}/CurrentCOR/Row2/Other`]: v }) },
           { id: 'corFrom', label: '该身份起始日期', type: 'date', row: 'two', showIf: (s) => s.corStatus && s.corStatus !== '01',
             paths: (v) => spread(v, { whole: `${P1}/CurrentCOR/Row2/FromDate`, y: `${P1}/CORDates/FromYr`, m: `${P1}/CORDates/FromMM`, d: `${P1}/CORDates/FromDD` }) },
@@ -229,7 +229,7 @@ export const SPEC = [
         fields: [
           { id: 'purpose', label: '访问目的', type: 'select', req: true, lov: 'VisitPurposeList', row: 'two',
             paths: (v) => ({ [`${DV}/PurposeRow1/PurposeOfVisit/PurposeOfVisit`]: v }) },
-          { id: 'purposeOther', label: '其他目的说明', type: 'text', row: 'two', showIf: (s) => s.purpose === '03',
+          { id: 'purposeOther', label: '其他目的说明', hint: '请用英文填写', type: 'text', row: 'two', showIf: (s) => s.purpose === '03',
             paths: (v) => ({ [`${DV}/PurposeRow1/Other/Other`]: v }) },
           { id: 'stayFrom', label: '计划入境日期', type: 'date', req: true, row: 'two',
             paths: (v) => spread(v, { whole: `${DV}/PurposeRow1/HowLongStay/FromDate`, y: `${DV}/PurposeRow1/HowLongStay/StayDates/FromYr`, m: `${DV}/PurposeRow1/HowLongStay/StayDates/FromMM`, d: `${DV}/PurposeRow1/HowLongStay/StayDates/FromDD` }) },
@@ -239,7 +239,7 @@ export const SPEC = [
           // anything with a currency word, comma, or space.
           { id: 'funds', label: '此行可用资金', hint: '只填数字，不要写 CAD、逗号或空格', type: 'digits', req: true,
             paths: (v) => ({ [`${DV}/PurposeRow1/Funds/Funds`]: String(v).replace(/[^\d]/g, '') }) },
-          { id: 'hostName', romanize: 'address', label: '在加拿大的联系人姓名', type: 'text', row: 'two',
+          { id: 'hostName', latin: true, label: '在加拿大的联系人姓名', hint: '照邀请函上的写法填', type: 'text', row: 'two',
             paths: (v) => ({ [`${DV}/Contacts_Row1/Name/Name`]: v }) },
           // A closed list, so there is nothing to romanise and nothing to get wrong.
           { id: 'hostRel', label: '与你的关系', type: 'select', row: 'two',
@@ -284,11 +284,11 @@ export const SPEC = [
               paths: (v) => (v ? { [`${R}/ToYear`]: v.split('-')[0], [`${R}/ToMonth`]: v.split('-')[1] } : {}) },
             { id: `occ${n}Title`, label: '职位', type: 'occupation', req: n === 1, row: 'two', showIf: only1,
               paths: (v) => ({ [`${R}/Occupation/Occupation`]: v }) },
-            { id: `occ${n}Employer`, label: '雇主 / 公司', type: 'text', req: n === 1, row: 'two', showIf: only1,
+            { id: `occ${n}Employer`, romanize: 'company', label: '雇主 / 公司', type: 'text', req: n === 1, row: 'two', showIf: only1,
               paths: (v) => ({ [`${R}/Employer`]: v }) },
-            { id: `occ${n}City`, label: '城市', type: 'text', row: 'three', showIf: only1,
+            { id: `occ${n}City`, romanize: 'address', label: '城市', type: 'text', row: 'three', showIf: only1,
               paths: (v) => ({ [`${R}/CityTown/CityTown`]: v }) },
-            { id: `occ${n}Prov`, label: '省 / 州', type: 'text', row: 'three', showIf: only1,
+            { id: `occ${n}Prov`, romanize: 'address', label: '省 / 州', type: 'text', row: 'three', showIf: only1,
               paths: (v) => ({ [`${R}/ProvState`]: v }) },
             { id: `occ${n}Country`, label: '国家或地区', type: 'select', lov: 'CountryList', row: 'three', showIf: only1,
               paths: (v) => ({ [`${R}/Country/Country`]: v }) },
@@ -304,7 +304,7 @@ export const SPEC = [
             paths: (v) => ({ 'form1/Page3/BackgroundInfo/Choice': v }) },
           { id: 'bg1b', label: '1b. 你是否有需要持续治疗或监护的身体或精神疾病？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/BackgroundInfo/Choice[1]': v }) },
-          { id: 'bgMedical', label: '如上面任一题答「是」，请简要说明', type: 'text', showIf: (s) => s.bg1a === 'Y' || s.bg1b === 'Y',
+          { id: 'bgMedical', label: '如上面任一题答「是」，请简要说明', hint: '请用英文填写', type: 'text', showIf: (s) => s.bg1a === 'Y' || s.bg1b === 'Y',
             paths: (v) => ({ 'form1/Page3/BackgroundInfo/Details/MedicalDetails': v }) },
           { id: 'vc1', label: '2a. 你是否曾在加拿大逾期居留、无授权工作或无授权学习？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/BackgroundInfo2/VisaChoice1': v }) },
@@ -312,16 +312,16 @@ export const SPEC = [
             paths: (v) => ({ 'form1/Page3/BackgroundInfo2/VisaChoice2': v }) },
           { id: 'vc3', label: '2c. 你此前是否申请过来加拿大？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/BackgroundInfo2/Details/VisaChoice3': v }) },
-          { id: 'refusedDetails', label: '2d. 如上面任一题答「是」，请简要说明', hint: '字数有限，写要点即可', type: 'text',
+          { id: 'refusedDetails', label: '2d. 如上面任一题答「是」，请简要说明', hint: '请用英文填写，字数有限，写要点即可', type: 'text',
             showIf: (s) => [s.vc1, s.vc2, s.vc3].includes('Y'),
             paths: (v) => ({ 'form1/Page3/BackgroundInfo2/Details/refusedDetails': v }) },
           { id: 'bg3', label: '3. 你是否曾犯罪、被捕、被指控或被判刑？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/PageWrapper/BackgroundInfo3/Choice': v }) },
-          { id: 'bg3d', label: '请简要说明', type: 'text', showIf: (s) => s.bg3 === 'Y',
+          { id: 'bg3d', label: '请简要说明', hint: '请用英文填写', type: 'text', showIf: (s) => s.bg3 === 'Y',
             paths: (v) => ({ 'form1/Page3/PageWrapper/BackgroundInfo3/details': v }) },
           { id: 'military', label: '4. 你是否曾在军队、民兵或民防部队服役？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/PageWrapper/Military/Choice': v }) },
-          { id: 'militaryD', label: '请简要说明', type: 'text', showIf: (s) => s.military === 'Y',
+          { id: 'militaryD', label: '请简要说明', hint: '请用英文填写', type: 'text', showIf: (s) => s.military === 'Y',
             paths: (v) => ({ 'form1/Page3/PageWrapper/Military/militaryServiceDetails': v }) },
           { id: 'orgs', label: '5. 你是否曾是暴力、恐怖或推翻政权组织的成员？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/PageWrapper/Occupation/Choice': v }) },
@@ -606,24 +606,37 @@ document.getElementById('form').addEventListener('input', (e) => {
   }
   const fld = allFields().find((x) => x.id === n);
   if (fld?.type === 'digits') e.target.value = e.target.value.replace(/[^\d]/g, '');
-  state[n] = e.target.value;
+
   const ctl = e.target;
   if (ctl.getAttribute('aria-invalid') === 'true' && ctl.value) ctl.setAttribute('aria-invalid', 'false');
-  // conditional fields may need to appear or disappear
-  const f = allFields().find((x) => x.id === n);
-  if (f && allFields().some((x) => x.showIf)) {
-    const active = document.activeElement?.name;
-    const pos = document.activeElement?.selectionStart;
-    render();
-    if (active) {
-      const el = document.querySelector(`[name="${active}"]`);
-      if (el) {
-        el.focus();
-        if (pos != null && el.setSelectionRange && el.type === 'text') el.setSelectionRange(pos, pos);
-      }
+
+  // Re-render only when this edit actually changes which fields are shown.
+  // The old guard was `allFields().some(x => x.showIf)`, which is always true, so
+  // every keystroke rebuilt the step and the caret had to be put back by hand.
+  const before = visibleSignature();
+  state[n] = ctl.value;
+  if (visibleSignature() === before) return;
+
+  const active = document.activeElement?.name;
+  const pos = document.activeElement?.selectionStart;
+  render();
+  if (active) {
+    const el = document.querySelector(`[name="${active}"]`);
+    if (el) {
+      el.focus();
+      if (pos != null && el.setSelectionRange && el.type === 'text') el.setSelectionRange(pos, pos);
     }
   }
 });
+
+/** Which conditional fields are currently shown, as a cheap comparable string. */
+function visibleSignature() {
+  return SPEC[step].boxes
+    .flatMap((b) => b.fields || [])
+    .filter((f) => f.showIf)
+    .map((f) => (f.showIf(state) ? f.id : ''))
+    .join(',');
+}
 
 // Romanise when the user leaves the field. In place and visible: the conversion
 // is imperfect (no word segmentation, so long runs mash together), so the honest

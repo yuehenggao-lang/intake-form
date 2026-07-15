@@ -23,6 +23,52 @@ import { pinyin } from './vendor/pinyin-pro.mjs';
 
 const CJK = /[㐀-䶿一-鿿豈-﫿぀-ヿ]/;
 
+
+/** Full-width punctuation has to become ASCII: the forms take Latin text, and a
+ *  stray ，would survive romanisation and land in the PDF. */
+const PUNCT = [
+  ['，', ', '], ['、', ', '], ['。', '. '], ['；', '; '], ['：', ': '],
+  ['（', ' ('], ['）', ') '], ['\u3000', ' '], ['－', '-'],
+];
+const normalizePunct = (s) =>
+  PUNCT.reduce((acc, [zh, en]) => acc.split(zh).join(en), String(s ?? ''));
+
+/** Place names, because pinyin is simply wrong for them: 东京 is Tokyo, not
+ *  "Dongjing", and 中国 is China. Only the ones a Chinese applicant plausibly
+ *  types; anything else falls through to pinyin, which the user can correct. */
+const PLACES = [
+  ['中国', 'China'], ['香港', 'Hong Kong'], ['澳门', 'Macau'], ['台湾', 'Taiwan'],
+  ['日本', 'Japan'], ['东京', 'Tokyo'], ['大阪', 'Osaka'], ['京都', 'Kyoto'], ['名古屋', 'Nagoya'],
+  ['韩国', 'South Korea'], ['首尔', 'Seoul'], ['泰国', 'Thailand'], ['曼谷', 'Bangkok'],
+  ['普吉', 'Phuket'], ['清迈', 'Chiang Mai'], ['新加坡', 'Singapore'], ['马来西亚', 'Malaysia'],
+  ['吉隆坡', 'Kuala Lumpur'], ['越南', 'Vietnam'], ['菲律宾', 'Philippines'],
+  ['印度尼西亚', 'Indonesia'], ['印尼', 'Indonesia'], ['巴厘岛', 'Bali'], ['柬埔寨', 'Cambodia'],
+  ['缅甸', 'Myanmar'], ['印度', 'India'],
+  ['美国', 'United States'], ['纽约', 'New York'], ['洛杉矶', 'Los Angeles'],
+  ['旧金山', 'San Francisco'], ['夏威夷', 'Hawaii'], ['西雅图', 'Seattle'],
+  ['加拿大', 'Canada'], ['多伦多', 'Toronto'], ['温哥华', 'Vancouver'], ['蒙特利尔', 'Montreal'],
+  ['英国', 'United Kingdom'], ['伦敦', 'London'], ['法国', 'France'], ['巴黎', 'Paris'],
+  ['德国', 'Germany'], ['柏林', 'Berlin'], ['意大利', 'Italy'], ['罗马', 'Rome'],
+  ['西班牙', 'Spain'], ['瑞士', 'Switzerland'], ['荷兰', 'Netherlands'],
+  ['俄罗斯', 'Russia'], ['莫斯科', 'Moscow'], ['澳大利亚', 'Australia'], ['悉尼', 'Sydney'],
+  ['墨尔本', 'Melbourne'], ['新西兰', 'New Zealand'], ['迪拜', 'Dubai'],
+  ['土耳其', 'Turkey'], ['埃及', 'Egypt'], ['南非', 'South Africa'], ['巴西', 'Brazil'],
+  ['北京', 'Beijing'], ['上海', 'Shanghai'], ['广州', 'Guangzhou'], ['深圳', 'Shenzhen'],
+  ['杭州', 'Hangzhou'], ['南京', 'Nanjing'], ['成都', 'Chengdu'], ['重庆', 'Chongqing'],
+  ['武汉', 'Wuhan'], ['西安', "Xi'an"], ['天津', 'Tianjin'], ['苏州', 'Suzhou'],
+  ['青岛', 'Qingdao'], ['大连', 'Dalian'], ['沈阳', 'Shenyang'], ['哈尔滨', 'Harbin'],
+  ['长春', 'Changchun'], ['济南', 'Jinan'], ['郑州', 'Zhengzhou'], ['长沙', 'Changsha'],
+  ['福州', 'Fuzhou'], ['厦门', 'Xiamen'], ['昆明', 'Kunming'], ['南宁', 'Nanning'],
+  ['合肥', 'Hefei'], ['南昌', 'Nanchang'], ['太原', 'Taiyuan'], ['石家庄', 'Shijiazhuang'],
+  ['浙江', 'Zhejiang'], ['江苏', 'Jiangsu'], ['广东', 'Guangdong'], ['山东', 'Shandong'],
+  ['河南', 'Henan'], ['河北', 'Hebei'], ['四川', 'Sichuan'], ['湖北', 'Hubei'],
+  ['湖南', 'Hunan'], ['福建', 'Fujian'], ['安徽', 'Anhui'], ['辽宁', 'Liaoning'],
+  ['吉林', 'Jilin'], ['黑龙江', 'Heilongjiang'], ['陕西', 'Shaanxi'], ['山西', 'Shanxi'],
+  ['江西', 'Jiangxi'], ['云南', 'Yunnan'], ['贵州', 'Guizhou'], ['广西', 'Guangxi'],
+  ['甘肃', 'Gansu'], ['内蒙古', 'Inner Mongolia'], ['新疆', 'Xinjiang'], ['西藏', 'Tibet'],
+  ['宁夏', 'Ningxia'], ['青海', 'Qinghai'], ['海南', 'Hainan'],
+];
+
 export const hasCJK = (s) => CJK.test(String(s ?? ''));
 
 const cap = (w) => (w ? w[0].toUpperCase() + w.slice(1) : w);
@@ -94,28 +140,40 @@ const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /** Split on the known terms (keeping them), map each term to English and romanize
  *  the Han runs in between. Terms are matched longest-first so 自治区 beats 区. */
 function translate(s, terms) {
-  const src = flipNumbered(String(s ?? '').trim());
+  // flipNumbered first: 88号 has to become "No. 88" before the term table gets a
+  // chance to turn 号 into a trailing "Hao"/"No.".
+  let src = flipNumbered(normalizePunct(String(s ?? ''))).trim();
   if (!src) return src;
-  if (!terms.length) return hasCJK(src) ? py(src) : src.replace(/\s+/g, ' ').trim();
 
-  const sorted = [...terms].sort((a, b) => b[0].length - a[0].length);
-  const table = new Map(sorted);
-  const re = new RegExp(`(${sorted.map(([zh]) => esc(zh)).join('|')})`, 'g');
+  // Longest-first so 自治区 beats 区 and 内蒙古 beats 蒙古.
+  const table = [...terms, ...PLACES].sort((a, b) => b[0].length - a[0].length);
+  if (!table.length) return hasCJK(src) ? py(src) : src;
+
+  const map = new Map(table);
+  const re = new RegExp(`(${table.map(([zh]) => esc(zh)).join('|')})`, 'g');
 
   const out = src
     .split(re)
     .map((chunk) => {
       if (!chunk) return '';
-      if (table.has(chunk)) return table.get(chunk);
-      return hasCJK(chunk) ? ` ${py(chunk)}` : chunk;
+      if (map.has(chunk)) return ` ${map.get(chunk).trim()} `;
+      // Romanise each Han run on its own so every word gets capitalised, rather
+      // than only the first character of a whole comma-spanning string.
+      return chunk.replace(/[㐀-䶿一-鿿豈-﫿぀-ヿ]+/g, (run) => ` ${py(run)} `);
     })
     .join('');
 
-  return out.replace(/\s+/g, ' ').replace(/\s+([.,])/g, '$1').trim();
+  return out
+    .replace(/\s+/g, ' ')
+    .replace(/\s+([.,;:)])/g, '$1')
+    .replace(/\(\s+/g, '(')
+    .replace(/,\s*,/g, ',')
+    .replace(/^[\s,]+|[\s,]+$/g, '')
+    .trim();
 }
 
 export const romanizeAddress = (s) => translate(s, ADDRESS_TERMS);
 export const romanizeCompany = (s) => translate(s, COMPANY_TERMS);
 
 /** Plain pinyin, for free text with no useful vocabulary (city names etc). */
-export const romanize = (s) => (hasCJK(s) ? translate(s, []) : String(s ?? '').trim());
+export const romanize = (s) => translate(s, []);
