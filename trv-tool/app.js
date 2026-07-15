@@ -450,7 +450,7 @@ function boxHtml(b) {
 
 function render() {
   // keep derived answers in step with their source
-  state.eduInd = (state.education || []).some((r) => r.name || r.position) ? 'Y' : 'N';
+  state.eduInd = (state.education || []).some((r) => r.school || r.position) ? 'Y' : 'N';
   document.querySelectorAll('.step').forEach((el, i) => {
     el.hidden = i !== step;
     if (i === step) el.innerHTML = SPEC[i].boxes.map(boxHtml).join('');
@@ -562,6 +562,10 @@ function buildTables() {
           out.name = [row.employer, row.city, row.prov, lovLabel('CountryList', row.country)]
             .filter(Boolean).join(', ');
         }
+        if (box.repeat.table === 'EducationTbl') {
+          out.name = [row.school, row.city, row.prov, lovLabel('CountryList', row.country)]
+            .filter(Boolean).join(', ');
+        }
         return out;
       });
   }
@@ -618,6 +622,27 @@ function prefill5645() {
   for (const [k, v] of Object.entries(map)) if (!state[k] && v) state[k] = v;
 }
 
+/** IMM5257 asks for the highest level of post-secondary education in one row.
+ *  We take the first education row: the box tells the user to put their highest
+ *  qualification there, because "most recent" and "highest" are not the same and
+ *  choosing between them for them would be a judgement call. */
+function educationRow5257() {
+  const e = (state.education || []).find((r) => r.school || r.position);
+  if (!e) return {};
+  const R = 'form1/Page3/Education/Edu_Row1';
+  const [fy, fm] = String(e.from || '').split('-');
+  const [ty, tm] = String(e.to || '').split('-');
+  const out = {};
+  if (fy) { out[`${R}/FromYear`] = fy; out[`${R}/FromMonth`] = fm || ''; }
+  if (ty) { out[`${R}/ToYear`] = ty; out[`${R}/ToMonth`] = tm || ''; }
+  if (e.position) out[`${R}/FieldOfStudy`] = e.position;
+  if (e.school) out[`${R}/School`] = e.school;
+  if (e.city) out[`${R}/CityTown`] = e.city;
+  if (e.prov) out[`${R}/ProvState`] = e.prov;
+  if (e.country) out[`${R}/Country/Country`] = e.country;
+  return out;
+}
+
 /** IMM5257 asks for the same employment IMM0104 does, in its own shape. Derive it
  *  rather than asking twice -- two inputs is two chances to disagree, and an
  *  officer reading both forms is exactly who would notice. */
@@ -642,9 +667,9 @@ async function generateAll() {
   const out = [];
 
   // eduInd is answered by the education rows, not asked twice
-  state.eduInd = (state.education || []).some((r) => r.name || r.position) ? 'Y' : 'N';
+  state.eduInd = (state.education || []).some((r) => r.school || r.position) ? 'Y' : 'N';
   const v5257 = valuesFor(0);
-  Object.assign(v5257, valuesFor(1), valuesFor(2), occupationRows5257());
+  Object.assign(v5257, valuesFor(1), valuesFor(2), occupationRows5257(), educationRow5257());
   const printed = [state.givenName, state.familyName].filter(Boolean).join(' ').toUpperCase();
   if (printed) v5257['form1/Page3/Signature/TextField2'] = printed;
   const r1 = await fillForm('IMM5257', await blankOf(FORMS.IMM5257.file), v5257);
@@ -845,48 +870,62 @@ document.getElementById('back').addEventListener('click', () => {
  *  the funnel end to end. */
 const DEMO = {
   serviceIn: '01', visaType: 'VisitorVisa',
-  familyName: 'WANG', givenName: 'XIULAN', aliasInd: 'N',
-  sex: 'Female', dob: '1964-03-22', birthCity: 'Suzhou', birthCountry: '202', citizenship: '202',
+  familyName: 'CHEN', givenName: 'XIAOMEI', aliasInd: 'N',
+  sex: 'Female', dob: '1985-07-19', birthCity: 'Ningbo', birthCountry: '202', citizenship: '202',
   corCountry: '202', corStatus: '01', pcrInd: 'N', sameAsCor: 'Y',
-  marital: '06', prevMarried: 'Y',
-  pmFamily: 'ZHAO', pmGiven: 'GUOQIANG', pmDOB: '1960-01-09', pmType: '01',
-  pmFrom: '1988-04-02', pmTo: '2019-11-30',
-  passportNum: 'EF1234567', passportCountry: '202',
-  passportIssue: '2019-08-12', passportExpiry: '2029-08-11',
-  nativeLang: '299', ableTo: 'Neither', langTest: 'N',
-  natIdInd: 'Y', natIdNum: '320506196403220026', natIdCountry: '202',
-  natIdIssue: '2016-05-04', natIdExpiry: '2036-05-04', usCardInd: 'N',
-  streetNum: '12', streetName: 'Pingjiang Road', city: 'Suzhou', province: 'Jiangsu',
+  marital: '01', marriageDate: '2011-10-02', spouseFamily: 'LIN', spouseGiven: 'HAO', prevMarried: 'N',
+  passportNum: 'E90887766', passportCountry: '202',
+  passportIssue: '2023-02-08', passportExpiry: '2033-02-07',
+  nativeLang: '299', ableTo: 'English', langTest: 'N',
+  natIdInd: 'Y', natIdNum: '330203198507190028', natIdCountry: '202',
+  natIdIssue: '2017-11-20', natIdExpiry: '2037-11-20', usCardInd: 'N',
+  streetNum: '66', streetName: 'Zhongshan East Road', city: 'Ningbo', province: 'Zhejiang',
   country: '202', sameAsMailing: 'Y',
-  phoneType: '01', phoneCC: '86', phoneNum: '8651267889012', email: 'demo@example.com',
-  purpose: '08', stayFrom: '2026-11-01', stayTo: '2027-01-25', funds: '80000',
-  hostName: 'ZHAO Min', hostRel: 'Daughter', hostAddr: '77 King Street West, Toronto, ON',
+  phoneType: '02', phoneCC: '86', phoneNum: '8613806668888', email: 'demo@example.com',
+  purpose: '02', stayFrom: '2026-12-05', stayTo: '2026-12-26', funds: '120000',
+  hostName: 'Sarah Thompson', hostRel: 'Friend', hostAddr: '250 Yonge Street, Toronto, ON',
   bg1a: 'N', bg1b: 'N', vc1: 'N', vc2: 'Y', vc3: 'Y',
-  refusedDetails: 'Canadian TRV refused 14 Aug 2023 (V123456789, IRPR 179(b)).',
+  refusedDetails: 'Canadian TRV refused 11 Mar 2022 (V987654321, IRPR 179(b)).',
   bg3: 'N', military: 'N', orgs: 'N', govPos: 'N', consent: 'N',
-  f5645AppZh: '王秀兰',
-  // Deceased people keep the marital status they had; "Deceased" goes in the
-  // address column (that is what the portal-accepted submissions do).
-  hasSpouse: 'Y', spouse5645Name: 'ZHAO, Guoqiang', spouse5645Zh: '赵国强', spouse5645DOB: '1960-01-09',
-  spouse5645COB: 'China', spouse5645MStatus: '6', spouse5645Address: 'Deceased, Suzhou, China, 2019-11-30',
-  spouse5645Occupation: 'Retired', spouse5645Acc: 'N',
-  motherName: 'GU, Fengying', motherZh: '顾凤英', motherDOB: '1938-06-01', motherCOB: 'China', motherMStatus: '5',
-  motherAddress: 'Deceased, Suzhou, China, 2011-04-18', motherOccupation: 'Retired', motherAcc: 'N',
-  fatherName: 'WANG, Dehai', fatherZh: '王德海', fatherDOB: '1935-02-18', fatherCOB: 'China', fatherMStatus: '5',
-  fatherAddress: 'Deceased, Suzhou, China, 2008-09-02', fatherOccupation: 'Retired', fatherAcc: 'N',
+  f5645AppZh: '陈晓梅',
+  spouse5645Zh: '林浩', spouse5645DOB: '1983-05-11', spouse5645COB: 'China',
+  spouse5645MStatus: '5', spouse5645Address: 'No. 66 Zhongshan East Road, Haishu District, Ningbo, Zhejiang',
+  spouse5645Occupation: 'Engineer', spouse5645Acc: 'N',
+  motherName: 'XU, Guiyun', motherZh: '徐桂云', motherDOB: '1958-03-30', motherCOB: 'China',
+  motherMStatus: '5', motherAddress: 'Haishu District, Ningbo, Zhejiang', motherOccupation: 'Retired', motherAcc: 'N',
+  fatherName: 'CHEN, Jianping', fatherZh: '陈建平', fatherDOB: '1956-12-08', fatherCOB: 'China',
+  fatherMStatus: '5', fatherAddress: 'Haishu District, Ningbo, Zhejiang', fatherOccupation: 'Retired', fatherAcc: 'N',
 };
 const DEMO_ROWS = {
-  children: [{ name: 'ZHAO, Min', zh: '赵敏', rel: 'Daughter', dob: '1990-09-14', mstatus: '5', cob: 'China',
-               occ: 'Engineer', addr: '77 King Street West, Toronto, ON, Canada', acc: 'N' }],
-  siblings: [],
-  employment: [
-    { from: '2009-04-01', to: '2019-03-31', position: 'Worker',
-      employer: 'Suzhou Sample Textile Factory', city: 'Suzhou', prov: 'Jiangsu', country: '202' },
-    { from: '1985-09-01', to: '2009-03-31', position: 'Worker',
-      employer: 'Suzhou Example Garment Co., Ltd.', city: 'Suzhou', prov: 'Jiangsu', country: '202' },
+  children: [
+    { name: 'LIN, Zixuan', zh: '林梓萱', rel: 'Daughter', dob: '2013-06-21', mstatus: '6',
+      cob: 'China', occ: 'Student', addr: 'No. 66 Zhongshan East Road, Ningbo, Zhejiang', acc: 'N' },
+    { name: 'LIN, Zihang', zh: '林梓航', rel: 'Son', dob: '2018-09-03', mstatus: '6',
+      cob: 'China', occ: 'Student', addr: 'No. 66 Zhongshan East Road, Ningbo, Zhejiang', acc: 'N' },
   ],
-  education: [],
-  travel: [],
+  siblings: [
+    { name: 'CHEN, Xiaodong', zh: '陈晓东', rel: 'Brother', dob: '1982-02-14', mstatus: '5',
+      cob: 'China', occ: 'Driver', addr: 'Jiangbei District, Ningbo, Zhejiang', acc: 'N' },
+  ],
+  employment: [
+    { from: '2014-04-01', to: '2026-07-15', position: 'Accountant',
+      employer: 'Ningbo Yangli Trading Co., Ltd.', city: 'Ningbo', prov: 'Zhejiang', country: '202' },
+    { from: '2009-07-01', to: '2014-03-31', position: 'Clerk',
+      employer: 'Ningbo No. 2 Textile Factory', city: 'Ningbo', prov: 'Zhejiang', country: '202' },
+  ],
+  education: [
+    { from: '2006-09-01', to: '2009-06-30', position: "Bachelor's degree in Accounting",
+      school: 'Zhejiang Gongshang University', city: 'Hangzhou', prov: 'Zhejiang', country: '202',
+      description: 'Full-time' },
+    { from: '2003-09-01', to: '2006-06-30', position: 'Diploma in Business',
+      school: 'Ningbo Yangli Vocational and Technical College', city: 'Ningbo', prov: 'Zhejiang',
+      country: '202', description: 'Full-time' },
+  ],
+  travel: [
+    { from: '2024-08-03', to: '2024-08-12', name: 'Tourism', description: 'Tokyo, Japan' },
+    { from: '2019-05-01', to: '2019-05-08', name: 'Tourism', description: 'Seoul, South Korea' },
+    { from: '2017-02-11', to: '2017-02-18', name: 'Tourism', description: 'Bangkok, Thailand' },
+  ],
 };
 
 export async function boot() {

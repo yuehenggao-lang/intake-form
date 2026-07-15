@@ -36,7 +36,7 @@ export const SPEC_0104 = {
     {
       num: '2',
       title: '教育经历',
-      hint: '只填高中之后的（大学 / 大专 / 职业培训）。初中高中不要填。没有就不加 —— IMM5257 上「是否上过大专或大学」会据此自动作答。',
+      hint: '只填高中之后的（大学 / 大专 / 职业培训）。初中高中不要填。没有就不加 —— IMM5257 上「是否上过大专或大学」会据此自动作答。IMM5257 只问最高学历，会取下面的第 1 条：如果你的最高学历不是最近这段，把它排到第 1 条。',
       repeat: {
         key: 'education',
         max: 6,
@@ -45,10 +45,13 @@ export const SPEC_0104 = {
         fields: [
           { id: 'from', label: '起始日期', type: 'date', row: 'two', cell: 'from' },
           { id: 'to', label: '结束日期', type: 'date', row: 'two', cell: 'to' },
-          { id: 'name', romanize: 'company', label: '学校，城市，国家', type: 'text', cell: 'name' },
-          { id: 'position', label: '学位 / 专业', hint: "如 Bachelor's degree in English Education", type: 'text', row: 'two', cell: 'position' },
+          { id: 'position', label: '学位 / 专业', hint: "如 Bachelor's degree in English Education", type: 'text', cell: 'position' },
+          { id: 'school', romanize: 'company', label: '学校', type: 'text', row: 'two' },
           { id: 'description', label: '就读方式', type: 'select', row: 'two', cell: 'description',
             options: [{ code: 'Full-time', label: '全日制 Full-time' }, { code: 'Part-time', label: '非全日制 Part-time' }] },
+          { id: 'city', romanize: 'address', label: '城市', type: 'text', row: 'three' },
+          { id: 'prov', romanize: 'address', label: '省 / 州', type: 'text', row: 'three' },
+          { id: 'country', label: '国家或地区', type: 'select', lov: 'CountryList', row: 'three' },
         ],
       },
     },
