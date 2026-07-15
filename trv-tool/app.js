@@ -330,8 +330,8 @@ export const SPEC = [
       },
     ],
   },
-  { step: 3, ...SPEC_5645 },
-  { step: 4, ...SPEC_0104 },
+  { step: 3, ...SPEC_0104 },
+  { step: 4, ...SPEC_5645 },
 ];
 
 // ── state ────────────────────────────────────────────────────────────────
@@ -652,7 +652,7 @@ async function generateAll() {
   out.push({ id: 'IMM5257', name: '访问签证申请表 IMM5257', pdf: r1.pdf });
 
   const v5645 = {
-    ...valuesFor(3),
+    ...valuesFor(4),
     ...visaTypeBoxes(state.visaType),
     // section dates are negative declarations -- only when that section is empty
     ...dates5645(state.signDate, {
@@ -676,7 +676,7 @@ async function generateAll() {
 /** Name the factors an officer weighs that the user's own answers touch. Flags
  *  only -- there is deliberately no "looks fine" branch; see risk.js. */
 function renderRadar() {
-  const flags = riskFlags(state, { children: state.children, travel: state.travel });
+  const flags = riskFlags(state, { children: state.children, travel: state.travel, employment: state.employment });
   const box = document.getElementById('radar');
   if (!flags.length) { box.hidden = true; return; }
   document.getElementById('radar-h').textContent = `有 ${flags.length} 项值得你留意`;

@@ -68,8 +68,10 @@ export function riskFlags(state, rows) {
   }
 
   // ── ties to home: employment ─────────────────────────────────────────────
-  const occ = String(state.occ1Title || '').toLowerCase();
-  if (/retired|unemployed|homemaker|student/.test(occ) || !state.occ1Employer) {
+  // Read the current job off the employment rows -- the same ones both forms use.
+  const job = (rows?.employment || []).find((r) => r.position || r.employer) || {};
+  const occ = String(job.position || '').toLowerCase();
+  if (!job.position || /retired|unemployed|homemaker|student|无业|退休/.test(occ)) {
     f.push({
       id: 'ties-work',
       title: '你目前没有在职工作（退休 / 待业 / 学生 / 家庭主妇）',

@@ -67,6 +67,26 @@ const PLACES = [
   ['江西', 'Jiangxi'], ['云南', 'Yunnan'], ['贵州', 'Guizhou'], ['广西', 'Guangxi'],
   ['甘肃', 'Gansu'], ['内蒙古', 'Inner Mongolia'], ['新疆', 'Xinjiang'], ['西藏', 'Tibet'],
   ['宁夏', 'Ningxia'], ['青海', 'Qinghai'], ['海南', 'Hainan'],
+  // more prefecture-level cities: without these a company name like 宁波样例贸易
+  // comes out as one mashed word ("Ningboyangli").
+  ['宁波', 'Ningbo'], ['温州', 'Wenzhou'], ['无锡', 'Wuxi'], ['常州', 'Changzhou'],
+  ['徐州', 'Xuzhou'], ['南通', 'Nantong'], ['扬州', 'Yangzhou'], ['盐城', 'Yancheng'],
+  ['泰州', 'Taizhou'], ['镇江', 'Zhenjiang'], ['连云港', 'Lianyungang'], ['淮安', "Huai'an"],
+  ['宿迁', 'Suqian'], ['嘉兴', 'Jiaxing'], ['湖州', 'Huzhou'], ['绍兴', 'Shaoxing'],
+  ['金华', 'Jinhua'], ['衢州', 'Quzhou'], ['舟山', 'Zhoushan'], ['丽水', 'Lishui'],
+  ['东莞', 'Dongguan'], ['佛山', 'Foshan'], ['珠海', 'Zhuhai'], ['中山', 'Zhongshan'],
+  ['惠州', 'Huizhou'], ['汕头', 'Shantou'], ['湛江', 'Zhanjiang'], ['江门', 'Jiangmen'],
+  ['烟台', 'Yantai'], ['潍坊', 'Weifang'], ['淄博', 'Zibo'], ['临沂', 'Linyi'],
+  ['威海', 'Weihai'], ['泰安', "Tai'an"], ['洛阳', 'Luoyang'], ['南阳', 'Nanyang'],
+  ['开封', 'Kaifeng'], ['新乡', 'Xinxiang'], ['宜昌', 'Yichang'], ['襄阳', 'Xiangyang'],
+  ['株洲', 'Zhuzhou'], ['湘潭', 'Xiangtan'], ['衡阳', 'Hengyang'], ['岳阳', 'Yueyang'],
+  ['桂林', 'Guilin'], ['柳州', 'Liuzhou'], ['三亚', 'Sanya'], ['绵阳', 'Mianyang'],
+  ['遵义', 'Zunyi'], ['大理', 'Dali'], ['兰州', 'Lanzhou'], ['银川', 'Yinchuan'],
+  ['乌鲁木齐', 'Urumqi'], ['呼和浩特', 'Hohhot'], ['包头', 'Baotou'], ['鞍山', 'Anshan'],
+  ['吉林市', 'Jilin City'], ['大庆', 'Daqing'], ['唐山', 'Tangshan'], ['保定', 'Baoding'],
+  ['邯郸', 'Handan'], ['秦皇岛', 'Qinhuangdao'], ['廊坊', 'Langfang'], ['芜湖', 'Wuhu'],
+  ['泉州', 'Quanzhou'], ['莆田', 'Putian'], ['漳州', 'Zhangzhou'], ['赣州', 'Ganzhou'],
+  ['九江', 'Jiujiang'], ['张家港', 'Zhangjiagang'], ['昆山', 'Kunshan'], ['义乌', 'Yiwu'],
 ];
 
 export const hasCJK = (s) => CJK.test(String(s ?? ''));
