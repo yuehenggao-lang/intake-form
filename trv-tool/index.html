@@ -117,6 +117,8 @@
   input[aria-invalid="true"], select[aria-invalid="true"] { border: 2px solid var(--flag); background: #fdf0f0; }
   .err { color: var(--flag); font-size: 12px; margin-top: 4px; display: none; }
   input[aria-invalid="true"] ~ .err, select[aria-invalid="true"] ~ .err { display: block; }
+  .note { display: block; color: var(--gov); font-size: 12px; margin-top: 4px; }
+  .note[hidden] { display: none; }
 
   /* Y/N pairs mirror the form's own two-box radio */
   .yn { display: inline-flex; border: 1px solid var(--rule); justify-self: start; }

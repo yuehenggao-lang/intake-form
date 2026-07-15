@@ -8,6 +8,7 @@
  * and the code itself.
  */
 import { fillImm5257 } from './xfa-fill.js';
+import { hasCJK, romanizeAddress, romanizeCompany, OCCUPATIONS } from './zh.js';
 
 const P1 = 'form1/Page1/PersonalDetails';
 const P1M = 'form1/Page1/MaritalStatus/SectionA';
@@ -51,21 +52,21 @@ export const SPEC = [
         num: '1-6',
         title: '个人详细信息',
         fields: [
-          { id: 'familyName', label: '姓（与护照一致，拼音）', type: 'text', req: true, upper: true, row: 'two',
+          { id: 'familyName', latin: true, label: '姓（与护照一致，拼音）', type: 'text', req: true, upper: true, row: 'two',
             paths: (v) => ({ [`${P1}/Name/FamilyName`]: v }) },
-          { id: 'givenName', label: '名（与护照一致，拼音）', type: 'text', upper: true, row: 'two',
+          { id: 'givenName', latin: true, label: '名（与护照一致，拼音）', type: 'text', upper: true, row: 'two',
             paths: (v) => ({ [`${P1}/Name/GivenName`]: v }) },
           { id: 'aliasInd', label: '是否曾用过其他姓名？', hint: '曾用名、婚前姓、别名等', type: 'yn', req: true,
             paths: (v) => ({ [`${P1}/AliasName/AliasNameIndicator/AliasNameIndicator`]: v }) },
-          { id: 'aliasFamily', label: '曾用姓', type: 'text', upper: true, row: 'two', showIf: (s) => s.aliasInd === 'Y',
+          { id: 'aliasFamily', latin: true, label: '曾用姓', type: 'text', upper: true, row: 'two', showIf: (s) => s.aliasInd === 'Y',
             paths: (v) => ({ [`${P1}/AliasName/AliasFamilyName`]: v }) },
-          { id: 'aliasGiven', label: '曾用名', type: 'text', upper: true, row: 'two', showIf: (s) => s.aliasInd === 'Y',
+          { id: 'aliasGiven', latin: true, label: '曾用名', type: 'text', upper: true, row: 'two', showIf: (s) => s.aliasInd === 'Y',
             paths: (v) => ({ [`${P1}/AliasName/AliasGivenName`]: v }) },
           { id: 'sex', label: '性别', type: 'select', req: true, lov: 'GenderMelList', row: 'two',
             paths: (v) => ({ [`${P1}/Sex/Sex`]: v }) },
           { id: 'dob', label: '出生日期', type: 'date', req: true, row: 'two',
             paths: (v) => spread(v, { y: `${P1}/DOBYear`, m: `${P1}/DOBMonth`, d: `${P1}/DOBDay` }) },
-          { id: 'birthCity', label: '出生城市', type: 'text', req: true, row: 'two',
+          { id: 'birthCity', romanize: 'address', label: '出生城市', type: 'text', req: true, row: 'two',
             paths: (v) => ({ [`${P1}/PlaceBirthCity`]: v }) },
           { id: 'birthCountry', label: '出生国家或地区', type: 'select', req: true, lov: 'CountryOfBirthList', row: 'two',
             paths: (v) => ({ [`${P1}/PlaceBirthCountry`]: v }) },
@@ -113,9 +114,9 @@ export const SPEC = [
             paths: (v) => ({ [`${P1M}/MaritalStatus`]: v }) },
           { id: 'marriageDate', label: '结婚 / 同居开始日期', type: 'date', row: 'two', showIf: (s) => ['01', '03'].includes(s.marital),
             paths: (v) => spread(v, { whole: `${P1M}/DateOfMarriage`, y: `${P1M}/MarriageDate/FromYr`, m: `${P1M}/MarriageDate/FromMM`, d: `${P1M}/MarriageDate/FromDD` }) },
-          { id: 'spouseFamily', label: '配偶姓', type: 'text', upper: true, row: 'two', showIf: (s) => ['01', '03'].includes(s.marital),
+          { id: 'spouseFamily', latin: true, label: '配偶姓', type: 'text', upper: true, row: 'two', showIf: (s) => ['01', '03'].includes(s.marital),
             paths: (v) => ({ [`${P1M}/FamilyName`]: v }) },
-          { id: 'spouseGiven', label: '配偶名', type: 'text', upper: true, row: 'two', showIf: (s) => ['01', '03'].includes(s.marital),
+          { id: 'spouseGiven', latin: true, label: '配偶名', type: 'text', upper: true, row: 'two', showIf: (s) => ['01', '03'].includes(s.marital),
             paths: (v) => ({ [`${P1M}/GivenName`]: v }) },
           { id: 'prevMarried', label: '是否曾有过其他婚姻或同居关系？', type: 'yn', req: true,
             paths: (v) => ({ [`${P2M}/PrevMarriedIndicator`]: v }) },
@@ -181,15 +182,15 @@ export const SPEC = [
         num: '1-3',
         title: '联系方式',
         fields: [
-          { id: 'aptUnit', label: '公寓 / 单元号', type: 'text', row: 'three',
+          { id: 'aptUnit', romanize: 'address', label: '公寓 / 单元号', type: 'text', row: 'three',
             paths: (v) => ({ [`${CT}/AddressRow1/Apt/AptUnit`]: v }) },
           { id: 'streetNum', label: '门牌号', type: 'text', req: true, row: 'three',
             paths: (v) => ({ [`${CT}/AddressRow1/StreetNum/StreetNum`]: v }) },
-          { id: 'streetName', label: '街道名', type: 'text', req: true, row: 'three',
+          { id: 'streetName', romanize: 'address', label: '街道名', type: 'text', req: true, row: 'three',
             paths: (v) => ({ [`${CT}/AddressRow1/Streetname/Streetname`]: v }) },
-          { id: 'city', label: '城市', type: 'text', req: true, row: 'three',
+          { id: 'city', romanize: 'address', label: '城市', type: 'text', req: true, row: 'three',
             paths: (v) => ({ [`${CT}/AddressRow2/CityTow/CityTown`]: v }) },
-          { id: 'province', label: '省 / 州', type: 'text', row: 'three',
+          { id: 'province', romanize: 'address', label: '省 / 州', type: 'text', row: 'three',
             paths: (v) => ({ [`${CT}/AddressRow2/ProvinceState/ProvinceState`]: v }) },
           { id: 'postal', label: '邮编', type: 'text', row: 'three',
             paths: (v) => ({ [`${CT}/AddressRow2/PostalCode/PostalCode`]: v }) },
@@ -236,11 +237,22 @@ export const SPEC = [
           // anything with a currency word, comma, or space.
           { id: 'funds', label: '此行可用资金', hint: '只填数字，不要写 CAD、逗号或空格', type: 'digits', req: true,
             paths: (v) => ({ [`${DV}/PurposeRow1/Funds/Funds`]: String(v).replace(/[^\d]/g, '') }) },
-          { id: 'hostName', label: '在加拿大的联系人姓名', type: 'text', row: 'two',
+          { id: 'hostName', romanize: 'address', label: '在加拿大的联系人姓名', type: 'text', row: 'two',
             paths: (v) => ({ [`${DV}/Contacts_Row1/Name/Name`]: v }) },
-          { id: 'hostRel', label: '与你的关系', type: 'text', row: 'two',
+          // A closed list, so there is nothing to romanise and nothing to get wrong.
+          { id: 'hostRel', label: '与你的关系', type: 'select', row: 'two',
+            options: [
+              { code: 'Friend', label: '朋友 Friend' }, { code: 'Spouse', label: '配偶 Spouse' },
+              { code: 'Father', label: '父亲 Father' }, { code: 'Mother', label: '母亲 Mother' },
+              { code: 'Son', label: '儿子 Son' }, { code: 'Daughter', label: '女儿 Daughter' },
+              { code: 'Brother', label: '兄弟 Brother' }, { code: 'Sister', label: '姐妹 Sister' },
+              { code: 'Relative', label: '其他亲戚 Relative' }, { code: 'Colleague', label: '同事 Colleague' },
+              { code: 'Classmate', label: '同学 Classmate' },
+              { code: 'Business contact', label: '商务伙伴 Business contact' },
+              { code: 'Hotel', label: '酒店 Hotel' },
+            ],
             paths: (v) => ({ [`${DV}/Contacts_Row1/RelationshipToMe/RelationshipToMe`]: v }) },
-          { id: 'hostAddr', label: '在加拿大的地址', type: 'text',
+          { id: 'hostAddr', romanize: 'address', label: '在加拿大的地址', type: 'text',
             paths: (v) => ({ [`${DV}/Contacts_Row1/AddressInCanada/AddressInCanada`]: v }) },
         ],
       },
@@ -268,7 +280,7 @@ export const SPEC = [
               paths: (v) => (v ? { [`${R}/FromYear`]: v.split('-')[0], [`${R}/FromMonth`]: v.split('-')[1] } : {}) },
             { id: `occ${n}To`, label: '结束（年-月）', hint: '至今填当前月份', type: 'month', row: 'two', showIf: only1,
               paths: (v) => (v ? { [`${R}/ToYear`]: v.split('-')[0], [`${R}/ToMonth`]: v.split('-')[1] } : {}) },
-            { id: `occ${n}Title`, label: '职位', type: 'text', req: n === 1, row: 'two', showIf: only1,
+            { id: `occ${n}Title`, label: '职位', type: 'occupation', req: n === 1, row: 'two', showIf: only1,
               paths: (v) => ({ [`${R}/Occupation/Occupation`]: v }) },
             { id: `occ${n}Employer`, label: '雇主 / 公司', type: 'text', req: n === 1, row: 'two', showIf: only1,
               paths: (v) => ({ [`${R}/Employer`]: v }) },
@@ -368,6 +380,13 @@ function fieldHtml(f) {
     control = `<input type="date" name="${f.id}" value="${esc(v)}">`;
   } else if (f.type === 'month') {
     control = `<input type="month" name="${f.id}" value="${esc(v)}">`;
+  } else if (f.type === 'occupation') {
+    // A datalist, not a select: the term table covers the common cases but people
+    // hold jobs it doesn't list, and those must still be typeable (in English).
+    control = `<input type="text" name="${f.id}" list="occ-list" value="${esc(v)}" placeholder="选择或用英文填写">
+      <datalist id="occ-list">
+        ${OCCUPATIONS.map(([zh, en]) => `<option value="${esc(en)}">${esc(zh)}</option>`).join('')}
+      </datalist>`;
   } else if (f.type === 'digits') {
     control = `<input type="text" inputmode="numeric" pattern="[0-9]*" name="${f.id}" value="${esc(v)}">`;
   } else {
@@ -377,7 +396,8 @@ function fieldHtml(f) {
   return `<label class="f" data-fid="${f.id}">
     <span class="lab">${req}${esc(f.label)}${hint}</span>
     ${control}
-    <span class="err">此项必填</span>
+    <span class="err">${f.latin ? '请填护照上的拼音，不要填中文' : '此项必填'}</span>
+    <span class="note" hidden></span>
   </label>`;
 }
 
@@ -418,8 +438,12 @@ function render() {
 function validateStep() {
   let firstBad = null;
   for (const f of SPEC[step].boxes.flatMap((b) => b.fields)) {
-    if (!visible(f) || !f.req) continue;
-    const ok = !!state[f.id];
+    if (!visible(f)) continue;
+    if (!f.req && !f.latin) continue;
+    // Names are never romanised for the user: pinyin is ambiguous (单 is Shan as a
+    // surname, Dan as a word) and the passport spelling is the only one IRCC will
+    // accept, so a guess here means the form no longer matches the passport.
+    const ok = f.latin ? (f.req ? !!state[f.id] : true) && !hasCJK(state[f.id] || '') : !!state[f.id];
     const host = document.querySelector(`[data-fid="${f.id}"]`);
     if (!host) continue;
     const ctl = host.querySelector('input, select');
@@ -445,6 +469,11 @@ export function buildValues(s) {
     if (f.upper) v = String(v).toUpperCase();
     // IRCC's PDF parser rejects em/en dashes in free text.
     if (typeof v === 'string') v = v.replace(/[—–]/g, '-');
+    if (hasCJK(v)) {
+      // The form rejects CJK outright, so refuse rather than emit a PDF that
+      // fails Validate with nothing to explain why.
+      throw new Error(`「${f.label}」还是中文，请改成英文或拼音`);
+    }
     Object.assign(out, f.paths(v, s));
   }
   return out;
@@ -481,6 +510,20 @@ document.getElementById('form').addEventListener('input', (e) => {
       }
     }
   }
+});
+
+// Romanise when the user leaves the field. In place and visible: the conversion
+// is imperfect (no word segmentation, so long runs mash together), so the honest
+// move is to show the result and let them fix it, not to transform silently.
+document.getElementById('form').addEventListener('focusout', (e) => {
+  const f = allFields().find((x) => x.id === e.target.name);
+  if (!f?.romanize || !hasCJK(e.target.value)) return;
+  const fn = f.romanize === 'company' ? romanizeCompany : romanizeAddress;
+  e.target.value = fn(e.target.value);
+  state[f.id] = e.target.value;
+  const host = e.target.closest('[data-fid]');
+  const note = host?.querySelector('.note');
+  if (note) { note.textContent = '已转为拼音，请核对'; note.hidden = false; }
 });
 
 document.getElementById('rail').addEventListener('click', (e) => {
