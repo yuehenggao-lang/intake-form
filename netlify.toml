@@ -34,7 +34,9 @@
   to   = "/consult.html"
   status = 200
 
+# 301, not a 200 rewrite: the tool lives in a subdirectory and loads its assets
+# with relative paths, so the browser has to actually land on /trv-tool/.
 [[redirects]]
   from = "/trv"
-  to   = "/trv-tool/index.html"
-  status = 200
+  to   = "/trv-tool/"
+  status = 301
