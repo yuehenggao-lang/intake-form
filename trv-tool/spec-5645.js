@@ -54,7 +54,7 @@ const person = (id, zh, base, opts = {}) => [
   { id: `${id}MStatus`, label: `${zh}婚姻状况`, type: 'select', row: 'two', showIf: opts.showIf,
     options: opts.mstatus,
     paths: (v) => ({ [`${base}/ChildMStatus`]: v }) },
-  { id: `${id}Address`, romanize: 'address', label: `${zh}现居地址`, type: 'text', showIf: opts.showIf,
+  { id: `${id}Address`, romanize: 'address', label: `${zh}现居地址`, hint: '已故填 Deceased', type: 'text', showIf: opts.showIf,
     paths: (v) => ({ [`${base}/${opts.addrField}`]: v }) },
   { id: `${id}Occupation`, label: `${zh}职业`, type: 'occupation', row: 'two', showIf: opts.showIf,
     paths: (v) => ({ [`${base}/${opts.occField}`]: v }) },
@@ -90,7 +90,10 @@ export const SPEC_5645 = {
       num: 'A',
       title: '配偶 / 同居伴侣',
       fields: [
-        { id: 'hasSpouse', label: '你有配偶或同居伴侣吗？', type: 'yn', req: true, paths: () => ({}) },
+        // A widow answering "no" here would drop her late spouse off the form,
+        // and IRCC wants him listed. Ask it as "is there a spouse to record".
+        { id: 'hasSpouse', label: '需要填写配偶 / 同居伴侣吗？',
+          hint: '已故配偶也要填 —— 选「是」，地址栏写 Deceased', type: 'yn', req: true, paths: () => ({}) },
         ...person('spouse5645', '配偶', `${P}/SectionA/Spouse`, {
           showIf: (s) => s.hasSpouse === 'Y',
           nameField: 'SpouseName', dobField: 'SpouseDOB', cobField: 'SpouseCOB',
@@ -171,6 +174,13 @@ export const SPEC_5645 = {
     },
   ],
 };
+
+/** Signature dates. The drawn signature stays empty for the applicant. */
+export const dates5645 = (d) => ({
+  'IMM_5645/page1/SectionA/SectionAdate': d,
+  'IMM_5645/page1/SectionB/SectionBdate': d,
+  'IMM_5645/page1/SectionC/SectionCdate': d,
+});
 
 /** The application-type checkboxes at the top of the form. */
 export const visaTypeBoxes = (visaType) => ({

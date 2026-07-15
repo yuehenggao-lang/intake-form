@@ -9,7 +9,7 @@
  */
 import { fillForm, FORMS } from './xfa-fill.js';
 import { hasCJK, romanizeAddress, romanizeCompany, OCCUPATIONS } from './zh.js';
-import { SPEC_5645, visaTypeBoxes } from './spec-5645.js';
+import { SPEC_5645, visaTypeBoxes, dates5645 } from './spec-5645.js';
 import { SPEC_0104, signature0104 } from './spec-0104.js';
 import { riskFlags } from './risk.js';
 
@@ -121,8 +121,22 @@ export const SPEC = [
             paths: (v) => ({ [`${P1M}/FamilyName`]: v }) },
           { id: 'spouseGiven', latin: true, label: '配偶名', type: 'text', upper: true, row: 'two', showIf: (s) => ['01', '03'].includes(s.marital),
             paths: (v) => ({ [`${P1M}/GivenName`]: v }) },
-          { id: 'prevMarried', label: '是否曾有过其他婚姻或同居关系？', type: 'yn', req: true,
+          { id: 'prevMarried', label: '是否曾有过其他婚姻或同居关系？',
+            hint: '丧偶 / 离异 / 分居的，这里选「是」，并填下面的前配偶信息', type: 'yn', req: true,
             paths: (v) => ({ [`${P2M}/PrevMarriedIndicator`]: v }) },
+          { id: 'pmFamily', latin: true, label: '前配偶姓', type: 'text', row: 'two', showIf: (s) => s.prevMarried === 'Y',
+            paths: (v) => ({ [`${P2M}/PMFamilyName`]: v }) },
+          { id: 'pmGiven', latin: true, label: '前配偶名', type: 'text', row: 'two', showIf: (s) => s.prevMarried === 'Y',
+            paths: (v) => ({ [`${P2M}/GivenName/PMGivenName`]: v }) },
+          { id: 'pmDOB', label: '前配偶出生日期', type: 'date', row: 'two', showIf: (s) => s.prevMarried === 'Y',
+            paths: (v) => spread(v, { y: `${P2M}/PrevSpouseDOB/DOBYear`, m: `${P2M}/PrevSpouseDOB/DOBMonth`, d: `${P2M}/PrevSpouseDOB/DOBDay` }) },
+          { id: 'pmType', label: '关系类型', type: 'select', row: 'two', showIf: (s) => s.prevMarried === 'Y',
+            options: [{ code: '01', label: '已婚 Married' }, { code: '03', label: '同居 Common-Law' }],
+            paths: (v) => ({ [`${P2M}/TypeOfRelationship`]: v }) },
+          { id: 'pmFrom', label: '关系开始日期', type: 'date', row: 'two', showIf: (s) => s.prevMarried === 'Y',
+            paths: (v) => spread(v, { whole: `${P2M}/FromDate`, y: `${P2M}/PreviouslyMarriedDates/FromYr`, m: `${P2M}/PreviouslyMarriedDates/FromMM`, d: `${P2M}/PreviouslyMarriedDates/FromDD` }) },
+          { id: 'pmTo', label: '关系结束日期', hint: '丧偶填配偶去世日期', type: 'date', row: 'two', showIf: (s) => s.prevMarried === 'Y',
+            paths: (v) => spread(v, { whole: `${P2M}/ToDate/ToDate`, y: `${P2M}/PreviouslyMarriedDates/ToYr`, m: `${P2M}/PreviouslyMarriedDates/ToMM`, d: `${P2M}/PreviouslyMarriedDates/ToDD` }) },
         ],
       },
     ],
@@ -336,6 +350,8 @@ export const SPEC = [
         fields: [
           { id: 'consent', label: '是否同意 IRCC 就本申请与你的代表联系？', hint: '没有代表就选「否」', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/Signature/Consent0/Choice': v }) },
+          { id: 'signDate', label: '签署日期', hint: '默认今天。你实际签字/递交那天是哪天就填哪天', type: 'date', req: true,
+            paths: (v) => ({ 'form1/Page3/Signature/C1CertificateIssueDate': v }) },
         ],
       },
     ],
@@ -586,6 +602,69 @@ function valuesFor(stepIdx) {
 // ── events ───────────────────────────────────────────────────────────────
 /** All DOM wiring lives here so importing this module has no side effects and
  *  the pure parts (SPEC, buildValues) stay testable without a page. */
+const blankOf = async (file) => new Uint8Array(await (await fetch('./' + file)).arrayBuffer());
+
+/** Carry the answers IMM5645 asks for again over from the IMM5257 steps, so the
+ *  user isn't retyping their own name and address. */
+function prefill5645() {
+  const map = {
+    f5645AppName: [state.familyName, state.givenName].filter(Boolean).join(' ').toUpperCase(),
+    f5645AppDOB: state.dob,
+    f5645AppAddress: [state.streetNum, state.streetName, state.city, state.province]
+      .filter(Boolean).join(', '),
+    f5645AppOcc: state.occ1Title,
+  };
+  for (const [k, v] of Object.entries(map)) if (!state[k] && v) state[k] = v;
+}
+
+async function generateAll() {
+  const out = [];
+
+  const v5257 = valuesFor(0);
+  Object.assign(v5257, valuesFor(1), valuesFor(2));
+  const printed = [state.givenName, state.familyName].filter(Boolean).join(' ').toUpperCase();
+  if (printed) v5257['form1/Page3/Signature/TextField2'] = printed;
+  const r1 = await fillForm('IMM5257', await blankOf(FORMS.IMM5257.file), v5257);
+  if (r1.missing.length) console.warn('IMM5257 paths not found:', r1.missing);
+  out.push({ id: 'IMM5257', name: '访问签证申请表 IMM5257', pdf: r1.pdf });
+
+  const v5645 = { ...valuesFor(3), ...visaTypeBoxes(state.visaType), ...dates5645(state.signDate) };
+  const r2 = await fillForm('IMM5645', await blankOf(FORMS.IMM5645.file), v5645);
+  if (r2.missing.length) console.warn('IMM5645 paths not found:', r2.missing);
+  out.push({ id: 'IMM5645', name: '家庭信息表 IMM5645', pdf: r2.pdf });
+
+  const v0104 = signature0104(state.familyName, state.givenName, state.signDate);
+  const r3 = await fillForm('IMM0104', await blankOf(FORMS.IMM0104.file), v0104, buildTables());
+  if (r3.missing.length) console.warn('IMM0104 paths not found:', r3.missing);
+  out.push({ id: 'IMM0104', name: '教育/工作/旅行史 IMM0104', pdf: r3.pdf });
+
+  return out;
+}
+
+/** Name the factors an officer weighs that the user's own answers touch. Flags
+ *  only -- there is deliberately no "looks fine" branch; see risk.js. */
+function renderRadar() {
+  const flags = riskFlags(state, { children: state.children, travel: state.travel });
+  const box = document.getElementById('radar');
+  if (!flags.length) { box.hidden = true; return; }
+  document.getElementById('radar-h').textContent = `有 ${flags.length} 项值得你留意`;
+  document.getElementById('radar-list').innerHTML = flags
+    .map((f) => `<li><b>${esc(f.title)}</b><span>${esc(f.why)}</span></li>`)
+    .join('');
+  box.hidden = false;
+  document.getElementById('cta-h').textContent = '这几项要不要紧？找持牌顾问看一次';
+  document.getElementById('cta-p').textContent =
+    '上面这些是签证官会看的地方，但每一项要不要紧、该怎么用材料回应，得看你的完整情况才能判断——这正是付费咨询在做的事。表格本身你已经填好了。';
+}
+
+function renderDownloads() {
+  const base = [state.familyName, state.givenName].filter(Boolean).join('-').toUpperCase() || 'IMM';
+  document.getElementById('downloads').innerHTML = generated
+    .map((g, i) => `<button type="button" class="btn primary dl" data-dl="${i}">下载 ${esc(g.name)}</button>`)
+    .join('');
+  document.getElementById('downloads').dataset.base = base;
+}
+
 function wire() {
 /** "children.0.name" addresses a row field; anything else is a plain field. */
 function repeatRef(name) {
@@ -703,66 +782,6 @@ document.getElementById('next').addEventListener('click', async () => {
   }
 });
 
-const blankOf = async (file) => new Uint8Array(await (await fetch('./' + file)).arrayBuffer());
-
-/** Carry the answers IMM5645 asks for again over from the IMM5257 steps, so the
- *  user isn't retyping their own name and address. */
-function prefill5645() {
-  const map = {
-    f5645AppName: [state.familyName, state.givenName].filter(Boolean).join(' ').toUpperCase(),
-    f5645AppDOB: state.dob,
-    f5645AppAddress: [state.streetNum, state.streetName, state.city, state.province]
-      .filter(Boolean).join(', '),
-    f5645AppOcc: state.occ1Title,
-  };
-  for (const [k, v] of Object.entries(map)) if (!state[k] && v) state[k] = v;
-}
-
-async function generateAll() {
-  const out = [];
-
-  const v5257 = valuesFor(0);
-  Object.assign(v5257, valuesFor(1), valuesFor(2));
-  const r1 = await fillForm('IMM5257', await blankOf(FORMS.IMM5257.file), v5257);
-  if (r1.missing.length) console.warn('IMM5257 paths not found:', r1.missing);
-  out.push({ id: 'IMM5257', name: '访问签证申请表 IMM5257', pdf: r1.pdf });
-
-  const v5645 = { ...valuesFor(3), ...visaTypeBoxes(state.visaType) };
-  const r2 = await fillForm('IMM5645', await blankOf(FORMS.IMM5645.file), v5645);
-  if (r2.missing.length) console.warn('IMM5645 paths not found:', r2.missing);
-  out.push({ id: 'IMM5645', name: '家庭信息表 IMM5645', pdf: r2.pdf });
-
-  const v0104 = signature0104(state.familyName, state.givenName);
-  const r3 = await fillForm('IMM0104', await blankOf(FORMS.IMM0104.file), v0104, buildTables());
-  if (r3.missing.length) console.warn('IMM0104 paths not found:', r3.missing);
-  out.push({ id: 'IMM0104', name: '教育/工作/旅行史 IMM0104', pdf: r3.pdf });
-
-  return out;
-}
-
-/** Name the factors an officer weighs that the user's own answers touch. Flags
- *  only -- there is deliberately no "looks fine" branch; see risk.js. */
-function renderRadar() {
-  const flags = riskFlags(state, { children: state.children, travel: state.travel });
-  const box = document.getElementById('radar');
-  if (!flags.length) { box.hidden = true; return; }
-  document.getElementById('radar-h').textContent = `有 ${flags.length} 项值得你留意`;
-  document.getElementById('radar-list').innerHTML = flags
-    .map((f) => `<li><b>${esc(f.title)}</b><span>${esc(f.why)}</span></li>`)
-    .join('');
-  box.hidden = false;
-  document.getElementById('cta-h').textContent = '这几项要不要紧？找持牌顾问看一次';
-  document.getElementById('cta-p').textContent =
-    '上面这些是签证官会看的地方，但每一项要不要紧、该怎么用材料回应，得看你的完整情况才能判断——这正是付费咨询在做的事。表格本身你已经填好了。';
-}
-
-function renderDownloads() {
-  const base = [state.familyName, state.givenName].filter(Boolean).join('-').toUpperCase() || 'IMM';
-  document.getElementById('downloads').innerHTML = generated
-    .map((g, i) => `<button type="button" class="btn primary dl" data-dl="${i}">下载 ${esc(g.name)}</button>`)
-    .join('');
-  document.getElementById('downloads').dataset.base = base;
-}
 
 document.getElementById('downloads').addEventListener('click', (e) => {
   const i = e.target.dataset?.dl;
@@ -788,9 +807,75 @@ document.getElementById('back').addEventListener('click', () => {
 }
 
 // ── boot ─────────────────────────────────────────────────────────────────
+/** `?demo=1` fills a sample applicant and jumps to the result, so the flags and
+ *  the CTA can be seen without typing five steps of answers. Wholly invented
+ *  data; nothing about it is a real person. Unlinked -- it exists for checking
+ *  the funnel end to end. */
+const DEMO = {
+  serviceIn: '01', visaType: 'VisitorVisa',
+  familyName: 'WANG', givenName: 'XIULAN', aliasInd: 'N',
+  sex: 'Female', dob: '1964-03-22', birthCity: 'Suzhou', birthCountry: '202', citizenship: '202',
+  corCountry: '202', corStatus: '01', pcrInd: 'N', sameAsCor: 'Y',
+  marital: '06', prevMarried: 'Y',
+  pmFamily: 'ZHAO', pmGiven: 'GUOQIANG', pmDOB: '1960-01-09', pmType: '01',
+  pmFrom: '1988-04-02', pmTo: '2019-11-30',
+  passportNum: 'EF1234567', passportCountry: '202',
+  passportIssue: '2019-08-12', passportExpiry: '2029-08-11',
+  nativeLang: '299', ableTo: 'Neither', langTest: 'N',
+  natIdInd: 'Y', natIdNum: '320506196403220026', natIdCountry: '202',
+  natIdIssue: '2016-05-04', natIdExpiry: '2036-05-04', usCardInd: 'N',
+  streetNum: '12', streetName: 'Pingjiang Road', city: 'Suzhou', province: 'Jiangsu',
+  country: '202', sameAsMailing: 'Y',
+  phoneType: '01', phoneCC: '86', phoneNum: '8651267889012', email: 'demo@example.com',
+  purpose: '08', stayFrom: '2026-11-01', stayTo: '2027-01-25', funds: '80000',
+  hostName: 'ZHAO Min', hostRel: 'Daughter', hostAddr: '77 King Street West, Toronto, ON',
+  eduInd: 'N',
+  occ1From: '1985-09', occ1To: '2019-03', occ1Title: 'Retired',
+  occ1Employer: 'Suzhou Sample Textile Factory', occ1City: 'Suzhou', occ1Prov: 'Jiangsu', occ1Country: '202',
+  bg1a: 'N', bg1b: 'N', vc1: 'N', vc2: 'Y', vc3: 'Y',
+  refusedDetails: 'Canadian TRV refused 14 Aug 2023 (V123456789, IRPR 179(b)).',
+  bg3: 'N', military: 'N', orgs: 'N', govPos: 'N', consent: 'N',
+  f5645AppCOB: 'China', f5645AppMStatus: '8',
+  hasSpouse: 'Y', spouse5645Name: 'ZHAO GUOQIANG', spouse5645DOB: '1960-01-09',
+  spouse5645COB: 'China', spouse5645MStatus: '5', spouse5645Address: 'Deceased',
+  spouse5645Occupation: 'Retired', spouse5645Acc: 'N',
+  motherName: 'GU FENGYING', motherDOB: '1938-06-01', motherCOB: 'China', motherMStatus: '7',
+  motherAddress: 'Deceased', motherOccupation: 'Retired', motherAcc: 'N',
+  fatherName: 'WANG DEHAI', fatherDOB: '1935-02-18', fatherCOB: 'China', fatherMStatus: '7',
+  fatherAddress: 'Deceased', fatherOccupation: 'Retired', fatherAcc: 'N',
+};
+const DEMO_ROWS = {
+  children: [{ name: 'ZHAO MIN', rel: 'Daughter', dob: '1990-09-14', mstatus: '5', cob: 'China',
+               occ: 'Engineer', addr: '77 King Street West, Toronto, ON, Canada', acc: 'N' }],
+  siblings: [],
+  employment: [
+    { from: '2009-04-01', to: '2019-03-31', name: 'Suzhou Sample Textile Factory, Suzhou, Jiangsu, China', position: 'Worker' },
+    { from: '1985-09-01', to: '2009-03-31', name: 'Suzhou Example Garment Co., Ltd., Suzhou, Jiangsu, China', position: 'Worker' },
+  ],
+  education: [],
+  travel: [],
+};
+
 export async function boot() {
   LOV = await (await fetch('./imm5257-lov.json')).json();
+  state.signDate ||= new Date().toISOString().slice(0, 10);
   wire();
+
+  if (new URLSearchParams(location.search).get('demo')) {
+    Object.assign(state, DEMO);
+    Object.assign(state, DEMO_ROWS);
+    try {
+      generated = await generateAll();
+      renderRadar();
+      document.getElementById('form').hidden = true;
+      document.getElementById('rail').hidden = true;
+      document.getElementById('result').hidden = false;
+      renderDownloads();
+      return;
+    } catch (e) {
+      console.error('demo failed', e);
+    }
+  }
   render();
 }
 if (document.getElementById('form')) await boot();

@@ -78,9 +78,12 @@ export const SPEC_0104 = {
 /** Signature block: print the name, leave the drawn signature empty for the
  *  applicant to sign. Steven's convention is "SURNAME, Given" -- surname upper,
  *  given name title case. */
-export const signature0104 = (family, given) => {
+export const signature0104 = (family, given, date) => {
   const g = (given || '').trim();
   const titled = g ? g[0].toUpperCase() + g.slice(1).toLowerCase() : '';
   const name = [(family || '').trim().toUpperCase(), titled].filter(Boolean).join(', ');
-  return name ? { 'IMM_0104/Page1/SignatureSub/name': name } : {};
+  const out = {};
+  if (name) out['IMM_0104/Page1/SignatureSub/name'] = name;
+  if (date) out['IMM_0104/Page1/SignatureSub/dateSigned'] = date;
+  return out;
 };
