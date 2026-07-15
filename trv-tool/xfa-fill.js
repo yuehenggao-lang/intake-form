@@ -20,13 +20,14 @@
 
 // Constants of the specific blank we ship. Re-derive them with tools/pin-blank.py
 // whenever the pinned canada.ca PDF is refreshed; see web/trv-tool/README.md.
+// Pinned to IMM5257 FormVersion .ENU-09-2023 (canada.ca imm5257/01-09-2023).
 export const BLANK = {
-  datasetsObj: 116,
-  // AES-128 object key for object 116 gen 0. Not a secret: the PDF uses the
-  // standard security handler with an empty user password, so anyone holding the
-  // public form can derive this. It only exists to satisfy the PDF's encryption.
-  objectKeyHex: '232db8a3ac0df55bc1891675501039cc',
-  expectedSize: 566571,
+  datasetsObj: 117,
+  // AES-128 object key for the datasets object, gen 0. Not a secret: the PDF uses
+  // the standard security handler with an empty user password, so anyone holding
+  // the public form can derive this. It only exists to satisfy the encryption.
+  objectKeyHex: 'b48521648277a36fa19a485e35b4a679',
+  expectedSize: 1364527,
 };
 
 const te = new TextEncoder();
