@@ -107,6 +107,13 @@ export const SPEC = [
             paths: (v) => ({ [`${P1}/CountryWhereApplying/Row2/Country`]: v }) },
           { id: 'cwaStatus', label: '在该国的身份', type: 'select', lov: 'ImmigrationStatusList', row: 'two', showIf: (s) => s.sameAsCor === 'N',
             paths: (v) => ({ [`${P1}/CountryWhereApplying/Row2/Status`]: v }) },
+          { id: 'cwaOther', label: '其他身份说明', type: 'text', showIf: (s) => s.sameAsCor === 'N' && s.cwaStatus === '06',
+            paths: (v) => ({ [`${P1}/CountryWhereApplying/Row2/Other`]: v }) },
+          // The From column here is mandatory on the form (red box when empty).
+          { id: 'cwaFrom', label: '该身份起始日期', type: 'date', req: true, row: 'two', showIf: (s) => s.sameAsCor === 'N',
+            paths: (v) => spread(v, { whole: `${P1}/CountryWhereApplying/Row2/FromDate`, y: `${P1}/CWADates/FromYr`, m: `${P1}/CWADates/FromMM`, d: `${P1}/CWADates/FromDD` }) },
+          { id: 'cwaTo', label: '该身份到期日期', hint: '公民/永居等无到期日的留空', type: 'date', row: 'two', showIf: (s) => s.sameAsCor === 'N',
+            paths: (v) => spread(v, { whole: `${P1}/CountryWhereApplying/Row2/ToDate`, y: `${P1}/CWADates/ToYr`, m: `${P1}/CWADates/ToMM`, d: `${P1}/CWADates/ToDD` }) },
         ],
       },
       {
@@ -308,10 +315,15 @@ export const SPEC = [
             paths: (v) => ({ 'form1/Page3/PageWrapper/BackgroundInfo3/Choice': v }) },
           { id: 'bg3d', label: '请简要说明', hint: '请用英文填写', type: 'text', showIf: (s) => s.bg3 === 'Y',
             paths: (v) => ({ 'form1/Page3/PageWrapper/BackgroundInfo3/details': v }) },
-          { id: 'military', label: '4. 你是否曾在军队、民兵或民防部队服役？', type: 'yn', req: true,
+          { id: 'military', label: '4. 你是否曾在军队、民兵、民防部队、安保组织或警察部队服役？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/PageWrapper/Military/Choice': v }) },
-          { id: 'militaryD', label: '请简要说明', hint: '请用英文填写', type: 'text', showIf: (s) => s.military === 'Y',
+          { id: 'militaryD', label: '请填服役日期和服役国家', hint: '请用英文填写', type: 'text', showIf: (s) => s.military === 'Y',
             paths: (v) => ({ 'form1/Page3/PageWrapper/Military/militaryServiceDetails': v }) },
+          // IMM0104 wants military/police service listed in its employment table
+          // as well, with the unit designator -- the two forms disagree otherwise.
+          { id: 'militaryNote', label: '', type: 'notice', showIf: (s) => s.military === 'Y',
+            text: '服役经历也要作为一段填进第 4 步的「工作经历」—— IMM0104 明确要求列出 18 岁以后的军队/警察服役，并写明部队代号（MUCD）和部队名称。',
+            paths: () => ({}) },
           { id: 'orgs', label: '5. 你是否曾是暴力、恐怖或推翻政权组织的成员？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/PageWrapper/Occupation/Choice': v }) },
           { id: 'govPos', label: '6. 你是否曾担任政府公职？', type: 'yn', req: true,
@@ -353,6 +365,10 @@ function fieldHtml(f) {
   const req = f.req ? '<span class="req" aria-hidden="true">*</span>' : '';
   const hint = f.hint ? `<span class="hint">${esc(f.hint)}</span>` : '';
   const v = ('value' in f ? f.value : state[f.id]) || '';
+
+  if (f.type === 'notice') {
+    return `<p class="notice" data-fid="${f.id}">${esc(f.text)}</p>`;
+  }
 
   if (f.type === 'yn') {
     return `<div class="q" data-fid="${f.id}">
@@ -700,6 +716,13 @@ async function generateAll() {
 
 /** Name the factors an officer weighs that the user's own answers touch. Flags
  *  only -- there is deliberately no "looks fine" branch; see risk.js. */
+/** The form's own rule: yes to any of background Q3-6 may mean Schedule 1, which
+ *  this tool does not produce. Better said here than discovered at submission. */
+function renderSchedule1() {
+  const yes = ['bg3', 'military', 'orgs', 'govPos'].some((k) => state[k] === 'Y');
+  document.getElementById('sched1').hidden = !yes;
+}
+
 function renderRadar() {
   const flags = riskFlags(state, { children: state.children, travel: state.travel, employment: state.employment });
   const box = document.getElementById('radar');
@@ -825,6 +848,7 @@ document.getElementById('next').addEventListener('click', async () => {
   try {
     generated = await generateAll();
     renderRadar();
+    renderSchedule1();
     document.getElementById('form').hidden = true;
     document.getElementById('rail').hidden = true;
     document.getElementById('result').hidden = false;
@@ -876,7 +900,7 @@ const DEMO = {
   corCountry: '202', corStatus: '01',
   // lived in Singapore 2015-2019, and is applying from there rather than from home
   pcrInd: 'Y', pcrCountry: '246', pcrStatus: '04', pcrFrom: '2015-03-01', pcrTo: '2019-08-31',
-  sameAsCor: 'N', cwaCountry: '246', cwaStatus: '03',
+  sameAsCor: 'N', cwaCountry: '246', cwaStatus: '03', cwaFrom: '2026-08-20', cwaTo: '2026-11-20',
   marital: '04',
   prevMarried: 'Y', pmFamily: 'SUN', pmGiven: 'LI', pmDOB: '1980-09-17',
   pmType: '01', pmFrom: '2005-06-18', pmTo: '2016-02-29',
@@ -888,10 +912,12 @@ const DEMO = {
   streetNum: '18', streetName: 'Renmin Road', city: 'Dalian', province: 'Liaoning',
   country: '202', sameAsMailing: 'Y',
   phoneType: '02', phoneCC: '86', phoneNum: '8613941188999', email: 'demo@example.com',
-  purpose: '03', purposeOther: 'Attending a trade exhibition',
+  purpose: '01',
   stayFrom: '2026-09-14', stayTo: '2026-09-28', funds: '45000',
   hostName: 'David Miller', hostRel: 'Business contact', hostAddr: '900 Georgia Street, Vancouver, BC',
-  bg1a: 'N', bg1b: 'N', vc1: 'N', vc2: 'N', vc3: 'N', bg3: 'N',
+  bg1a: 'N', bg1b: 'N', vc1: 'N', vc2: 'Y', vc3: 'Y',
+  refusedDetails: 'Canadian TRV refused 09 Feb 2021 (V456789123, IRPR 179(b)).',
+  bg3: 'N',
   military: 'Y', militaryD: 'Peoples Liberation Army, 1996-1998, conscript, honourable discharge.',
   orgs: 'N', govPos: 'N', consent: 'N',
   f5645AppZh: '刘志强', hasSpouse: 'N',
@@ -923,6 +949,10 @@ const DEMO_ROWS = {
       employer: 'Dalian No. 2 Machine Tool Factory', city: 'Dalian', prov: 'Liaoning', country: '202' },
     { from: '2004-07-01', to: '2010-04-30', position: 'Worker',
       employer: 'Dalian Yangli Electronics Factory', city: 'Dalian', prov: 'Liaoning', country: '202' },
+    // IMM0104 asks for military service in this table too, with the unit designator
+    { from: '1996-09-01', to: '1998-08-31', position: 'Conscript',
+      employer: "People's Liberation Army, Unit Cover Designator 12345, 3rd Infantry Regiment",
+      city: 'Shenyang', prov: 'Liaoning', country: '202' },
   ],
   education: [
     { from: '2000-09-01', to: '2004-06-30', position: "Bachelor's degree in Mechanical Engineering",
@@ -947,6 +977,7 @@ export async function boot() {
     try {
       generated = await generateAll();
       renderRadar();
+      renderSchedule1();
       document.getElementById('form').hidden = true;
       document.getElementById('rail').hidden = true;
       document.getElementById('result').hidden = false;

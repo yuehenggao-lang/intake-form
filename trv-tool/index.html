@@ -199,6 +199,11 @@
   .downloads { display: grid; gap: 10px; margin: 18px 0 4px; }
   .downloads .dl { text-align: left; }
 
+  .sched1 { margin: 22px 0 0; }
+  .notice {
+    margin: 0; padding: 10px 12px; font-size: 13px; line-height: 1.6;
+    background: var(--field); border-left: 3px solid var(--gov); color: var(--gov-hi);
+  }
   .radar { border: 1px solid var(--rule); border-left: 4px solid var(--flag); background: var(--paper); padding: 18px 20px; margin: 26px 0 0; }
   .radar h3 { margin: 0 0 8px; font-size: 17px; }
   .radar-lede { margin: 0 0 14px; font-size: 13px; color: var(--ink-soft); }
@@ -251,6 +256,10 @@
     <p class="lede">境外旅游签常见的组合是这三张。你的申请具体要交哪些，以 IRCC 发给你的清单为准。下载后还有两步必须由你完成。</p>
 
     <div id="downloads" class="downloads"></div>
+
+    <section id="sched1" class="warn sched1" hidden>
+      <b>你可能还需要 IMM 5257 Schedule 1。</b>IMM5257 上写明：背景信息第 3-6 题只要有一题答「是」，或签证官要求时，你<b>可能被要求另外填写 IMM 5257 Schedule 1</b>。本工具不生成这张表，需要的话去 canada.ca 下载。
+    </section>
 
     <section id="radar" class="radar" hidden>
       <h3 id="radar-h"></h3>
