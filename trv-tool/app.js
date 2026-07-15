@@ -358,10 +358,10 @@ const esc = (s) =>
   String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // ── render ───────────────────────────────────────────────────────────────
-function fieldHtml(f, forced) {
+function fieldHtml(f) {
   const req = f.req ? '<span class="req" aria-hidden="true">*</span>' : '';
   const hint = f.hint ? `<span class="hint">${esc(f.hint)}</span>` : '';
-  const v = (forced !== undefined ? forced : state[f.id]) || '';
+  const v = ('value' in f ? f.value : state[f.id]) || '';
 
   if (f.type === 'yn') {
     return `<div class="q" data-fid="${f.id}">
@@ -416,7 +416,7 @@ function repeatHtml(b) {
       <div class="rep-hd"><span>${esc(b.title)} ${i + 1}</span>
         <button type="button" class="lnk" data-del="${r.key}:${i}">删除</button></div>
       ${groupRows(r.fields).map((g) => `<div class="row ${g.row || ''}">${g.items
-        .map((f) => fieldHtml({ ...f, id: `${r.key}.${i}.${f.id}` }, row[f.id]))
+        .map((f) => fieldHtml({ ...f, id: `${r.key}.${i}.${f.id}`, value: row[f.id] }))
         .join('')}</div>`).join('')}
     </div>`).join('');
 
