@@ -196,21 +196,28 @@ export const SPEC_5645 = {
 };
 
 /**
- * The three section dates are NEGATIVE declarations, not "I filled this in" dates.
+ * Two of these three dates are negative declarations; the third is not, and the
+ * field names actively mislead about which.
  *
- * Each section footer reads "I certify that I do NOT have a spouse / any children
- * / any brothers or sisters", with a signature and date under it. So the date goes
- * in ONLY when that section is empty. Dating Section A while a spouse is listed
- * above it certifies the opposite of what the form says.
+ *   SectionAdate -> NOTE 1 "I certify that I do NOT have a spouse..."   conditional
+ *   SectionBdate -> NOTE 2 "I certify that I do NOT have any children"  conditional
+ *   SectionCdate -> SECTION D "I certify that the information contained in this
+ *                   document is complete, accurate and factual."        ALWAYS
  *
- * (Filling all three unconditionally is a known way to get this wrong -- it comes
- * from copying a values.json that had them all filled.)
+ * Despite the name, SectionCdate has nothing to do with Section C -- Section C
+ * (brothers and sisters) carries no declaration at all. In the template the field
+ * sits directly under the SECTION D certification text, and across 104
+ * portal-accepted submissions it is filled 104 times: 59 with siblings listed and
+ * 45 without. SectionAdate meanwhile is empty in 59 of 60 filings that name a
+ * spouse.
+ *
+ * Treating SectionCdate as conditional leaves SECTION D unsigned, which is the
+ * one certification the form actually needs.
  */
-export const dates5645 = (d, { hasSpouse, children, siblings }) => {
-  const out = {};
-  if (!hasSpouse) out['IMM_5645/page1/SectionA/SectionAdate'] = d;
-  if (!children) out['IMM_5645/page1/SectionB/SectionBdate'] = d;
-  if (!siblings) out['IMM_5645/page1/SectionC/SectionCdate'] = d;
+export const dates5645 = (d, { hasSpouse, children }) => {
+  const out = { 'IMM_5645/page1/SectionC/SectionCdate': d }; // SECTION D certification
+  if (!hasSpouse) out['IMM_5645/page1/SectionA/SectionAdate'] = d; // NOTE 1
+  if (!children) out['IMM_5645/page1/SectionB/SectionBdate'] = d; // NOTE 2
   return out;
 };
 

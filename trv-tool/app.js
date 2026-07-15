@@ -679,11 +679,11 @@ async function generateAll() {
   const v5645 = {
     ...valuesFor(4),
     ...visaTypeBoxes(state.visaType),
-    // section dates are negative declarations -- only when that section is empty
+    // A/B dates are negative declarations; the one named SectionCdate is
+    // actually SECTION D's certification and is always signed. See spec-5645.js.
     ...dates5645(state.signDate, {
       hasSpouse: state.hasSpouse === 'Y',
       children: (state.children || []).some((r) => r.name),
-      siblings: (state.siblings || []).some((r) => r.name),
     }),
   };
   const r2 = await fillForm('IMM5645', await blankOf(FORMS.IMM5645.file), v5645);
