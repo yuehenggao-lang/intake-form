@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>加拿大旅游签 IMM5257 在线填表工具（免费）</title>
-<meta name="description" content="免费填写加拿大访问签证申请表 IMM5257。全程在你的浏览器里完成，信息不上传任何服务器。" />
+<title>加拿大旅游签在线填表工具（免费）· IMM5257 / IMM5645 / IMM0104</title>
+<meta name="description" content="免费填写加拿大访问签证申请表 IMM5257、家庭信息表 IMM5645、教育工作旅行史 IMM0104。全程在你的浏览器里完成，信息不上传任何服务器。" />
 <style>
   /* The palette is lifted from the IMM5257 itself: the pale periwinkle field
      fill, the hairline black rules, the Canada red used only for mandatory
@@ -185,6 +185,18 @@
 
   .busy { font: 13px/1 var(--mono); color: var(--ink-soft); align-self: center; }
 
+  .bhint { margin: 0; font-size: 13px; color: var(--ink-soft); }
+  .rep { border: 1px solid var(--field-edge); padding: 12px; display: grid; gap: 12px; }
+  .rep-hd {
+    display: flex; justify-content: space-between; align-items: center;
+    font: 600 12px/1 var(--mono); letter-spacing: .06em; color: var(--ink-soft);
+  }
+  .lnk { appearance: none; border: 0; background: none; color: var(--flag); font-size: 12px; cursor: pointer; padding: 0; }
+  .lnk:hover { text-decoration: underline; }
+  .btn.add { font-size: 14px; padding: 8px 14px; justify-self: start; }
+  .downloads { display: grid; gap: 10px; margin: 18px 0 4px; }
+  .downloads .dl { text-align: left; }
+
   @media (prefers-reduced-motion: no-preference) {
     .step { animation: in .22s ease-out; }
     @keyframes in { from { opacity: 0; transform: translateY(4px); } }
@@ -196,13 +208,13 @@
 <header class="mast">
   <div class="wrap">
     <div class="mast-top">
-      <span><span class="leaf">&#127809;</span> IMM 5257 &middot; 访问签证申请表</span>
+      <span><span class="leaf">&#127809;</span> IMM 5257 &middot; 5645 &middot; 0104</span>
       <span>免费工具</span>
     </div>
     <h1>加拿大旅游签在线填表
       <span class="en">Application for Visitor Visa (Temporary Resident Visa)</span>
     </h1>
-    <p class="lede">用中文填一遍，导出可提交的官方 PDF 表格。题号与官方表格一一对应，方便你对照检查。</p>
+    <p class="lede">用中文填一遍，一次导出三张官方 PDF 表格。题号与官方表格一一对应，方便你对照检查。</p>
     <p class="privacy"><b>信息不出你的浏览器</b>：填表和生成 PDF 全在本机完成，不上传任何服务器。</p>
   </div>
 </header>
@@ -214,6 +226,8 @@
     <div class="step" data-step="0"></div>
     <div class="step" data-step="1" hidden></div>
     <div class="step" data-step="2" hidden></div>
+    <div class="step" data-step="3" hidden></div>
+    <div class="step" data-step="4" hidden></div>
 
     <div class="nav">
       <button type="button" class="btn" id="prev">上一步</button>
@@ -223,12 +237,14 @@
   </form>
 
   <section class="result" id="result" hidden>
-    <h2>表格已生成</h2>
-    <p class="lede">下载后还有两步必须由你完成，否则递交会被系统退回。</p>
+    <h2>三张表已生成</h2>
+    <p class="lede">境外旅游签常见的组合是这三张。你的申请具体要交哪些，以 IRCC 发给你的清单为准。下载后还有两步必须由你完成。</p>
+
+    <div id="downloads" class="downloads"></div>
 
     <ol class="steps-todo">
       <li><b>用 Adobe Acrobat Reader 打开</b>这个 PDF。用浏览器或 Mac「预览」打开会显示空白，这是这类政府表格的正常现象，不是文件坏了。<a href="https://get.adobe.com/reader/" target="_blank" rel="noopener">免费下载 Reader</a></li>
-      <li><b>在 Reader 里点表格顶部的 Validate 按钮。</b>这一步会生成页脚的条形码。跳过它，IRCC 系统不会接受你的表格。</li>
+      <li><b>在 Reader 里打开 IMM5257，点表格顶部的 Validate 按钮。</b>这一步会生成页脚的条形码。跳过它，IRCC 系统不会接受你的表格。（另外两张表没有这个按钮，不需要这一步。）</li>
       <li><b>逐页核对一遍，再自己递交。</b>本工具只负责把你填的内容写进表格，不检查内容对错。</li>
     </ol>
 
@@ -236,7 +252,6 @@
 
     <div class="nav">
       <button type="button" class="btn" id="back">返回修改</button>
-      <button type="button" class="btn primary" id="download">下载填好的 IMM5257</button>
     </div>
 
     <div class="cta">

@@ -7,8 +7,10 @@
  * Everything stays in this tab: no network calls beyond fetching the blank form
  * and the code itself.
  */
-import { fillImm5257 } from './xfa-fill.js';
+import { fillForm, FORMS } from './xfa-fill.js';
 import { hasCJK, romanizeAddress, romanizeCompany, OCCUPATIONS } from './zh.js';
+import { SPEC_5645, visaTypeBoxes } from './spec-5645.js';
+import { SPEC_0104, signature0104 } from './spec-0104.js';
 
 const P1 = 'form1/Page1/PersonalDetails';
 const P1M = 'form1/Page1/MaritalStatus/SectionA';
@@ -337,26 +339,29 @@ export const SPEC = [
       },
     ],
   },
+  { step: 3, ...SPEC_5645 },
+  { step: 4, ...SPEC_0104 },
 ];
 
 // ── state ────────────────────────────────────────────────────────────────
-const state = {};
+const state = { children: [], siblings: [], employment: [{}], education: [], travel: [] };
 let LOV = {};
 let step = 0;
-let generated = null;
+let generated = [];
 let blobUrl = null;
 
-const allFields = () => SPEC.flatMap((s) => s.boxes.flatMap((b) => b.fields));
+const allBoxes = () => SPEC.flatMap((s) => s.boxes);
+const allFields = () => allBoxes().flatMap((b) => b.fields || []);
 const visible = (f) => !f.showIf || f.showIf(state);
 
 const esc = (s) =>
   String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // ── render ───────────────────────────────────────────────────────────────
-function fieldHtml(f) {
+function fieldHtml(f, forced) {
   const req = f.req ? '<span class="req" aria-hidden="true">*</span>' : '';
   const hint = f.hint ? `<span class="hint">${esc(f.hint)}</span>` : '';
-  const v = state[f.id] || '';
+  const v = (forced !== undefined ? forced : state[f.id]) || '';
 
   if (f.type === 'yn') {
     return `<div class="q" data-fid="${f.id}">
@@ -401,16 +406,48 @@ function fieldHtml(f) {
   </label>`;
 }
 
-function boxHtml(b) {
-  const fields = b.fields.filter(visible);
-  if (!fields.length) return '';
-  // group consecutive fields that share a row hint
+/** A repeat box renders N instances of a row spec, backed by state[key] (an array).
+ *  IMM5645's children/siblings and IMM0104's tables all work this way. */
+function repeatHtml(b) {
+  const r = b.repeat;
+  const rows = state[r.key] || [];
+  const body = rows.map((row, i) => `
+    <div class="rep" data-rep="${r.key}" data-i="${i}">
+      <div class="rep-hd"><span>${esc(b.title)} ${i + 1}</span>
+        <button type="button" class="lnk" data-del="${r.key}:${i}">删除</button></div>
+      ${groupRows(r.fields).map((g) => `<div class="row ${g.row || ''}">${g.items
+        .map((f) => fieldHtml({ ...f, id: `${r.key}.${i}.${f.id}` }, row[f.id]))
+        .join('')}</div>`).join('')}
+    </div>`).join('');
+
+  return `<fieldset class="box">
+    <legend><span class="box-hd"><span class="num">${esc(b.num)}</span><span class="t">${esc(b.title)}</span></span></legend>
+    <div class="box-body">
+      ${b.hint ? `<p class="bhint">${esc(b.hint)}</p>` : ''}
+      ${body || '<p class="bhint">还没有添加。</p>'}
+      ${rows.length < r.max
+        ? `<button type="button" class="btn add" data-add="${r.key}">+ ${esc(r.addLabel)}</button>`
+        : `<p class="bhint">已达上限 ${r.max} 条。</p>`}
+    </div>
+  </fieldset>`;
+}
+
+/** Group consecutive fields that share a row hint. */
+function groupRows(fields) {
   const groups = [];
   for (const f of fields) {
     const last = groups[groups.length - 1];
     if (last && last.row && last.row === f.row) last.items.push(f);
     else groups.push({ row: f.row, items: [f] });
   }
+  return groups;
+}
+
+function boxHtml(b) {
+  if (b.repeat) return repeatHtml(b);
+  const fields = b.fields.filter(visible);
+  if (!fields.length) return '';
+  const groups = groupRows(fields);
   return `<fieldset class="box">
     <legend><span class="box-hd"><span class="num">${esc(b.num)}</span><span class="t">${esc(b.title)}</span></span></legend>
     <div class="box-body">
@@ -437,7 +474,7 @@ function render() {
 // ── validation ───────────────────────────────────────────────────────────
 function validateStep() {
   let firstBad = null;
-  for (const f of SPEC[step].boxes.flatMap((b) => b.fields)) {
+  for (const f of SPEC[step].boxes.flatMap((b) => b.fields || [])) {
     if (!visible(f)) continue;
     if (!f.req && !f.latin) continue;
     // Names are never romanised for the user: pinyin is ambiguous (单 is Shan as a
@@ -480,17 +517,93 @@ export function buildValues(s) {
 }
 
 function releaseUrl() {
-  if (blobUrl) URL.revokeObjectURL(blobUrl);
-  blobUrl = null;
+  for (const g of generated || []) if (g.url) { URL.revokeObjectURL(g.url); g.url = null; }
+}
+
+/** IMM5645's repeat rows: map each row onto its pre-created <Child> node. */
+function buildRepeatValues(box, out) {
+  const r = box.repeat;
+  if (!r.base) return; // IMM0104 tables go through setRows instead
+  (state[r.key] || []).forEach((row, i) => {
+    const base = r.base(i);
+    for (const f of r.fields) {
+      let v = row[f.id];
+      if (v == null || v === '') continue;
+      if (f.latin) v = String(v).toUpperCase();
+      if (typeof v === 'string') v = v.replace(/[—–]/g, '-');
+      if (hasCJK(v)) throw new Error(`「${box.title} ${i + 1} · ${f.label}」还是中文，请改成英文或拼音`);
+      if (f.kind === 'acc') {
+        // Accompanying is two independent 0/1 checkboxes, not an exclGroup.
+        const [yes, no] = f.path.split('/');
+        out[`${base}/${yes}`] = v === 'Y' ? '1' : '0';
+        out[`${base}/${no}`] = v === 'Y' ? '0' : '1';
+      } else {
+        out[`${base}/${f.path}`] = v;
+      }
+    }
+  });
+}
+
+/** IMM0104's dynamic tables: rows out, in the order the user entered them. */
+function buildTables() {
+  const tables = {};
+  for (const box of allBoxes()) {
+    if (!box.repeat?.table) continue;
+    tables[box.repeat.table] = (state[box.repeat.key] || [])
+      .filter((row) => Object.values(row).some((v) => v))
+      .map((row) => {
+        const out = {};
+        for (const f of box.repeat.fields) {
+          let v = row[f.id] || '';
+          if (typeof v === 'string') v = v.replace(/[—–]/g, '-');
+          if (hasCJK(v)) throw new Error(`「${box.title} · ${f.label}」还是中文，请改成英文或拼音`);
+          out[f.cell] = v;
+        }
+        return out;
+      });
+  }
+  return tables;
+}
+
+function valuesFor(stepIdx) {
+  const out = {};
+  for (const box of SPEC[stepIdx].boxes) {
+    if (box.repeat) { buildRepeatValues(box, out); continue; }
+    for (const f of box.fields || []) {
+      if (f.showIf && !f.showIf(state)) continue;
+      let v = state[f.id];
+      if (v == null || v === '') continue;
+      if (f.upper || f.latin) v = String(v).toUpperCase();
+      if (typeof v === 'string') v = v.replace(/[—–]/g, '-');
+      if (hasCJK(v)) throw new Error(`「${f.label}」还是中文，请改成英文或拼音`);
+      Object.assign(out, f.paths(v, state));
+    }
+  }
+  return out;
 }
 
 // ── events ───────────────────────────────────────────────────────────────
 /** All DOM wiring lives here so importing this module has no side effects and
  *  the pure parts (SPEC, buildValues) stay testable without a page. */
 function wire() {
+/** "children.0.name" addresses a row field; anything else is a plain field. */
+function repeatRef(name) {
+  const m = /^([a-z]+)\.(\d+)\.(.+)$/.exec(name || '');
+  if (!m) return null;
+  const box = allBoxes().find((b) => b.repeat?.key === m[1]);
+  if (!box) return null;
+  return { key: m[1], i: +m[2], field: box.repeat.fields.find((f) => f.id === m[3]) };
+}
+
 document.getElementById('form').addEventListener('input', (e) => {
   const n = e.target.name;
   if (!n) return;
+  const rep = repeatRef(n);
+  if (rep) {
+    if (rep.field?.type === 'digits') e.target.value = e.target.value.replace(/[^\d]/g, '');
+    state[rep.key][rep.i][rep.field.id] = e.target.value;
+    return;
+  }
   const fld = allFields().find((x) => x.id === n);
   if (fld?.type === 'digits') e.target.value = e.target.value.replace(/[^\d]/g, '');
   state[n] = e.target.value;
@@ -516,14 +629,27 @@ document.getElementById('form').addEventListener('input', (e) => {
 // is imperfect (no word segmentation, so long runs mash together), so the honest
 // move is to show the result and let them fix it, not to transform silently.
 document.getElementById('form').addEventListener('focusout', (e) => {
-  const f = allFields().find((x) => x.id === e.target.name);
+  const rep = repeatRef(e.target.name);
+  const f = rep ? rep.field : allFields().find((x) => x.id === e.target.name);
   if (!f?.romanize || !hasCJK(e.target.value)) return;
   const fn = f.romanize === 'company' ? romanizeCompany : romanizeAddress;
   e.target.value = fn(e.target.value);
-  state[f.id] = e.target.value;
+  if (rep) state[rep.key][rep.i][f.id] = e.target.value;
+  else state[f.id] = e.target.value;
   const host = e.target.closest('[data-fid]');
   const note = host?.querySelector('.note');
   if (note) { note.textContent = '已转为拼音，请核对'; note.hidden = false; }
+});
+
+document.getElementById('form').addEventListener('click', (e) => {
+  const add = e.target.dataset?.add;
+  if (add) { state[add].push({}); render(); return; }
+  const del = e.target.dataset?.del;
+  if (del) {
+    const [key, i] = del.split(':');
+    state[key].splice(+i, 1);
+    render();
+  }
 });
 
 document.getElementById('rail').addEventListener('click', (e) => {
@@ -535,30 +661,88 @@ document.getElementById('prev').addEventListener('click', () => { if (step > 0) 
 
 document.getElementById('next').addEventListener('click', async () => {
   if (!validateStep()) return;
-  if (step < SPEC.length - 1) { step++; render(); return; }
+  if (step < SPEC.length - 1) {
+    step++;
+    prefill5645();
+    render();
+    return;
+  }
 
   const busy = document.getElementById('busy');
   const next = document.getElementById('next');
   busy.textContent = '正在生成…';
   next.disabled = true;
   try {
-    const blank = new Uint8Array(await (await fetch('./IMM5257-blank.pdf')).arrayBuffer());
-    const { pdf, missing } = await fillImm5257(blank, buildValues(state));
-    if (missing.length) console.warn('paths not found in the form:', missing);
-    releaseUrl();
-    generated = pdf;
+    generated = await generateAll();
     document.getElementById('form').hidden = true;
     document.getElementById('rail').hidden = true;
     document.getElementById('result').hidden = false;
+    renderDownloads();
     window.scrollTo({ top: 0, behavior: 'instant' });
   } catch (err) {
-    busy.textContent = '';
-    alert('生成失败：' + err.message + '\n\n请刷新页面重试。你填的内容没有离开这台电脑。');
+    alert('生成失败：' + err.message + '\n\n你填的内容没有离开这台电脑。');
     console.error(err);
   } finally {
     busy.textContent = '';
     next.disabled = false;
   }
+});
+
+const blankOf = async (file) => new Uint8Array(await (await fetch('./' + file)).arrayBuffer());
+
+/** Carry the answers IMM5645 asks for again over from the IMM5257 steps, so the
+ *  user isn't retyping their own name and address. */
+function prefill5645() {
+  const map = {
+    f5645AppName: [state.familyName, state.givenName].filter(Boolean).join(' ').toUpperCase(),
+    f5645AppDOB: state.dob,
+    f5645AppAddress: [state.streetNum, state.streetName, state.city, state.province]
+      .filter(Boolean).join(', '),
+    f5645AppOcc: state.occ1Title,
+  };
+  for (const [k, v] of Object.entries(map)) if (!state[k] && v) state[k] = v;
+}
+
+async function generateAll() {
+  const out = [];
+
+  const v5257 = valuesFor(0);
+  Object.assign(v5257, valuesFor(1), valuesFor(2));
+  const r1 = await fillForm('IMM5257', await blankOf(FORMS.IMM5257.file), v5257);
+  if (r1.missing.length) console.warn('IMM5257 paths not found:', r1.missing);
+  out.push({ id: 'IMM5257', name: '访问签证申请表 IMM5257', pdf: r1.pdf });
+
+  const v5645 = { ...valuesFor(3), ...visaTypeBoxes(state.visaType) };
+  const r2 = await fillForm('IMM5645', await blankOf(FORMS.IMM5645.file), v5645);
+  if (r2.missing.length) console.warn('IMM5645 paths not found:', r2.missing);
+  out.push({ id: 'IMM5645', name: '家庭信息表 IMM5645', pdf: r2.pdf });
+
+  const v0104 = signature0104(state.familyName, state.givenName);
+  const r3 = await fillForm('IMM0104', await blankOf(FORMS.IMM0104.file), v0104, buildTables());
+  if (r3.missing.length) console.warn('IMM0104 paths not found:', r3.missing);
+  out.push({ id: 'IMM0104', name: '教育/工作/旅行史 IMM0104', pdf: r3.pdf });
+
+  return out;
+}
+
+function renderDownloads() {
+  const base = [state.familyName, state.givenName].filter(Boolean).join('-').toUpperCase() || 'IMM';
+  document.getElementById('downloads').innerHTML = generated
+    .map((g, i) => `<button type="button" class="btn primary dl" data-dl="${i}">下载 ${esc(g.name)}</button>`)
+    .join('');
+  document.getElementById('downloads').dataset.base = base;
+}
+
+document.getElementById('downloads').addEventListener('click', (e) => {
+  const i = e.target.dataset?.dl;
+  if (i == null) return;
+  const g = generated[+i];
+  const base = document.getElementById('downloads').dataset.base;
+  g.url = g.url || URL.createObjectURL(new Blob([g.pdf], { type: 'application/pdf' }));
+  const a = document.createElement('a');
+  a.href = g.url;
+  a.download = `${base}-${g.id}.pdf`;
+  a.click();
 });
 
 document.getElementById('back').addEventListener('click', () => {
@@ -569,16 +753,7 @@ document.getElementById('back').addEventListener('click', () => {
   render();
 });
 
-document.getElementById('download').addEventListener('click', () => {
-  const name = [state.familyName, state.givenName].filter(Boolean).join('-').toUpperCase() || 'IMM5257';
-  // Keep the URL alive: revoking straight after click races the download in some
-  // browsers, and people reasonably click download more than once.
-  if (!blobUrl) blobUrl = URL.createObjectURL(new Blob([generated], { type: 'application/pdf' }));
-  const a = document.createElement('a');
-  a.href = blobUrl;
-  a.download = `${name}-IMM5257.pdf`;
-  a.click();
-});
+
 }
 
 // ── boot ─────────────────────────────────────────────────────────────────
