@@ -196,6 +196,12 @@
   .lnk { appearance: none; border: 0; background: none; color: var(--flag); font-size: 12px; cursor: pointer; padding: 0; }
   .lnk:hover { text-decoration: underline; }
   .btn.add { font-size: 14px; padding: 8px 14px; justify-self: start; }
+  .check {
+    border: 2px solid var(--flag); background: #fdf2f2; padding: 14px 16px; margin: 18px 0 0;
+  }
+  .check b { color: var(--flag); font-size: 15px; }
+  .check p { margin: 6px 0 0; font-size: 13.5px; line-height: 1.65; color: var(--ink); }
+
   .downloads { display: grid; gap: 10px; margin: 18px 0 4px; }
   .downloads .dl { text-align: left; }
 
@@ -253,7 +259,12 @@
 
   <section class="result" id="result" hidden>
     <h2>三张表已生成</h2>
-    <p class="lede">境外旅游签常见的组合是这三张。你的申请具体要交哪些，以 IRCC 发给你的清单为准。下载后还有两步必须由你完成。</p>
+    <p class="lede">境外旅游签常见的组合是这三张。你的申请具体要交哪些，以 IRCC 发给你的清单为准。</p>
+
+    <div class="check">
+      <b>递交前请逐页核对一遍。</b>
+      <p>这个工具只把你填的内容机械地写进表格，<b>不检查内容对错</b>——填错了它也照填。日期、拼写、号码、家庭成员有没有漏，都要你自己对着护照和证件核。表格上的信息由你本人负责，一旦递交就会进入你的移民记录。</p>
+    </div>
 
     <div id="downloads" class="downloads"></div>
 
@@ -272,7 +283,7 @@
       <li><b>用 Adobe Acrobat Reader 打开</b>这个 PDF。用浏览器或 Mac「预览」打开会显示空白，这是这类政府表格的正常现象，不是文件坏了。<a href="https://get.adobe.com/reader/" target="_blank" rel="noopener">免费下载 Reader</a></li>
       <li><b>在 Reader 里打开 IMM5257，点表格顶部的 Validate 按钮。</b>这一步会生成页脚的条形码。跳过它，IRCC 系统不会接受你的表格。（另外两张表没有这个按钮，不需要这一步。）</li>
       <li><b>用 GCKey 登录 IRCC 账户递交</b>，在那里上传这三张 PDF 和你自己准备的材料。<a href="https://www.canada.ca/en/immigration-refugees-citizenship/services/application/account.html" target="_blank" rel="noopener">去 IRCC 账户登录 / 注册 →</a><br>IRCC 另有一个直接在线填写的访问签证入口，那条路不上传 PDF，这三张表在那儿用不上。入口以 IRCC 网站当时的指引为准。</li>
-      <li><b>逐页核对一遍，再自己递交。</b>本工具只负责把你填的内容写进表格，不检查内容对错。</li>
+      <li><b>核对无误后，自己递交。</b></li>
     </ol>
 
     <p class="warn"><b>请注意：</b>本工具不判断你是否符合申请条件、不替你选表、不代为递交。表格内容与递交结果由你本人负责。</p>

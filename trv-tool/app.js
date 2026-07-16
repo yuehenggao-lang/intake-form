@@ -67,7 +67,7 @@ export const SPEC = [
             paths: (v) => ({ [`${P1}/AliasName/AliasGivenName`]: v }) },
           { id: 'sex', label: '性别', type: 'select', req: true, lov: 'GenderMelList', row: 'two',
             paths: (v) => ({ [`${P1}/Sex/Sex`]: v }) },
-          { id: 'dob', label: '出生日期', type: 'date', req: true, row: 'two',
+          { id: 'dob', past: true, label: '出生日期', type: 'date', req: true, row: 'two',
             paths: (v) => spread(v, { y: `${P1}/DOBYear`, m: `${P1}/DOBMonth`, d: `${P1}/DOBDay` }) },
           { id: 'birthCity', romanize: 'address', label: '出生城市', type: 'text', req: true, row: 'two',
             paths: (v) => ({ [`${P1}/PlaceBirthCity`]: v }) },
@@ -87,7 +87,7 @@ export const SPEC = [
             paths: (v) => ({ [`${P1}/CurrentCOR/Row2/Status`]: v }) },
           { id: 'corOther', label: '其他身份说明', hint: '请用英文填写', type: 'text', showIf: (s) => s.corStatus === '06',
             paths: (v) => ({ [`${P1}/CurrentCOR/Row2/Other`]: v }) },
-          { id: 'corFrom', label: '该身份起始日期', type: 'date', row: 'two', showIf: (s) => s.corStatus && s.corStatus !== '01',
+          { id: 'corFrom', past: true, label: '该身份起始日期', type: 'date', row: 'two', showIf: (s) => s.corStatus && s.corStatus !== '01',
             paths: (v) => spread(v, { whole: `${P1}/CurrentCOR/Row2/FromDate`, y: `${P1}/CORDates/FromYr`, m: `${P1}/CORDates/FromMM`, d: `${P1}/CORDates/FromDD` }) },
           { id: 'corTo', label: '该身份到期日期', type: 'date', row: 'two', showIf: (s) => s.corStatus && s.corStatus !== '01',
             paths: (v) => spread(v, { whole: `${P1}/CurrentCOR/Row2/ToDate`, y: `${P1}/CORDates/ToYr`, m: `${P1}/CORDates/ToMM`, d: `${P1}/CORDates/ToDD` }) },
@@ -97,9 +97,9 @@ export const SPEC = [
             paths: (v) => ({ [`${P1}/PreviousCOR/Row2/Country`]: v }) },
           { id: 'pcrStatus', label: '在该国的身份', type: 'select', lov: 'ImmigrationStatusList', row: 'two', showIf: (s) => s.pcrInd === 'Y',
             paths: (v) => ({ [`${P1}/PreviousCOR/Row2/Status`]: v }) },
-          { id: 'pcrFrom', label: '起始日期', type: 'date', row: 'two', showIf: (s) => s.pcrInd === 'Y',
+          { id: 'pcrFrom', past: true, label: '起始日期', type: 'date', row: 'two', showIf: (s) => s.pcrInd === 'Y',
             paths: (v) => spread(v, { whole: `${P1}/PreviousCOR/Row2/FromDate`, y: `${P1}/PCRDatesR1/FromYr`, m: `${P1}/PCRDatesR1/FromMM`, d: `${P1}/PCRDatesR1/FromDD` }) },
-          { id: 'pcrTo', label: '结束日期', type: 'date', row: 'two', showIf: (s) => s.pcrInd === 'Y',
+          { id: 'pcrTo', past: true, label: '结束日期', type: 'date', row: 'two', showIf: (s) => s.pcrInd === 'Y',
             paths: (v) => spread(v, { whole: `${P1}/PreviousCOR/Row2/ToDate`, y: `${P1}/PCRDatesR1/ToYr`, m: `${P1}/PCRDatesR1/ToMM`, d: `${P1}/PCRDatesR1/ToDD` }) },
           { id: 'sameAsCor', label: '申请递交国就是你目前的居住国吗？', type: 'yn', req: true,
             paths: (v) => ({ [`${P1}/SameAsCORIndicator`]: v }) },
@@ -110,7 +110,7 @@ export const SPEC = [
           { id: 'cwaOther', label: '其他身份说明', type: 'text', showIf: (s) => s.sameAsCor === 'N' && s.cwaStatus === '06',
             paths: (v) => ({ [`${P1}/CountryWhereApplying/Row2/Other`]: v }) },
           // The From column here is mandatory on the form (red box when empty).
-          { id: 'cwaFrom', label: '该身份起始日期', type: 'date', req: true, row: 'two', showIf: (s) => s.sameAsCor === 'N',
+          { id: 'cwaFrom', past: true, label: '该身份起始日期', type: 'date', req: true, row: 'two', showIf: (s) => s.sameAsCor === 'N',
             paths: (v) => spread(v, { whole: `${P1}/CountryWhereApplying/Row2/FromDate`, y: `${P1}/CWADates/FromYr`, m: `${P1}/CWADates/FromMM`, d: `${P1}/CWADates/FromDD` }) },
           { id: 'cwaTo', label: '该身份到期日期', hint: '公民/永居等无到期日的留空', type: 'date', row: 'two', showIf: (s) => s.sameAsCor === 'N',
             paths: (v) => spread(v, { whole: `${P1}/CountryWhereApplying/Row2/ToDate`, y: `${P1}/CWADates/ToYr`, m: `${P1}/CWADates/ToMM`, d: `${P1}/CWADates/ToDD` }) },
@@ -122,7 +122,7 @@ export const SPEC = [
         fields: [
           { id: 'marital', label: '目前婚姻状况', type: 'select', req: true, lov: 'MaritalStatusList',
             paths: (v) => ({ [`${P1M}/MaritalStatus`]: v }) },
-          { id: 'marriageDate', label: '结婚 / 同居开始日期', type: 'date', row: 'two', showIf: (s) => ['01', '03'].includes(s.marital),
+          { id: 'marriageDate', past: true, label: '结婚 / 同居开始日期', type: 'date', row: 'two', showIf: (s) => ['01', '03'].includes(s.marital),
             paths: (v) => spread(v, { whole: `${P1M}/DateOfMarriage`, y: `${P1M}/MarriageDate/FromYr`, m: `${P1M}/MarriageDate/FromMM`, d: `${P1M}/MarriageDate/FromDD` }) },
           { id: 'spouseFamily', latin: true, label: '配偶姓', type: 'text', upper: true, row: 'two', showIf: (s) => ['01', '03'].includes(s.marital),
             paths: (v) => ({ [`${P1M}/FamilyName`]: v }) },
@@ -135,14 +135,14 @@ export const SPEC = [
             paths: (v) => ({ [`${P2M}/PMFamilyName`]: v }) },
           { id: 'pmGiven', latin: true, label: '前配偶名', type: 'text', row: 'two', showIf: (s) => s.prevMarried === 'Y',
             paths: (v) => ({ [`${P2M}/GivenName/PMGivenName`]: v }) },
-          { id: 'pmDOB', label: '前配偶出生日期', type: 'date', row: 'two', showIf: (s) => s.prevMarried === 'Y',
+          { id: 'pmDOB', past: true, label: '前配偶出生日期', type: 'date', row: 'two', showIf: (s) => s.prevMarried === 'Y',
             paths: (v) => spread(v, { y: `${P2M}/PrevSpouseDOB/DOBYear`, m: `${P2M}/PrevSpouseDOB/DOBMonth`, d: `${P2M}/PrevSpouseDOB/DOBDay` }) },
           { id: 'pmType', label: '关系类型', type: 'select', row: 'two', showIf: (s) => s.prevMarried === 'Y',
             options: [{ code: '01', label: '已婚 Married' }, { code: '03', label: '同居 Common-Law' }],
             paths: (v) => ({ [`${P2M}/TypeOfRelationship`]: v }) },
-          { id: 'pmFrom', label: '关系开始日期', type: 'date', row: 'two', showIf: (s) => s.prevMarried === 'Y',
+          { id: 'pmFrom', past: true, label: '关系开始日期', type: 'date', row: 'two', showIf: (s) => s.prevMarried === 'Y',
             paths: (v) => spread(v, { whole: `${P2M}/FromDate`, y: `${P2M}/PreviouslyMarriedDates/FromYr`, m: `${P2M}/PreviouslyMarriedDates/FromMM`, d: `${P2M}/PreviouslyMarriedDates/FromDD` }) },
-          { id: 'pmTo', label: '关系结束日期', hint: '丧偶填配偶去世日期', type: 'date', row: 'two', showIf: (s) => s.prevMarried === 'Y',
+          { id: 'pmTo', past: true, label: '关系结束日期', hint: '丧偶填配偶去世日期', type: 'date', row: 'two', showIf: (s) => s.prevMarried === 'Y',
             paths: (v) => spread(v, { whole: `${P2M}/ToDate/ToDate`, y: `${P2M}/PreviouslyMarriedDates/ToYr`, m: `${P2M}/PreviouslyMarriedDates/ToMM`, d: `${P2M}/PreviouslyMarriedDates/ToDD` }) },
         ],
       },
@@ -162,9 +162,9 @@ export const SPEC = [
             paths: (v) => ({ [`${P2M}/Passport/PassportNum/PassportNum`]: v }) },
           { id: 'passportCountry', label: '签发国家或地区', type: 'select', req: true, lov: 'CountryOfIssueList', row: 'two',
             paths: (v) => ({ [`${P2M}/Passport/CountryofIssue/CountryofIssue`]: v }) },
-          { id: 'passportIssue', label: '签发日期', type: 'date', req: true, row: 'two',
+          { id: 'passportIssue', past: true, label: '签发日期', type: 'date', req: true, row: 'two',
             paths: (v) => spread(v, { whole: `${P2M}/Passport/IssueDate/IssueDate`, y: `${P2M}/Passport/IssueYYYY`, m: `${P2M}/Passport/IssueMM`, d: `${P2M}/Passport/IssueDD` }) },
-          { id: 'passportExpiry', label: '到期日期', type: 'date', req: true, row: 'two',
+          { id: 'passportExpiry', future: true, label: '到期日期', type: 'date', req: true, row: 'two',
             paths: (v) => spread(v, { whole: `${P2M}/Passport/ExpiryDate`, y: `${P2M}/Passport/expiryYYYY`, m: `${P2M}/Passport/expiryMM`, d: `${P2M}/Passport/expiryDD` }) },
         ],
       },
@@ -190,15 +190,15 @@ export const SPEC = [
             paths: (v) => ({ 'form1/Page2/natID/natIDdocs/DocNum/DocNum': v }) },
           { id: 'natIdCountry', label: '签发国家或地区', type: 'select', lov: 'CountryOfIssueList', row: 'two', showIf: (s) => s.natIdInd === 'Y',
             paths: (v) => ({ 'form1/Page2/natID/natIDdocs/CountryofIssue/CountryofIssue': v }) },
-          { id: 'natIdIssue', label: '签发日期', type: 'date', row: 'two', showIf: (s) => s.natIdInd === 'Y',
+          { id: 'natIdIssue', past: true, label: '签发日期', type: 'date', row: 'two', showIf: (s) => s.natIdInd === 'Y',
             paths: (v) => ({ 'form1/Page2/natID/natIDdocs/IssueDate/IssueDate': v }) },
-          { id: 'natIdExpiry', label: '到期日期', type: 'date', row: 'two', showIf: (s) => s.natIdInd === 'Y',
+          { id: 'natIdExpiry', future: true, label: '到期日期', type: 'date', row: 'two', showIf: (s) => s.natIdInd === 'Y',
             paths: (v) => ({ 'form1/Page2/natID/natIDdocs/ExpiryDate': v }) },
           { id: 'usCardInd', label: '是否持有美国永久居民卡（绿卡）？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page2/USCard/q1/usCardIndicator': v }) },
           { id: 'usCardNum', label: '绿卡号码', type: 'text', row: 'two', showIf: (s) => s.usCardInd === 'Y',
             paths: (v) => ({ 'form1/Page2/USCard/usCarddocs/DocNum/DocNum': v }) },
-          { id: 'usCardExpiry', label: '绿卡到期日期', type: 'date', row: 'two', showIf: (s) => s.usCardInd === 'Y',
+          { id: 'usCardExpiry', future: true, label: '绿卡到期日期', type: 'date', row: 'two', showIf: (s) => s.usCardInd === 'Y',
             paths: (v) => ({ 'form1/Page2/USCard/usCarddocs/ExpiryDate': v }) },
         ],
       },
@@ -253,9 +253,9 @@ export const SPEC = [
             paths: (v) => ({ [`${DV}/PurposeRow1/PurposeOfVisit/PurposeOfVisit`]: v }) },
           { id: 'purposeOther', label: '其他目的说明', hint: '请用英文填写', type: 'text', row: 'two', showIf: (s) => s.purpose === '03',
             paths: (v) => ({ [`${DV}/PurposeRow1/Other/Other`]: v }) },
-          { id: 'stayFrom', label: '计划入境日期', type: 'date', req: true, row: 'two',
+          { id: 'stayFrom', future: true, label: '计划入境日期', type: 'date', req: true, row: 'two',
             paths: (v) => spread(v, { whole: `${DV}/PurposeRow1/HowLongStay/FromDate`, y: `${DV}/PurposeRow1/HowLongStay/StayDates/FromYr`, m: `${DV}/PurposeRow1/HowLongStay/StayDates/FromMM`, d: `${DV}/PurposeRow1/HowLongStay/StayDates/FromDD` }) },
-          { id: 'stayTo', label: '计划离境日期', type: 'date', req: true, row: 'two',
+          { id: 'stayTo', future: true, label: '计划离境日期', type: 'date', req: true, row: 'two',
             paths: (v) => spread(v, { whole: `${DV}/PurposeRow1/HowLongStay/ToDate`, y: `${DV}/PurposeRow1/HowLongStay/StayDates/ToYr`, m: `${DV}/PurposeRow1/HowLongStay/StayDates/ToMM`, d: `${DV}/PurposeRow1/HowLongStay/StayDates/ToDD` }) },
           // Funds is a numeric field: Acrobat's Validate rejects "CAD 15,000" or
           // anything with a currency word, comma, or space.
@@ -389,7 +389,12 @@ function fieldHtml(f) {
       ${opts.map((o) => `<option value="${esc(o.code)}" ${v === o.code ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}
     </select>`;
   } else if (f.type === 'date') {
-    control = `<input type="date" name="${f.id}" value="${esc(v)}">`;
+    // A status you already hold cannot start in the future, and a trip you have
+    // not taken cannot be in the past. Bound the input rather than let Acrobat
+    // red-box it after the user has already downloaded the form.
+    const today = new Date().toISOString().slice(0, 10);
+    const bound = f.past ? ` max="${today}"` : f.future ? ` min="${today}"` : '';
+    control = `<input type="date" name="${f.id}" value="${esc(v)}"${bound}>`;
   } else if (f.type === 'month') {
     control = `<input type="month" name="${f.id}" value="${esc(v)}">`;
   } else if (f.type === 'occupation') {
@@ -900,7 +905,7 @@ const DEMO = {
   corCountry: '202', corStatus: '01',
   // lived in Singapore 2015-2019, and is applying from there rather than from home
   pcrInd: 'Y', pcrCountry: '246', pcrStatus: '04', pcrFrom: '2015-03-01', pcrTo: '2019-08-31',
-  sameAsCor: 'N', cwaCountry: '246', cwaStatus: '03', cwaFrom: '2026-08-20', cwaTo: '2026-11-20',
+  sameAsCor: 'N', cwaCountry: '246', cwaStatus: '03', cwaFrom: '2026-06-10', cwaTo: '2026-09-10',
   marital: '04',
   prevMarried: 'Y', pmFamily: 'SUN', pmGiven: 'LI', pmDOB: '1980-09-17',
   pmType: '01', pmFrom: '2005-06-18', pmTo: '2016-02-29',

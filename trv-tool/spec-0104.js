@@ -23,8 +23,8 @@ export const SPEC_0104 = {
         table: 'EmploymentTbl',
         addLabel: '添加一段工作',
         fields: [
-          { id: 'from', label: '起始日期', type: 'date', row: 'two', cell: 'from' },
-          { id: 'to', label: '结束日期', hint: '至今填今天的日期', type: 'date', row: 'two', cell: 'to' },
+          { id: 'from', past: true, label: '起始日期', type: 'date', row: 'two', cell: 'from' },
+          { id: 'to', past: true, label: '结束日期', hint: '至今填今天的日期', type: 'date', row: 'two', cell: 'to' },
           { id: 'position', label: '职位', type: 'occupation', row: 'two', cell: 'position' },
           { id: 'employer', romanize: 'company', label: '雇主 / 公司', hint: '不要写街道地址', type: 'text', row: 'two' },
           { id: 'city', romanize: 'address', label: '城市', type: 'text', row: 'three' },
@@ -43,8 +43,8 @@ export const SPEC_0104 = {
         table: 'EducationTbl',
         addLabel: '添加一段学历',
         fields: [
-          { id: 'from', label: '起始日期', type: 'date', row: 'two', cell: 'from' },
-          { id: 'to', label: '结束日期', type: 'date', row: 'two', cell: 'to' },
+          { id: 'from', past: true, label: '起始日期', type: 'date', row: 'two', cell: 'from' },
+          { id: 'to', past: true, label: '结束日期', type: 'date', row: 'two', cell: 'to' },
           { id: 'position', label: '学位 / 专业', hint: "如 Bachelor's degree in English Education", type: 'text', cell: 'position' },
           { id: 'school', romanize: 'company', label: '学校', type: 'text', row: 'two' },
           { id: 'description', label: '就读方式', type: 'select', row: 'two', cell: 'description',
@@ -65,8 +65,8 @@ export const SPEC_0104 = {
         table: 'TravelTbl',
         addLabel: '添加一次出行',
         fields: [
-          { id: 'from', label: '起始日期', type: 'date', row: 'two', cell: 'from' },
-          { id: 'to', label: '结束日期', type: 'date', row: 'two', cell: 'to' },
+          { id: 'from', past: true, label: '起始日期', type: 'date', row: 'two', cell: 'from' },
+          { id: 'to', past: true, label: '结束日期', type: 'date', row: 'two', cell: 'to' },
           // The form's columns read the other way round from the field names.
           { id: 'name', label: '出行目的', type: 'select', row: 'two', cell: 'name',
             options: [
