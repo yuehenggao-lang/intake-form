@@ -10,8 +10,8 @@
  * Rewriting the file (which is what pdf-lib and pypdf both do) changes the signed
  * bytes and voids all of that. So we do what Acrobat does: leave every original
  * byte alone and append a new revision. Verified: an Acrobat-filled,
- * portal-accepted IMM5257 is byte-identical to the canada.ca blank for its first
- * 566,571 bytes, with the changes appended after.
+ * portal-accepted IMM5257 is byte-identical to its blank for the whole certified
+ * range, with the changes appended after.
  *
  * No pdf-lib and no crypto library: each blank we ship is pinned, so its AES
  * object keys are constants, and AES-CBC + zlib are both native to the browser.
@@ -21,7 +21,17 @@
 
 /**
  * Pinned blanks. Re-derive with `python3 scripts/xfa_incremental.py --pin FILE`
- * whenever a blank is refreshed from canada.ca; see README.md.
+ * whenever a blank is refreshed; see README.md.
+ *
+ * Re-pin from canada.ca's current edition; the portal accepts it (verified
+ * 2026-07-15 on .ENU-09-2023). What the portal will not accept is a datasets
+ * packet whose node tree differs from the blank's -- see setValue below. The
+ * form edition was suspected first and is not the issue.
+ *
+ * Pin a blank, never a submitted form. knowledge/forms/pdfs/IMM5257-working.pdf
+ * looks like a blank but is a client's accepted submission, UCI and passport
+ * number included; shipping it would publish their file. Check any candidate's
+ * datasets for names before pinning it.
  *
  * The object keys are not secrets: these PDFs use the standard security handler
  * with an empty user password, so anyone holding the public form can derive them.
@@ -30,7 +40,7 @@
 export const FORMS = {
   IMM5257: {
     file: 'IMM5257-blank.pdf',
-    size: 1364527, // FormVersion .ENU-09-2023
+    size: 1364527, // .ENU-09-2023, canada.ca's current edition
     root: 'form1',
     objs: { datasets: { num: 117, key: 'b48521648277a36fa19a485e35b4a679' } },
   },
@@ -127,26 +137,18 @@ function findStream(hay, num) {
   return { dict, start: s, length: len };
 }
 
-// exclGroup (Y/N radio) tags. Acrobat binds plain text on the group itself but
-// only renders the check state from a nested <Yes>/<No> child.
-const EXCL_TAGS = [
-  'AliasNameIndicator', 'PCRIndicator', 'SameAsCORIndicator', 'PrevMarriedIndicator',
-  'natIDIndicator', 'usCardIndicator', 'SameAsMailingIndicator', 'EducationIndicator',
-  'LanguageTest', 'VisaChoice1', 'VisaChoice2', 'VisaChoice3', 'Choice',
-];
-
-function nestExclGroups(xml) {
-  for (const tag of EXCL_TAGS) {
-    xml = xml.replace(new RegExp(`<${tag}\\b[^>]*>([YN])</${tag}\\s*>`, 'g'), (_m, v) =>
-      v === 'Y' ? `<${tag}><Yes>Y</Yes><No /></${tag}>` : `<${tag}><Yes /><No>N</No></${tag}>`
-    );
-  }
-  return xml;
-}
-
 /** Walk `Page1/PersonalDetails/Name/FamilyName`, honouring `Tag[2]` indices.
- *  Only writes leaves that already exist: on IMM5257 adding nodes would exceed
- *  what DocMDP /P 2 permits and Acrobat would refuse to open the file. */
+ *
+ *  Only writes leaves that already exist, and only ever as a scalar. The blank's
+ *  datasets IS the schema the portal validates against: `<PCRIndicator/>` is a
+ *  leaf, so `<PCRIndicator>N</PCRIndicator>` is the only legal fill. Wrapping a
+ *  Y/N group in `<Yes>`/`<No>` children -- which Acrobat renders, and which
+ *  Validate does not flag or normalise -- invents nodes the schema has no slot
+ *  for, and the portal rejects the upload with "You have submitted an invalid
+ *  form" (2026-07-15). Every IMM5257 the portal has accepted stores these as
+ *  plain scalars, because that is what Acrobat writes when a human fills it.
+ *
+ *  The rule, for any tag: match the blank's shape exactly. Never add a node. */
 function setValue(root, path, value) {
   let node = root;
   for (const part of path.split('/')) {
@@ -202,7 +204,7 @@ export class XfaFiller {
     }
     // XMLSerializer emits no <?xml?> declaration; one would make Acrobat fail
     // with error 17.
-    ds.xml = nestExclGroups(new XMLSerializer().serializeToString(doc));
+    ds.xml = new XMLSerializer().serializeToString(doc);
     this.dirty.add('datasets');
     return { filled, missing };
   }
