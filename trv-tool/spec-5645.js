@@ -57,10 +57,10 @@ export const joinName = (pinyin, zh) => [String(pinyin || '').trim(), String(zh 
 const person = (id, zh, base, opts = {}) => [
   // no `upper` here: the convention is "SURNAME, Given", so upper-casing the lot
   // would give "SURNAME, GIVEN".
-  { id: `${id}Name`, latin: true, label: `${zh}姓名（拼音）`, hint: '写成 SURNAME, Given', type: 'text', row: 'two',
+  { id: `${id}Name`, latin: true, label: `${zh}姓名（拼音）`, hint: '请写成 SURNAME, Given', type: 'text', row: 'two',
     req: opts.req, showIf: opts.showIf,
     paths: (v, s) => ({ [`${base}/${opts.nameField}`]: joinName(v, s[`${id}Zh`]) }) },
-  { id: `${id}Zh`, cjk: true, label: `${zh}中文名`, hint: '5645 要求写中文名', type: 'text', row: 'two',
+  { id: `${id}Zh`, cjk: true, label: `${zh}中文名`, hint: 'IMM5645 要求同时填写中文姓名', type: 'text', row: 'two',
     showIf: opts.showIf,
     paths: () => ({}) },  // folded into the name field above
   { id: `${id}DOB`, past: true, label: `${zh}出生日期`, type: 'date', row: 'two', showIf: opts.showIf,
@@ -70,12 +70,12 @@ const person = (id, zh, base, opts = {}) => [
   { id: `${id}MStatus`, label: `${zh}婚姻状况`, type: 'select', row: 'two', showIf: opts.showIf,
     options: opts.mstatus,
     paths: (v) => ({ [`${base}/ChildMStatus`]: v }) },
-  { id: `${id}Address`, romanize: 'address', label: `${zh}现居地址`, hint: '已故按表头要求填：Deceased + 城市, 国家, 日期', type: 'text', showIf: opts.showIf,
+  { id: `${id}Address`, romanize: 'address', label: `${zh}现居地址`, hint: '已故请按表头要求填写：Deceased + 城市, 国家, 日期', type: 'text', showIf: opts.showIf,
     paths: (v) => ({ [`${base}/${opts.addrField}`]: v }) },
   { id: `${id}Occupation`, label: `${zh}职业`, type: 'occupation', row: 'two', showIf: opts.showIf,
     paths: (v) => ({ [`${base}/${opts.occField}`]: v }) },
   ...(opts.accYes
-    ? [{ id: `${id}Acc`, label: `${zh}是否与你同行前往加拿大？`, type: 'yn', row: 'two', showIf: opts.showIf,
+    ? [{ id: `${id}Acc`, label: `${zh}是否与您同行前往加拿大？`, type: 'yn', row: 'two', showIf: opts.showIf,
         paths: acc(`${base}/${opts.accYes}`, `${base}/${opts.accNo}`) }]
     : []),
 ];
@@ -86,11 +86,11 @@ export const SPEC_5645 = {
     {
       num: 'A',
       title: '申请人本人',
-      hint: '这几项从前面自动带过来，核对即可。',
+      hint: '以下几项已从前面的回答自动带入，请核对。',
       fields: [
-        { id: 'f5645AppName', latin: true, label: '姓名（拼音）', hint: '写成 SURNAME, Given', type: 'text', req: true, row: 'two',
+        { id: 'f5645AppName', latin: true, label: '姓名（拼音）', hint: '请写成 SURNAME, Given', type: 'text', req: true, row: 'two',
           paths: (v, s) => ({ [`${P}/SectionA/Applicant/AppName`]: joinName(v, s.f5645AppZh) }) },
-        { id: 'f5645AppZh', cjk: true, label: '中文名', hint: '5645 要求写中文名', type: 'text', req: true, row: 'two',
+        { id: 'f5645AppZh', cjk: true, label: '中文名', hint: 'IMM5645 要求同时填写中文姓名', type: 'text', req: true, row: 'two',
           paths: () => ({}) },
         { id: 'f5645AppDOB', past: true, label: '出生日期', type: 'date', req: true, row: 'two',
           paths: (v) => ({ [`${P}/SectionA/Applicant/AppDOB`]: v }) },
@@ -111,7 +111,7 @@ export const SPEC_5645 = {
         // A widow answering "no" here would drop her late spouse off the form,
         // and IRCC wants him listed. Ask it as "is there a spouse to record".
         { id: 'hasSpouse', label: '需要填写配偶 / 同居伴侣吗？',
-          hint: '已故配偶也要填 —— 选「是」', type: 'yn', req: true, paths: () => ({}) },
+          hint: '已故配偶也需要填写，请选「是」', type: 'yn', req: true, paths: () => ({}) },
         ...person('spouse5645', '配偶', `${P}/SectionA/Spouse`, {
           showIf: (s) => s.hasSpouse === 'Y',
           nameField: 'SpouseName', dobField: 'SpouseDOB', cobField: 'SpouseCOB',
@@ -123,7 +123,7 @@ export const SPEC_5645 = {
     {
       num: 'A',
       title: '父母',
-      hint: '已故的也要填。婚姻状况按生前的填，地址栏按表头要求写：Deceased + 城市, 国家, 去世日期。',
+      hint: '已故的父母也需要填写。婚姻状况按生前情况填写；地址栏按表头要求写「Deceased + 城市, 国家, 去世日期」。',
       fields: [
         ...person('mother', '母亲', `${P}/SectionA/Mother`, {
           nameField: 'MotherName', dobField: 'MotherDOB', cobField: 'MotherCOB',
@@ -140,7 +140,7 @@ export const SPEC_5645 = {
     {
       num: 'B',
       title: '子女',
-      hint: '所有子女都要填，不论年龄、是否同住、是否随行。最多 4 位。',
+      hint: '所有子女都需要填写，不论年龄、是否同住、是否随行。最多 4 位。',
       repeat: {
         key: 'children',
         max: 4, // the blank pre-creates 4 <Child> nodes
@@ -160,14 +160,14 @@ export const SPEC_5645 = {
           { id: 'cob', romanize: 'address', label: '出生国家', type: 'text', row: 'two', path: 'ChildCOB' },
           { id: 'occ', label: '职业', type: 'occupation', row: 'two', path: 'ChildOccupation' },
           { id: 'addr', romanize: 'address', label: '现居地址', type: 'text', path: 'ChildAddress' },
-          { id: 'acc', label: '是否与你同行？', type: 'yn', path: 'ChildYes/ChildNo', kind: 'acc' },
+          { id: 'acc', label: '是否与您同行？', type: 'yn', path: 'ChildYes/ChildNo', kind: 'acc' },
         ],
       },
     },
     {
       num: 'C',
       title: '兄弟姐妹',
-      hint: '包括同父异母 / 同母异父。最多 7 位。',
+      hint: '包括同父异母、同母异父的兄弟姐妹。最多 7 位。',
       repeat: {
         key: 'siblings',
         max: 7, // the blank pre-creates 7 <Child> nodes under SectionC
@@ -188,7 +188,7 @@ export const SPEC_5645 = {
           { id: 'cob', romanize: 'address', label: '出生国家', type: 'text', row: 'two', path: 'ChildCOB' },
           { id: 'occ', label: '职业', type: 'occupation', row: 'two', path: 'ChildOccupation' },
           { id: 'addr', romanize: 'address', label: '现居地址', type: 'text', path: 'ChildAddress' },
-          { id: 'acc', label: '是否与你同行？', type: 'yn', path: 'ChildYes/ChildNo', kind: 'acc' },
+          { id: 'acc', label: '是否与您同行？', type: 'yn', path: 'ChildYes/ChildNo', kind: 'acc' },
         ],
       },
     },

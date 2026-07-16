@@ -47,7 +47,7 @@ export const SPEC = [
           { id: 'visaType', label: '申请的签证类型', type: 'select', req: true,
             options: [{ code: 'VisitorVisa', label: 'Visitor Visa 访问签证' }, { code: 'Transit', label: 'Transit 过境签证' }],
             paths: (v) => ({ [`${P1}/VisaType/VisaType`]: v }) },
-          { id: 'uci', label: 'UCI（客户编号）', hint: '没有就留空', type: 'text',
+          { id: 'uci', label: 'UCI（客户编号）', hint: '没有请留空', type: 'text',
             paths: (v) => ({ [`${P1}/UCIClientID`]: v }) },
         ],
       },
@@ -59,7 +59,7 @@ export const SPEC = [
             paths: (v) => ({ [`${P1}/Name/FamilyName`]: v }) },
           { id: 'givenName', latin: true, label: '名（与护照一致，拼音）', type: 'text', upper: true, row: 'two',
             paths: (v) => ({ [`${P1}/Name/GivenName`]: v }) },
-          { id: 'aliasInd', label: '是否曾用过其他姓名？', hint: '曾用名、婚前姓、别名等', type: 'yn', req: true,
+          { id: 'aliasInd', label: '您是否曾用过其他姓名？', hint: '包括曾用名、婚前姓、别名等', type: 'yn', req: true,
             paths: (v) => ({ [`${P1}/AliasName/AliasNameIndicator/AliasNameIndicator`]: v }) },
           { id: 'aliasFamily', latin: true, label: '曾用姓', type: 'text', upper: true, row: 'two', showIf: (s) => s.aliasInd === 'Y',
             paths: (v) => ({ [`${P1}/AliasName/AliasFamilyName`]: v }) },
@@ -91,7 +91,7 @@ export const SPEC = [
             paths: (v) => spread(v, { whole: `${P1}/CurrentCOR/Row2/FromDate`, y: `${P1}/CORDates/FromYr`, m: `${P1}/CORDates/FromMM`, d: `${P1}/CORDates/FromDD` }) },
           { id: 'corTo', label: '该身份到期日期', type: 'date', row: 'two', showIf: (s) => s.corStatus && s.corStatus !== '01',
             paths: (v) => spread(v, { whole: `${P1}/CurrentCOR/Row2/ToDate`, y: `${P1}/CORDates/ToYr`, m: `${P1}/CORDates/ToMM`, d: `${P1}/CORDates/ToDD` }) },
-          { id: 'pcrInd', label: '过去五年，是否在国籍国和现居国之外的国家住过超过六个月？', type: 'yn', req: true,
+          { id: 'pcrInd', label: '过去五年内，您是否曾在国籍国和现居国之外的国家或地区居住超过六个月？', type: 'yn', req: true,
             paths: (v) => ({ [`${P1}/PCRIndicator`]: v }) },
           { id: 'pcrCountry', label: '曾居住国家或地区', type: 'select', lov: 'CountryList', row: 'two', showIf: (s) => s.pcrInd === 'Y',
             paths: (v) => ({ [`${P1}/PreviousCOR/Row2/Country`]: v }) },
@@ -101,7 +101,7 @@ export const SPEC = [
             paths: (v) => spread(v, { whole: `${P1}/PreviousCOR/Row2/FromDate`, y: `${P1}/PCRDatesR1/FromYr`, m: `${P1}/PCRDatesR1/FromMM`, d: `${P1}/PCRDatesR1/FromDD` }) },
           { id: 'pcrTo', past: true, label: '结束日期', type: 'date', row: 'two', showIf: (s) => s.pcrInd === 'Y',
             paths: (v) => spread(v, { whole: `${P1}/PreviousCOR/Row2/ToDate`, y: `${P1}/PCRDatesR1/ToYr`, m: `${P1}/PCRDatesR1/ToMM`, d: `${P1}/PCRDatesR1/ToDD` }) },
-          { id: 'sameAsCor', label: '申请递交国就是你目前的居住国吗？', type: 'yn', req: true,
+          { id: 'sameAsCor', label: '您递交申请所在的国家，与目前居住国是同一个吗？', type: 'yn', req: true,
             paths: (v) => ({ [`${P1}/SameAsCORIndicator`]: v }) },
           { id: 'cwaCountry', label: '递交申请所在国家或地区', type: 'select', lov: 'CountryList', row: 'two', showIf: (s) => s.sameAsCor === 'N',
             paths: (v) => ({ [`${P1}/CountryWhereApplying/Row2/Country`]: v }) },
@@ -128,8 +128,8 @@ export const SPEC = [
             paths: (v) => ({ [`${P1M}/FamilyName`]: v }) },
           { id: 'spouseGiven', latin: true, label: '配偶名', type: 'text', upper: true, row: 'two', showIf: (s) => ['01', '03'].includes(s.marital),
             paths: (v) => ({ [`${P1M}/GivenName`]: v }) },
-          { id: 'prevMarried', label: '是否曾有过其他婚姻或同居关系？',
-            hint: '丧偶 / 离异 / 分居的，这里选「是」，并填下面的前配偶信息', type: 'yn', req: true,
+          { id: 'prevMarried', label: '您是否曾有过其他婚姻或同居关系？',
+            hint: '丧偶、离异、分居的情况请选「是」，并填写下方的前配偶信息', type: 'yn', req: true,
             paths: (v) => ({ [`${P2M}/PrevMarriedIndicator`]: v }) },
           { id: 'pmFamily', latin: true, label: '前配偶姓', type: 'text', row: 'two', showIf: (s) => s.prevMarried === 'Y',
             paths: (v) => ({ [`${P2M}/PMFamilyName`]: v }) },
@@ -176,7 +176,7 @@ export const SPEC = [
             paths: (v) => ({ [`${P2M}/Languages/languages/nativeLang/nativeLang`]: v }) },
           { id: 'ableTo', label: '能使用英语或法语交流吗？', type: 'select', req: true, lov: 'AbleCommunicateEnglishOrFrenchList', row: 'two',
             paths: (v) => ({ [`${P2M}/Languages/languages/ableToCommunicate/ableToCommunicate`]: v }) },
-          { id: 'langTest', label: '是否参加过指定机构的英语或法语考试？', type: 'yn', req: true,
+          { id: 'langTest', label: '您是否参加过指定机构的英语或法语考试？', type: 'yn', req: true,
             paths: (v) => ({ [`${P2M}/Languages/LanguageTest`]: v }) },
         ],
       },
@@ -184,7 +184,7 @@ export const SPEC = [
         num: '1-5',
         title: '身份证件',
         fields: [
-          { id: 'natIdInd', label: '是否持有身份证（中国居民身份证等）？', type: 'yn', req: true,
+          { id: 'natIdInd', label: '您是否持有身份证（如中国居民身份证）？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page2/natID/q1/natIDIndicator': v }) },
           { id: 'natIdNum', label: '证件号码', type: 'text', row: 'two', showIf: (s) => s.natIdInd === 'Y',
             paths: (v) => ({ 'form1/Page2/natID/natIDdocs/DocNum/DocNum': v }) },
@@ -194,7 +194,7 @@ export const SPEC = [
             paths: (v) => ({ 'form1/Page2/natID/natIDdocs/IssueDate/IssueDate': v }) },
           { id: 'natIdExpiry', future: true, label: '到期日期', type: 'date', row: 'two', showIf: (s) => s.natIdInd === 'Y',
             paths: (v) => ({ 'form1/Page2/natID/natIDdocs/ExpiryDate': v }) },
-          { id: 'usCardInd', label: '是否持有美国永久居民卡（绿卡）？', type: 'yn', req: true,
+          { id: 'usCardInd', label: '您是否持有美国永久居民卡（绿卡）？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page2/USCard/q1/usCardIndicator': v }) },
           { id: 'usCardNum', label: '绿卡号码', type: 'text', row: 'two', showIf: (s) => s.usCardInd === 'Y',
             paths: (v) => ({ 'form1/Page2/USCard/usCarddocs/DocNum/DocNum': v }) },
@@ -220,7 +220,7 @@ export const SPEC = [
             paths: (v) => ({ [`${CT}/AddressRow2/PostalCode/PostalCode`]: v }) },
           { id: 'country', label: '国家或地区', type: 'select', req: true, lov: 'CountryList',
             paths: (v) => ({ [`${CT}/AddressRow2/Country/Country`]: v }) },
-          { id: 'sameAsMailing', label: '居住地址与上面的邮寄地址相同吗？', type: 'yn', req: true,
+          { id: 'sameAsMailing', label: '您的居住地址与上面的邮寄地址相同吗？', type: 'yn', req: true,
             paths: (v) => ({ [`${CT}/SameAsMailingIndicator`]: v }) },
           { id: 'phoneType', label: '电话类型', type: 'select', req: true, lov: 'PhoneTypeTRVList', row: 'three',
             paths: (v) => ({ [`${CT}/PhoneNumbers/Phone/Type`]: v }) },
@@ -259,12 +259,12 @@ export const SPEC = [
             paths: (v) => spread(v, { whole: `${DV}/PurposeRow1/HowLongStay/ToDate`, y: `${DV}/PurposeRow1/HowLongStay/StayDates/ToYr`, m: `${DV}/PurposeRow1/HowLongStay/StayDates/ToMM`, d: `${DV}/PurposeRow1/HowLongStay/StayDates/ToDD` }) },
           // Funds is a numeric field: Acrobat's Validate rejects "CAD 15,000" or
           // anything with a currency word, comma, or space.
-          { id: 'funds', label: '此行可用资金', hint: '只填数字，不要写 CAD、逗号或空格', type: 'digits', req: true,
+          { id: 'funds', label: '此行可用资金', hint: '请只填数字，不要写 CAD、逗号或空格', type: 'digits', req: true,
             paths: (v) => ({ [`${DV}/PurposeRow1/Funds/Funds`]: String(v).replace(/[^\d]/g, '') }) },
-          { id: 'hostName', latin: true, label: '在加拿大的联系人姓名', hint: '照邀请函上的写法填', type: 'text', row: 'two',
+          { id: 'hostName', latin: true, label: '在加拿大的联系人姓名', hint: '请照邀请函上的写法填写', type: 'text', row: 'two',
             paths: (v) => ({ [`${DV}/Contacts_Row1/Name/Name`]: v }) },
           // A closed list, so there is nothing to romanise and nothing to get wrong.
-          { id: 'hostRel', label: '与你的关系', type: 'select', row: 'two',
+          { id: 'hostRel', label: '与您的关系', type: 'select', row: 'two',
             options: [
               { code: 'Friend', label: '朋友 Friend' }, { code: 'Spouse', label: '配偶 Spouse' },
               { code: 'Father', label: '父亲 Father' }, { code: 'Mother', label: '母亲 Mother' },
@@ -286,8 +286,8 @@ export const SPEC = [
         fields: [
           // Answered from the education rows on step 5 -- asking twice is how the
           // two forms end up contradicting each other.
-          { id: 'eduInd', label: '高中毕业后是否上过大专或大学？',
-            hint: '由第 5 步「教育经历」自动作答，在那里填就行', type: 'yn', readonly: true,
+          { id: 'eduInd', label: '高中毕业后，您是否上过大专或大学？',
+            hint: '由「教育经历」一步自动作答，在那里填写即可', type: 'yn', readonly: true,
             paths: (v) => ({ 'form1/Page3/Education/EducationIndicator': v }) },
         ],
       },
@@ -296,37 +296,37 @@ export const SPEC = [
         title: '背景信息',
         hint: '如实回答。答「是」不等于一定被拒，隐瞒才是大问题。',
         fields: [
-          { id: 'bg1a', label: '1a. 你是否患有肺结核，或近两年内与肺结核病人密切接触过？', type: 'yn', req: true,
+          { id: 'bg1a', label: '1a. 您是否患有肺结核，或在近两年内与肺结核病人有过密切接触？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/BackgroundInfo/Choice': v }) },
-          { id: 'bg1b', label: '1b. 你是否有需要持续治疗或监护的身体或精神疾病？', type: 'yn', req: true,
+          { id: 'bg1b', label: '1b. 您是否有需要持续治疗或监护的身体或精神疾病？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/BackgroundInfo/Choice[1]': v }) },
-          { id: 'bgMedical', label: '如上面任一题答「是」，请简要说明', hint: '请用英文填写', type: 'text', showIf: (s) => s.bg1a === 'Y' || s.bg1b === 'Y',
+          { id: 'bgMedical', label: '若上面任一题答「是」，请简要说明', hint: '请用英文填写', type: 'text', showIf: (s) => s.bg1a === 'Y' || s.bg1b === 'Y',
             paths: (v) => ({ 'form1/Page3/BackgroundInfo/Details/MedicalDetails': v }) },
-          { id: 'vc1', label: '2a. 你是否曾在加拿大逾期居留、无授权工作或无授权学习？', type: 'yn', req: true,
+          { id: 'vc1', label: '2a. 您是否曾在加拿大逾期居留、未经授权工作或未经授权学习？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/BackgroundInfo2/VisaChoice1': v }) },
-          { id: 'vc2', label: '2b. 你是否曾被任何国家拒签、拒绝入境或被要求离境？', type: 'yn', req: true,
+          { id: 'vc2', label: '2b. 您是否曾被任何国家或地区拒签、拒绝入境，或被要求离境？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/BackgroundInfo2/VisaChoice2': v }) },
-          { id: 'vc3', label: '2c. 你此前是否申请过来加拿大？', type: 'yn', req: true,
+          { id: 'vc3', label: '2c. 您此前是否申请过来加拿大？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/BackgroundInfo2/Details/VisaChoice3': v }) },
-          { id: 'refusedDetails', label: '2d. 如上面任一题答「是」，请简要说明', hint: '请用英文填写，字数有限，写要点即可', type: 'text',
+          { id: 'refusedDetails', label: '2d. 若上面任一题答「是」，请简要说明', hint: '请用英文填写；字数有限，写要点即可', type: 'text',
             showIf: (s) => [s.vc1, s.vc2, s.vc3].includes('Y'),
             paths: (v) => ({ 'form1/Page3/BackgroundInfo2/Details/refusedDetails': v }) },
-          { id: 'bg3', label: '3. 你是否曾犯罪、被捕、被指控或被判刑？', type: 'yn', req: true,
+          { id: 'bg3', label: '3. 您是否曾犯罪、被捕、被指控或被判刑？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/PageWrapper/BackgroundInfo3/Choice': v }) },
           { id: 'bg3d', label: '请简要说明', hint: '请用英文填写', type: 'text', showIf: (s) => s.bg3 === 'Y',
             paths: (v) => ({ 'form1/Page3/PageWrapper/BackgroundInfo3/details': v }) },
-          { id: 'military', label: '4. 你是否曾在军队、民兵、民防部队、安保组织或警察部队服役？', type: 'yn', req: true,
+          { id: 'military', label: '4. 您是否曾在军队、民兵、民防部队、安保组织或警察部队服役？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/PageWrapper/Military/Choice': v }) },
           { id: 'militaryD', label: '请填服役日期和服役国家', hint: '请用英文填写', type: 'text', showIf: (s) => s.military === 'Y',
             paths: (v) => ({ 'form1/Page3/PageWrapper/Military/militaryServiceDetails': v }) },
           // IMM0104 wants military/police service listed in its employment table
           // as well, with the unit designator -- the two forms disagree otherwise.
           { id: 'militaryNote', label: '', type: 'notice', showIf: (s) => s.military === 'Y',
-            text: '服役经历也要作为一段填进第 4 步的「工作经历」—— IMM0104 明确要求列出 18 岁以后的军队/警察服役，并写明部队代号（MUCD）和部队名称。',
+            text: '服役经历也请作为一段填进「工作经历」—— IMM0104 明确要求列出 18 岁以后的军队或警察服役，并写明部队代号（MUCD）与部队名称。',
             paths: () => ({}) },
-          { id: 'orgs', label: '5. 你是否曾是暴力、恐怖或推翻政权组织的成员？', type: 'yn', req: true,
+          { id: 'orgs', label: '5. 您是否曾加入、或曾关联于以暴力为手段的政治、宗教或犯罪相关组织？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/PageWrapper/Occupation/Choice': v }) },
-          { id: 'govPos', label: '6. 你是否曾担任政府公职？', type: 'yn', req: true,
+          { id: 'govPos', label: '6. 您是否曾担任政府公职？', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/PageWrapper/GovPosition/Choice': v }) },
         ],
       },
@@ -334,9 +334,9 @@ export const SPEC = [
         num: '—',
         title: '同意条款',
         fields: [
-          { id: 'consent', label: '是否同意 IRCC 就本申请与你的代表联系？', hint: '没有代表就选「否」', type: 'yn', req: true,
+          { id: 'consent', label: '您是否同意 IRCC 就本申请与您的代表联系？', hint: '没有代表请选「否」', type: 'yn', req: true,
             paths: (v) => ({ 'form1/Page3/Signature/Consent0/Choice': v }) },
-          { id: 'signDate', label: '签署日期', hint: '默认今天。你实际签字/递交那天是哪天就填哪天', type: 'date', req: true,
+          { id: 'signDate', label: '签署日期', hint: '默认为今天。请填写您实际签署/递交的日期', type: 'date', req: true,
             paths: (v) => ({ 'form1/Page3/Signature/C1CertificateIssueDate': v }) },
         ],
       },
@@ -413,7 +413,7 @@ function fieldHtml(f) {
   return `<label class="f" data-fid="${f.id}">
     <span class="lab">${req}${esc(f.label)}${hint}</span>
     ${control}
-    <span class="err">${f.latin ? '请填护照上的拼音，不要填中文' : '此项必填'}</span>
+    <span class="err">${f.latin ? '请填写护照上的拼音，不要填中文' : '此项必填'}</span>
     <span class="note" hidden></span>
   </label>`;
 }
@@ -523,7 +523,7 @@ export function buildValues(s) {
     if (hasCJK(v)) {
       // The form rejects CJK outright, so refuse rather than emit a PDF that
       // fails Validate with nothing to explain why.
-      throw new Error(`「${f.label}」还是中文，请改成英文或拼音`);
+      throw new Error(`「${f.label}」仍是中文，请改成英文或拼音`);
     }
     Object.assign(out, f.paths(v, s));
   }
@@ -548,7 +548,7 @@ function buildRepeatValues(box, out) {
       if (f.joinZh) v = joinName(v, row[f.joinZh]);
       if (typeof v === 'string') v = v.replace(/[—–]/g, '-');
       if (!f.cjk && !f.joinZh && hasCJK(v)) {
-        throw new Error(`「${box.title} ${i + 1} · ${f.label}」还是中文，请改成英文或拼音`);
+        throw new Error(`「${box.title} ${i + 1} · ${f.label}」仍是中文，请改成英文或拼音`);
       }
       if (f.kind === 'acc') {
         // Accompanying is two independent 0/1 checkboxes, not an exclGroup.
@@ -574,7 +574,7 @@ function buildTables() {
         for (const f of box.repeat.fields) {
           let v = row[f.id] || '';
           if (typeof v === 'string') v = v.replace(/[—–]/g, '-');
-          if (hasCJK(v)) throw new Error(`「${box.title} · ${f.label}」还是中文，请改成英文或拼音`);
+          if (hasCJK(v)) throw new Error(`「${box.title} · ${f.label}」仍是中文，请改成英文或拼音`);
           if (f.cell) out[f.cell] = v;
         }
         // IMM0104 wants employer, city and country in one column; IMM5257 wants
@@ -604,7 +604,7 @@ function valuesFor(stepIdx) {
       if (f.upper) v = String(v).toUpperCase();
       if (typeof v === 'string') v = v.replace(/[—–]/g, '-');
       // f.cjk marks the fields that are SUPPOSED to be Chinese (IMM5645 names).
-      if (!f.cjk && hasCJK(v)) throw new Error(`「${f.label}」还是中文，请改成英文或拼音`);
+      if (!f.cjk && hasCJK(v)) throw new Error(`「${f.label}」仍是中文，请改成英文或拼音`);
       Object.assign(out, f.paths(v, state));
     }
   }
@@ -732,14 +732,14 @@ function renderRadar() {
   const flags = riskFlags(state, { children: state.children, travel: state.travel, employment: state.employment });
   const box = document.getElementById('radar');
   if (!flags.length) { box.hidden = true; return; }
-  document.getElementById('radar-h').textContent = `有 ${flags.length} 项值得你留意`;
+  document.getElementById('radar-h').textContent = `有 ${flags.length} 项值得您留意`;
   document.getElementById('radar-list').innerHTML = flags
     .map((f) => `<li>${esc(f.title)}</li>`)
     .join('');
   box.hidden = false;
-  document.getElementById('cta-h').textContent = '这几项要不要紧？找持牌顾问看一次';
+  document.getElementById('cta-h').textContent = '这几项要不要紧？建议请持牌顾问看一次';
   document.getElementById('cta-p').textContent =
-    '上面这些是签证官会看的地方，但每一项要不要紧、该怎么用材料回应，得看你的完整情况才能判断——这正是付费咨询在做的事。表格本身你已经填好了。';
+    '上面这些是签证官会关注的方面。每一项要不要紧、该用什么材料回应，需要结合您的完整情况才能判断 —— 这正是付费咨询要做的事。表格本身您已经填好了。';
 }
 
 function renderDownloads() {
@@ -816,7 +816,7 @@ document.getElementById('form').addEventListener('focusout', (e) => {
   else state[f.id] = e.target.value;
   const host = e.target.closest('[data-fid]');
   const note = host?.querySelector('.note');
-  if (note) { note.textContent = '已转为拼音，请核对'; note.hidden = false; }
+  if (note) { note.textContent = '已自动转为拼音，请核对'; note.hidden = false; }
 });
 
 document.getElementById('form').addEventListener('click', (e) => {
@@ -860,7 +860,7 @@ document.getElementById('next').addEventListener('click', async () => {
     renderDownloads();
     window.scrollTo({ top: 0, behavior: 'instant' });
   } catch (err) {
-    alert('生成失败：' + err.message + '\n\n你填的内容没有离开这台电脑。');
+    alert('生成失败：' + err.message + '\n\n您填写的内容没有离开这台电脑。');
     console.error(err);
   } finally {
     busy.textContent = '';

@@ -35,19 +35,19 @@ export function riskFlags(state, rows) {
   if (has(state.vc2)) {
     f.push({
       id: 'refused',
-      title: '你曾被拒签、被拒入境或被要求离境',
+      title: '您曾被拒签、被拒绝入境或被要求离境',
     });
   }
   if (has(state.vc1)) {
     f.push({
       id: 'status',
-      title: '你曾在加拿大逾期居留、无授权工作或无授权学习',
+      title: '您曾在加拿大逾期居留、未经授权工作或未经授权学习',
     });
   }
   if (has(state.bg3)) {
     f.push({
       id: 'criminal',
-      title: '你有犯罪、被捕、被指控或被判刑的记录',
+      title: '您有犯罪、被捕、被指控或被判刑的记录',
     });
   }
 
@@ -58,12 +58,12 @@ export function riskFlags(state, rows) {
   if (allAccompanying) {
     f.push({
       id: 'ties-family-all',
-      title: '你的配偶和子女都与你同行',
+      title: '您的配偶与子女均与您同行',
     });
   } else if (state.marital === '02' && kids.length === 0) {
     f.push({
       id: 'ties-family-single',
-      title: '你单身且没有子女',
+      title: '您目前单身且没有子女',
     });
   }
 
@@ -74,7 +74,7 @@ export function riskFlags(state, rows) {
   if (!job.position || /retired|unemployed|homemaker|student|无业|退休/.test(occ)) {
     f.push({
       id: 'ties-work',
-      title: '你目前没有在职工作（退休 / 待业 / 学生 / 家庭主妇）',
+      title: '您目前没有在职工作（退休、待业、学生或家庭主妇）',
     });
   }
 
@@ -83,7 +83,7 @@ export function riskFlags(state, rows) {
   if (trips.length === 0) {
     f.push({
       id: 'no-travel',
-      title: '你没有填写任何出入境记录',
+      title: '您没有填写任何出入境记录',
     });
   }
 
@@ -91,14 +91,14 @@ export function riskFlags(state, rows) {
   if (state.purpose === '03') {
     f.push({
       id: 'purpose-other',
-      title: '你的访问目的选了「其它」',
+      title: '您的访问目的选择了「其他」',
     });
   }
   const days = daysBetween(state.stayFrom, state.stayTo);
   if (days != null && days > 180) {
     f.push({
       id: 'long-stay',
-      title: `你计划停留约 ${days} 天（超过 6 个月）`,
+      title: `您计划停留约 ${days} 天，超过 6 个月`,
     });
   }
 

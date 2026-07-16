@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>加拿大旅游签在线填表工具（免费）· IMM5257 / IMM5645 / IMM0104</title>
-<meta name="description" content="免费填写加拿大访问签证申请表 IMM5257、家庭信息表 IMM5645、教育工作旅行史 IMM0104。全程在你的浏览器里完成，信息不上传任何服务器。" />
+<meta name="description" content="免费填写加拿大访问签证申请表 IMM5257、家庭信息表 IMM5645、教育工作旅行史 IMM0104。全程在您的浏览器里完成，信息不上传任何服务器。" />
 <style>
   /* The palette is lifted from the IMM5257 itself: the pale periwinkle field
      fill, the hairline black rules, the Canada red used only for mandatory
@@ -56,6 +56,16 @@
   h1 { font-size: clamp(24px, 4vw, 34px); line-height: 1.25; margin: 0 0 10px; letter-spacing: -.01em; }
   h1 .en { display: block; font: 400 13px/1.5 var(--mono); color: var(--ink-soft); letter-spacing: .04em; margin-top: 8px; }
   .lede { margin: 0; color: var(--ink-soft); max-width: 62ch; }
+  .scope {
+    margin-top: 18px; border-left: 4px solid var(--flag); background: #fdf2f2;
+    padding: 12px 16px; max-width: 68ch;
+  }
+  .scope-main { margin: 0; font-size: 15px; color: var(--flag); }
+  .scope-sub { margin: 6px 0 0; font-size: 13px; line-height: 1.7; color: var(--ink); }
+  .scope-sub a { color: var(--gov); font-weight: 600; }
+
+  .check-adv { border-top: 1px solid #e8b4b4; padding-top: 10px; margin-top: 10px !important; }
+
   .privacy {
     display: inline-block; margin-top: 18px;
     background: var(--field); border: 1px solid var(--field-edge);
@@ -235,8 +245,15 @@
     <h1>加拿大旅游签在线填表
       <span class="en">Application for Visitor Visa (Temporary Resident Visa)</span>
     </h1>
-    <p class="lede">用中文填一遍，一次导出三张官方 PDF 表格。题号与官方表格一一对应，方便你对照检查。</p>
-    <p class="privacy"><b>信息不出你的浏览器</b>：填表和生成 PDF 全在本机完成，不上传任何服务器。</p>
+    <p class="lede">用中文填写一遍，一次导出三张官方 PDF 表格。题号与官方表格一一对应，便于您逐项核对。</p>
+
+    <div class="scope">
+      <p class="scope-main"><b>这是一个填表工具，不是移民建议。</b></p>
+      <p class="scope-sub">它只做一件事：把您填写的内容，机械地写进 IRCC 的官方表格。它<b>不评估您的资格</b>、<b>不判断能否获批</b>、<b>不检查您填的内容是否正确</b>，也<b>不代为递交</b>。表格内容与申请结果，由申请人本人负责。<br>
+      需要专业判断的部分（能不能过、材料怎么准备、被拒了怎么办），请<a href="https://www.nova-stage.ca/immigration#consult" target="_blank" rel="noopener">预约持牌顾问咨询</a>。</p>
+    </div>
+
+    <p class="privacy"><b>您的信息不会离开这台电脑</b>：填写与生成 PDF 全部在您的浏览器内完成，不上传任何服务器。</p>
   </div>
 </header>
 
@@ -258,49 +275,53 @@
   </form>
 
   <section class="result" id="result" hidden>
-    <h2>三张表已生成</h2>
-    <p class="lede">境外旅游签常见的组合是这三张。你的申请具体要交哪些，以 IRCC 发给你的清单为准。</p>
+    <h2>三张表已经生成</h2>
+    <p class="lede">境外旅游签常见的组合是这三张。您的申请具体需要交哪些，请以 IRCC 发给您的清单为准。</p>
 
     <div class="check">
-      <b>递交前请逐页核对一遍。</b>
-      <p>这个工具只把你填的内容机械地写进表格，<b>不检查内容对错</b>——填错了它也照填。日期、拼写、号码、家庭成员有没有漏，都要你自己对着护照和证件核。表格上的信息由你本人负责，一旦递交就会进入你的移民记录。</p>
+      <b>递交之前，请逐页核对一遍。</b>
+      <p>本工具只是把您填写的内容写进表格，<b>不会检查内容是否正确</b> —— 填错了也会照样填上去。日期、拼写、证件号码、家庭成员有无遗漏，这些都需要您对照护照和证件逐项确认。表格内容由申请人本人负责，一经递交即成为您移民记录的一部分。</p>
+      <p class="check-adv"><b>本工具不构成移民建议。</b>它不评估资格、不判断能否获批、不代为递交。签证申请的结果取决于签证官对您整体情况的判断，与本工具无关。</p>
     </div>
 
     <div id="downloads" class="downloads"></div>
 
     <section id="sched1" class="warn sched1" hidden>
-      <b>你可能还需要 IMM 5257 Schedule 1。</b>IMM5257 上写明：背景信息第 3-6 题只要有一题答「是」，或签证官要求时，你<b>可能被要求另外填写 IMM 5257 Schedule 1</b>。本工具不生成这张表，需要的话去 canada.ca 下载。
+      <b>您可能还需要填写 IMM 5257 Schedule 1。</b>IMM5257 上写明：背景信息第 3-6 题中只要有一题答「是」，或签证官提出要求时，<b>可能需要另外填写 IMM 5257 Schedule 1</b>。本工具不生成这张表，如有需要请到 canada.ca 下载。
     </section>
 
     <section id="radar" class="radar" hidden>
       <h3 id="radar-h"></h3>
-      <p class="radar-lede">下面这几项来自你自己的回答，列在这里供你核对。</p>
+      <p class="radar-lede">以下几项来自您自己的回答，列在这里供您核对。</p>
       <ul id="radar-list" class="radar-list"></ul>
-      <p class="radar-foot"><b>这不是评估，也不是建议。</b>列出<b>不代表会被拒</b>，没列出<b>也不代表没问题</b>。判断一份申请要看完整材料和背景。</p>
+      <p class="radar-foot"><b>这不是评估，也不是建议。</b>被列出<b>不代表会被拒签</b>，未被列出<b>也不代表没有问题</b> —— 本工具只看得到您填进表格的内容。一份申请是否稳妥，需要结合完整材料和背景才能判断。</p>
     </section>
 
     <ol class="steps-todo">
-      <li><b>用 Adobe Acrobat Reader 打开</b>这个 PDF。用浏览器或 Mac「预览」打开会显示空白，这是这类政府表格的正常现象，不是文件坏了。<a href="https://get.adobe.com/reader/" target="_blank" rel="noopener">免费下载 Reader</a></li>
-      <li><b>在 Reader 里打开 IMM5257，点表格顶部的 Validate 按钮。</b>这一步会生成页脚的条形码。跳过它，IRCC 系统不会接受你的表格。（另外两张表没有这个按钮，不需要这一步。）</li>
-      <li><b>用 GCKey 登录 IRCC 账户递交</b>，在那里上传这三张 PDF 和你自己准备的材料。<a href="https://www.canada.ca/en/immigration-refugees-citizenship/services/application/account.html" target="_blank" rel="noopener">去 IRCC 账户登录 / 注册 →</a><br>IRCC 另有一个直接在线填写的访问签证入口，那条路不上传 PDF，这三张表在那儿用不上。入口以 IRCC 网站当时的指引为准。</li>
-      <li><b>核对无误后，自己递交。</b></li>
+      <li><b>请用 Adobe Acrobat Reader 打开</b>。用浏览器或 Mac「预览」打开会是空白，这是这类政府表格的正常现象，并非文件损坏。<a href="https://get.adobe.com/reader/" target="_blank" rel="noopener">免费下载 Reader</a></li>
+      <li><b>在 Reader 中打开 IMM5257，点击表格顶部的 Validate 按钮。</b>这一步会生成页脚的条形码；若跳过，IRCC 系统不会接受该表格。（另外两张表没有这个按钮，无需此步。）</li>
+      <li><b>用 GCKey 登录 IRCC 账户递交</b>，在账户中上传这三张 PDF 以及您准备的其他材料。<a href="https://www.canada.ca/en/immigration-refugees-citizenship/services/application/account.html" target="_blank" rel="noopener">前往 IRCC 账户登录 / 注册 →</a><br>IRCC 另有一个直接在线填写的访问签证入口，那条路径不上传 PDF，这三张表在那里用不上。具体入口请以 IRCC 网站当时的指引为准。</li>
+      <li><b>确认无误后，由您本人递交。</b></li>
     </ol>
 
-    <p class="warn"><b>请注意：</b>本工具不判断你是否符合申请条件、不替你选表、不代为递交。表格内容与递交结果由你本人负责。</p>
+
 
     <div class="nav">
       <button type="button" class="btn" id="back">返回修改</button>
     </div>
 
     <div class="cta">
-      <h3 id="cta-h">想让持牌顾问帮你把关？</h3>
-      <p id="cta-p">填表是机械活，能不能过是另一回事。资格评估、拒签风险、材料清单这些需要专业判断的部分，可以约一次付费咨询。</p>
+      <h3 id="cta-h">需要持牌顾问帮您把关吗？</h3>
+      <p id="cta-p">填表是机械工作，能否获批是另一回事。资格评估、拒签风险、材料准备这些需要专业判断的部分，欢迎预约一次付费咨询。</p>
       <a href="https://www.nova-stage.ca/immigration#consult" target="_blank" rel="noopener">预约咨询 · Nova Stage</a>
     </div>
   </section>
 
   <footer class="disc">
-    <p><b>免责声明：</b>本工具由持牌顾问 Yueheng Gao（RCIC R534273，Nova Stage Immigration）免费提供，仅将你输入的内容机械填写进 IRCC 官方 IMM5257 表格，<b>不构成移民建议</b>。表格模板取自 canada.ca 公开发布的官方文件。你的任何信息都不会离开本机、不会被本站或任何第三方收集。递交前请自行核对每一项内容。</p>
+    <p><b>免责声明</b><br>
+    本工具由持牌顾问 Yueheng Gao（RCIC R534273，Nova Stage Immigration）免费提供，仅将您输入的内容机械填写进 IRCC 公开发布的官方表格（IMM5257 / IMM5645 / IMM0104），表格模板取自 canada.ca。<br>
+    本工具<b>不构成移民建议</b>，不评估申请资格，不判断申请能否获批，不检查所填内容是否正确，也不代为递交。使用本工具<b>不构成任何形式的委托关系或顾问-客户关系</b>。表格内容、递交行为及申请结果，均由申请人本人负责；签证审批权在 IRCC，任何人无法保证结果。<br>
+    您填写的信息不会离开本机，不会被本站或任何第三方收集。递交前请务必自行核对每一项内容。</p>
   </footer>
 </div>
 
