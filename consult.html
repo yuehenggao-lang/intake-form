@@ -50,6 +50,13 @@ textarea{resize:vertical;min-height:80px}
 .upload-box label{cursor:pointer;color:var(--blue);font-weight:600;font-size:14px}
 .file-chip{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:7px 10px;margin-top:8px;font-size:13px}
 .file-chip .del{color:var(--red);cursor:pointer;border:none;background:none;font-size:16px}
+.file-chip .fname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-chip.labeled{flex-wrap:wrap}
+.file-chip .label-in{flex:1 1 100%;order:3;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:13px;font-family:inherit}
+.file-chip .label-in:focus{outline:none;border-color:var(--blue-mid)}
+.file-chip .label-in.missing{border-color:var(--red);background:#fff5f5}
+.suggest{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.suggest span{background:#fff;border:1px solid var(--blue-mid);color:var(--blue);border-radius:999px;padding:3px 9px;font-size:12px}
 .note-box{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:12.5px;color:#92630a;margin-top:8px}
 .disclaimer{background:var(--gray-light);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12.5px;color:var(--gray);margin-top:6px}
 .disc-chk{display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:13px}
@@ -209,6 +216,21 @@ body.en [data-en-block]{display:block}
       </div>
     </div>
 
+    <!-- 5. 其他材料（选了申请类型后才出现） -->
+    <div class="card" id="otherCard" style="display:none">
+      <div class="card-title"><span class="card-num">5</span><span data-zh>上传其他材料</span><span data-en>Upload other documents</span></div>
+      <div class="note-box">
+        <span data-zh>如果手头有以下材料，可以传上来（<b>非必填</b>，没有也能提交）。<b>每传一份请写清楚它是什么</b>，我们按你写的名称归档。</span>
+        <span data-en-block>If you have any of the following, you can upload them (<b>optional</b> — you can submit without them). <b>Describe each file</b> so we can file it under that name.</span>
+        <div id="otherSuggest" class="suggest"></div>
+      </div>
+      <div class="upload-box">
+        <input type="file" id="otherFiles" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="handleFiles(this,'other')">
+        <label for="otherFiles">📎 <span data-zh>点击选择文件</span><span data-en>Choose file(s)</span></label>
+      </div>
+      <div id="otherFileList"></div>
+    </div>
+
     <!-- disclaimer -->
     <div class="card">
       <div class="disclaimer">
@@ -242,7 +264,7 @@ const APP_TYPE_OPTS = [
   {v:'旅游/探亲', en:'Visitor/Family'}, {v:'PR/移民', en:'PR/Immigration'},
   {v:'入籍', en:'Citizenship'}, {v:'不确定', en:'Not sure'},
 ];
-const uploads = { refusal: [], odn: [] }; // {id, name, mimeType, data}
+const uploads = { refusal: [], odn: [], other: [] }; // {id, name, mimeType, data, label?}
 
 let currentLang = 'zh';
 function setLang(l){
@@ -250,14 +272,49 @@ function setLang(l){
   document.body.classList.toggle('en', l === 'en');
   document.getElementById('langZh').classList.toggle('active', l === 'zh');
   document.getElementById('langEn').classList.toggle('active', l === 'en');
+  if (uploads.other.length) renderFileList('other'); // 占位符跟着切语言
+  if (document.getElementById('otherCard')) toggleOtherUploads(); // 建议清单跟着切语言
 }
 
 // ---- app types ----
 function renderAppTypes(){
   const box = document.getElementById('appTypes');
   box.innerHTML = APP_TYPE_OPTS.map((o,i)=>
-    `<label class="chk" id="at${i}"><input type="checkbox" value="${o.v}" onchange="this.closest('.chk').classList.toggle('on',this.checked)"><span data-zh>${o.v}</span><span data-en>${o.en}</span></label>`
+    `<label class="chk" id="at${i}"><input type="checkbox" value="${o.v}" onchange="this.closest('.chk').classList.toggle('on',this.checked);toggleOtherUploads()"><span data-zh>${o.v}</span><span data-en>${o.en}</span></label>`
   ).join('');
+}
+
+// 按申请类型给的材料建议（只是提示，全部非必填）
+const OTHER_SUGGEST = {
+  '学签':      { zh:['录取信 / LOA','现有学签或签证','成绩单 / 毕业证','资金证明'], en:['Offer letter / LOA','Current permit or visa','Transcripts / diploma','Proof of funds'] },
+  '工签':      { zh:['雇主 offer / 雇佣合同','LMIA 或豁免依据','现有工签或签证','简历'], en:['Employer offer / contract','LMIA or exemption basis','Current permit or visa','Résumé'] },
+  '旅游/探亲': { zh:['护照信息页','邀请信','行程 / 机票','资金证明','加方亲属身份文件'], en:['Passport bio page','Invitation letter','Itinerary / tickets','Proof of funds','Canadian relative’s status document'] },
+  'PR/移民':   { zh:['语言成绩','学历认证 ECA','工作证明 / 推荐信','EOI 或邀请函'], en:['Language test results','ECA report','Employment reference letters','EOI or ITA'] },
+  '入籍':      { zh:['PR 卡','护照出入境记录','居住天数计算'], en:['PR card','Passport entry/exit stamps','Physical presence calculation'] },
+  '不确定':    { zh:['护照信息页','现有签证 / 身份文件','IRCC 来信'], en:['Passport bio page','Current visa / status document','IRCC correspondence'] },
+};
+
+function toggleOtherUploads(){
+  const types = getAppTypes();
+  const card = document.getElementById('otherCard');
+  const show = types.length > 0;
+  card.style.display = show ? 'block' : 'none';
+  if (show){
+    // 选中类型的建议材料并集（去重、保序）
+    const items = [];
+    types.forEach(t=>{
+      const s = OTHER_SUGGEST[t];
+      if (s) (currentLang==='zh' ? s.zh : s.en).forEach(x=>{ if (!items.includes(x)) items.push(x); });
+    });
+    document.getElementById('otherSuggest').innerHTML = items.map(x=>`<span>${esc(x)}</span>`).join('');
+  } else if (uploads.other.length){
+    // 取消所有类型 → 区块藏起来，已传的必须一起清掉，
+    // 否则没写说明的文件会把提交按钮锁死在一个客户看不见的地方
+    uploads.other = [];
+    renderFileList('other');
+    showToast(currentLang==='zh' ? '已取消申请类型，其他材料上传已清空' : 'Application type cleared — uploaded other documents removed');
+  }
+  updateSubmit();
 }
 function getAppTypes(){
   return [...document.querySelectorAll('#appTypes input:checked')].map(c=>c.value);
@@ -336,17 +393,33 @@ async function handleFiles(input, kind){
     }
     const data = await fileToBase64(blob);
     const id = 'f'+Date.now()+Math.random().toString(36).slice(2,6);
-    uploads[kind].push({ id, name:file.name, mimeType:(blob.type||file.type||'application/octet-stream'), data });
+    uploads[kind].push({ id, name:file.name, mimeType:(blob.type||file.type||'application/octet-stream'), data, label:'' });
   }
   input.value = '';
   renderFileList(kind);
   updateSubmit();
 }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
 function renderFileList(kind){
-  const el = document.getElementById(kind==='refusal'?'refusalFileList':'odnFileList');
-  el.innerHTML = uploads[kind].map(f=>
-    `<div class="file-chip"><span>📄 ${f.name}</span><button type="button" class="del" onclick="removeFile('${kind}','${f.id}')">×</button></div>`
-  ).join('');
+  const el = document.getElementById(kind+'FileList');
+  const ph = currentLang==='zh' ? '这是什么文件？例如：护照信息页 / 学签 / 录取信' : 'What is this file? e.g. Passport bio page / Study permit / Offer letter';
+  el.innerHTML = uploads[kind].map(f=>{
+    const del = `<button type="button" class="del" onclick="removeFile('${kind}','${f.id}')">×</button>`;
+    if (kind !== 'other') return `<div class="file-chip"><span class="fname">📄 ${esc(f.name)}</span>${del}</div>`;
+    return `<div class="file-chip labeled"><span class="fname">📄 ${esc(f.name)}</span>${del}` +
+           `<input type="text" class="label-in" value="${esc(f.label||'')}" placeholder="${esc(ph)}" ` +
+           `oninput="setFileLabel('${f.id}', this.value)" ` +
+           `onblur="if(!this.value.trim())this.classList.add('missing')"></div>`;
+  }).join('');
+}
+// 只改模型 + 重新校验，不重渲染（否则每敲一个字都丢焦点）
+function setFileLabel(id, val){
+  const f = uploads.other.find(x=>x.id===id);
+  if (!f) return;
+  f.label = val;
+  updateSubmit();
+  document.querySelectorAll('#otherFileList .label-in').forEach(el=>el.classList.remove('missing'));
 }
 function removeFile(kind,id){
   uploads[kind] = uploads[kind].filter(f=>f.id!==id);
@@ -366,6 +439,8 @@ function isValid(){
     if (!uploads.refusal.length) return false;                 // 拒签信必传
     if (!uploads.odn.length && !document.getElementById('noODN').checked) return false; // ODN 必传或勾选无
   }
+  // 其他材料非必传，但传了就必须写清楚是什么（用于归档命名）
+  if (uploads.other.some(f => !(f.label||'').trim())) return false;
   return true;
 }
 
@@ -389,6 +464,7 @@ function collectData(){
     noODNReason: document.getElementById('noODN').checked ? (document.getElementById('noODNReason').value.trim() || '未提供') : '',
     everOverstay: document.querySelector('input[name=everOverstay]:checked')?.value || '',
     overstays: getRows('overstayRows'),
+    otherFiles: uploads.other.map(f=>({ label:(f.label||'').trim(), fileName:f.name })),
   };
 }
 
@@ -402,6 +478,7 @@ async function submitForm(){
   const files = [
     ...uploads.refusal.map(f=>({ kind:'refusal', fileName:f.name, mimeType:f.mimeType, data:f.data })),
     ...uploads.odn.map(f=>({ kind:'odn', fileName:f.name, mimeType:f.mimeType, data:f.data })),
+    ...uploads.other.map(f=>({ kind:'other', fileName:f.name, mimeType:f.mimeType, data:f.data, label:(f.label||'').trim() })),
   ];
   const payload = { clientName: data.clientName, formData: data, files, submittedAt: new Date().toISOString() };
 
@@ -496,7 +573,7 @@ function resumeDraft(){
   if (!draft || !draft.data) return;
   restoreDraft(draft.data);
   if (draft.data.everRefused === 'yes'){
-    showToast(currentLang==='zh' ? '已恢复文字内容，请重新选择拒签信/ODN 文件' : 'Text restored — please re-select your refusal letter / ODN files');
+    showToast(currentLang==='zh' ? '已恢复文字内容，请重新选择需要上传的文件' : 'Text restored — please re-select any files you want to upload');
   }
 }
 function discardDraft(){
@@ -520,6 +597,7 @@ function restoreDraft(d){
     const cb = [...document.querySelectorAll('#appTypes input')].find(c=>c.value===v);
     if (cb){ cb.checked = true; cb.closest('.chk').classList.add('on'); }
   });
+  toggleOtherUploads();
   // 拒签
   if (d.everRefused === 'yes'){
     const r = [...document.querySelectorAll('input[name=everRefused]')].find(x=>x.value==='yes');
