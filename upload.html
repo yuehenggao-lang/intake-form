@@ -114,10 +114,22 @@ input[type=text].error{border-color:var(--red)}
 <div class="card">
   <div class="card-header"><span class="card-num">1</span><span class="zh">您的姓名</span><span class="en" style="display:none">Your Name</span></div>
   <div class="card-body">
-    <label><span class="zh">中文姓名或英文姓名</span><span class="en" style="display:none">Chinese or English Name</span><span class="req">*</span></label>
-    <input type="text" id="clientName" placeholder="e.g. 张伟 / ZHANG Wei" autocomplete="off">
-    <div class="hint zh">请填写您在顾问处登记的姓名</div>
-    <div class="hint en" style="display:none">Please enter the name registered with your consultant</div>
+    <label><span class="zh">中文姓名</span><span class="en" style="display:none">Chinese Name</span><span class="req">*</span></label>
+    <input type="text" id="nameZh" placeholder="e.g. 张伟" autocomplete="off">
+
+    <label style="margin-top:6px"><span class="zh">拼音 / 英文姓名</span><span class="en" style="display:none">Name in Pinyin / English</span><span class="req">*</span></label>
+    <input type="text" id="namePinyin" placeholder="e.g. ZHANG Wei" autocomplete="off">
+    <div class="hint zh">请与护照上的拼写一致</div>
+    <div class="hint en" style="display:none">Please match the spelling on your passport</div>
+
+    <label style="margin-top:10px;font-weight:400;display:flex;align-items:center;gap:7px;cursor:pointer">
+      <input type="checkbox" id="noChineseName" style="width:auto;margin:0;cursor:pointer">
+      <span class="zh" style="font-size:13px;color:#6b7280">我没有中文名</span>
+      <span class="en" style="display:none;font-size:13px;color:#6b7280">I don't have a Chinese name</span>
+    </label>
+
+    <div class="hint zh" style="margin-top:8px">两种写法都填，材料才能准确归入您的档案</div>
+    <div class="hint en" style="display:none;margin-top:8px">Both spellings are needed to file your documents correctly</div>
   </div>
 </div>
 
@@ -407,25 +419,65 @@ function removeFile(id) {
   updateUploadBtn();
 }
 
+// ===== 姓名（中文 + 拼音双栏）=====
+// 两种写法都要，后端才能把材料归入客户已有的档案夹——无论那个夹当初是用中文
+// 还是用拼音建的。外籍客户可勾选"我没有中文名"跳过中文栏。
+function skipChineseName() {
+  return document.getElementById('noChineseName').checked;
+}
+
+/** 返回 {zh, pinyin}，均已 trim；中文栏被跳过时 zh 为 '' */
+function getNames() {
+  return {
+    zh: skipChineseName() ? '' : document.getElementById('nameZh').value.trim(),
+    pinyin: document.getElementById('namePinyin').value.trim()
+  };
+}
+
+function namesComplete() {
+  const n = getNames();
+  return n.pinyin.length > 0 && (skipChineseName() || n.zh.length > 0);
+}
+
+function onNoChineseNameToggle() {
+  const zhInput = document.getElementById('nameZh');
+  zhInput.disabled = skipChineseName();
+  if (zhInput.disabled) {
+    zhInput.value = '';
+    zhInput.classList.remove('error');
+    zhInput.style.background = '#f3f4f6';
+  } else {
+    zhInput.style.background = '#fff';
+  }
+  updateUploadBtn();
+}
+
 function updateUploadBtn() {
   const uploadable = pendingFiles.filter(f => f.status !== 'toolarge' && f.status !== 'error' && f.status !== 'done');
   const hasFiles = uploadable.length > 0;
-  const hasName = document.getElementById('clientName').value.trim().length > 0;
   const hasType = !!getSelectedType();
-  document.getElementById('uploadBtn').disabled = !(hasFiles && hasName && hasType);
+  document.getElementById('uploadBtn').disabled = !(hasFiles && namesComplete() && hasType);
 }
 
-document.getElementById('clientName').addEventListener('input', updateUploadBtn);
+document.getElementById('nameZh').addEventListener('input', updateUploadBtn);
+document.getElementById('namePinyin').addEventListener('input', updateUploadBtn);
+document.getElementById('noChineseName').addEventListener('change', onNoChineseNameToggle);
 
 // ===== UPLOAD =====
 async function startUpload() {
-  const name = document.getElementById('clientName').value.trim();
-  if (!name) {
-    showToast(currentLang === 'zh' ? '请先填写姓名' : 'Please enter your name');
-    document.getElementById('clientName').classList.add('error');
+  const names = getNames();
+  const zhInput = document.getElementById('nameZh');
+  const pyInput = document.getElementById('namePinyin');
+  zhInput.classList.remove('error');
+  pyInput.classList.remove('error');
+  if (!namesComplete()) {
+    if (!skipChineseName() && !names.zh) zhInput.classList.add('error');
+    if (!names.pinyin) pyInput.classList.add('error');
+    showToast(currentLang === 'zh' ? '请填写中文姓名和拼音' : 'Please enter both your Chinese name and pinyin');
     return;
   }
-  document.getElementById('clientName').classList.remove('error');
+  // clientName 保留给旧版后端；新后端读 nameZh / namePinyin
+  const name = [names.zh, names.pinyin].filter(Boolean).join(' ');
 
   const toUpload = pendingFiles.filter(f => f.status === 'pending' && f.compressed);
   if (toUpload.length === 0) {
@@ -449,6 +501,8 @@ async function startUpload() {
       const fileType = entry.docType || getSelectedType();
       const payload = {
         clientName: name,
+        nameZh: names.zh,
+        namePinyin: names.pinyin,
         docTypes: fileType ? [fileType] : [],
         fileName: entry.compressed.name,
         mimeType: entry.compressed.type || 'application/octet-stream',
