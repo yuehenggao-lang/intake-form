@@ -34,9 +34,22 @@
   to   = "/consult.html"
   status = 200
 
-# 301, not a 200 rewrite: the tool lives in a subdirectory and loads its assets
-# with relative paths, so the browser has to actually land on /trv-tool/.
+# 🔴 **免费 TRV 工具暂时下架**（Steven 2026-08-24）。
+#
+# 它跟「没有免费的了，全部收费」直接冲突，而产品还没对外，所以先藏起来。
+# 用**重定向**下架而不是删目录：删了要重新找回来，改一行就能放回来。
+#
+#     from = "/trv" → "/"        # 现在：谁点进来都回首页
+#     恢复时把下面两块换回原来那一条：from "/trv" → "/trv-tool/" 301
+#
+# `/trv-tool/*` 也一并挡住 —— 只挡 `/trv` 的话，知道真实路径的人照样进得去
+# （链接分享过、也可能被搜索引擎收录了）。
 [[redirects]]
   from = "/trv"
-  to   = "/trv-tool/"
-  status = 301
+  to   = "/"
+  status = 302
+
+[[redirects]]
+  from = "/trv-tool/*"
+  to   = "/"
+  status = 302
