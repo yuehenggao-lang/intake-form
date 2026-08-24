@@ -49,7 +49,11 @@
   to   = "/"
   status = 302
 
+# ⚠️ **`force = true` 不能省。** Netlify 默认让**真实文件**赢过重定向，
+# 而 `/trv-tool/index.html` 是真实存在的 —— 不加 force 的话
+# `/trv` 挡住了、`/trv-tool/` 照样 200（实测过）。
 [[redirects]]
   from = "/trv-tool/*"
   to   = "/"
   status = 302
+  force = true
