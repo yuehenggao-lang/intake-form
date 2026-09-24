@@ -506,6 +506,14 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
   </div>
   <div class="section-body">
     <div class="form-group">
+      <label><span class="zh">UCI 客户识别号</span><span class="en" style="display:none">UCI (Unique Client Identifier)</span><span class="req cit-only" style="display:none">*</span></label>
+      <input type="text" id="uci" placeholder="e.g. 1143868165">
+      <span class="hint zh">不要带横线，只填数字。申请过加拿大签证或许可的，UCI 在批准信上；已经是 PR 的，在枫叶卡和登陆纸（IMM 5292/5688）上。从没申请过加拿大任何签证的，留空即可。</span>
+      <span class="hint en" style="display:none">Numbers only, no hyphens. If you have applied to IRCC before, it is on your approval letter; if you are a permanent resident, it is on your PR card and your COPR (IMM 5292/5688). Leave it blank if you have never applied to Canada.</span>
+      <div class="hint zh cit-only" style="display:none;color:#b45309;margin-bottom:10px">入籍申请必填（CIT 0002 第 3 题）。</div>
+      <div class="hint en cit-only" style="display:none;color:#b45309;margin-bottom:10px">Required for a citizenship application (CIT 0002, question 3).</div>
+    </div>
+    <div class="form-group">
       <label><span class="zh">之前是否申请过加拿大签证/许可？</span><span class="en" style="display:none">Have you previously applied for any Canadian visa or permit?</span><span class="req">*</span></label>
       <div class="radio-group">
         <label><input type="radio" name="prevCaApp" value="No" required onchange="togglePrevCa()"> <span class="zh">从未申请过</span><span class="en" style="display:none">Never applied</span></label>
@@ -513,12 +521,7 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
       </div>
     </div>
     <div class="conditional" id="prevCaSection">
-      <div class="form-row cols-3">
-        <div class="form-group">
-          <label><span class="zh">UCI 号码（如有）</span><span class="en" style="display:none">UCI Number (if known)</span></label>
-          <input type="text" id="uci" placeholder="e.g. 1143868165">
-          <span class="hint zh">不要带横线，只填数字</span><span class="hint en" style="display:none">Numbers only, no hyphens</span>
-        </div>
+      <div class="form-row cols-2">
         <div class="form-group">
           <label><span class="zh">首次入境加拿大日期</span><span class="en" style="display:none">First Entry to Canada</span></label>
           <input type="date" id="firstEntryDate">
@@ -625,6 +628,8 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
   <div class="section-body">
     <div class="section-note zh">请填写高中及以上的教育经历，按时间顺序，时间不能有间断。</div>
     <div class="section-note en" style="display:none">List education from high school onward, chronological, no gaps.</div>
+    <div class="section-note zh cit-only" style="display:none;border-left:3px solid #b45309;background:#fffbeb">入籍申请：递交前 5 年里上过的语言班、职业培训也要写进来。这一栏和下面的工作经历合起来，要把这 5 年铺满（CIT 0002 第 11 题）。</div>
+    <div class="section-note en cit-only" style="display:none;border-left:3px solid #b45309;background:#fffbeb">Citizenship: also list language classes and vocational training taken in the five years before you apply. This section and the employment section together must cover those five years (CIT 0002, question 11).</div>
     <div class="form-group">
       <label><span class="zh">是否有高等教育（大专/本科/研究生及以上）？</span><span class="en" style="display:none">Any post-secondary education (college/bachelor/graduate)?</span><span class="req">*</span></label>
       <div class="radio-group">
@@ -701,6 +706,8 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
   <div class="section-body">
     <div class="section-note zh">请填写所有工作经历（含实习），时间不能有间断。无工作期间请填写"待业"。</div>
     <div class="section-note en" style="display:none">No gaps. If unemployed, enter "Unemployed" as position.</div>
+    <div class="section-note zh cit-only" style="display:none;border-left:3px solid #b45309;background:#fffbeb">入籍申请：这一栏要覆盖递交前 5 年的每一个月，中间不能断。失业、退休、在家照顾家人、自雇、上语言班，都要各写成一段，在「公司/单位名称」里写明是哪一种。这一栏留空或有断档，IRCC 会退件（CIT 0002 第 11 题）。</div>
+    <div class="section-note en cit-only" style="display:none;border-left:3px solid #b45309;background:#fffbeb">Citizenship: this section must account for every month of the five years before you apply, with no gaps. Unemployment, retirement, caring for family at home, self-employment and language classes each go in as their own line; say which one it was in the employer column. A blank or a gap here gets the application returned (CIT 0002, question 11).</div>
     <table class="dynamic-table" id="employmentTable">
       <thead><tr>
         <th class="zh">开始年月<span style="color:#dc2626">*</span></th><th class="en" style="display:none">From<span style="color:#dc2626">*</span></th>
@@ -1852,6 +1859,22 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
     </div>
   </div>
   <div class="section-body">
+    <div class="form-row cols-3">
+      <div class="form-group">
+        <label><span class="zh">成为 PR 的日期（登陆日）</span><span class="en" style="display:none">Date you became a PR (landing date)</span><span class="req">*</span></label>
+        <input type="date" id="prLandingDate" required oninput="calcProgress()">
+        <span class="hint zh">登陆纸（COPR，IMM 5292/5688）上的日期。PR 之前在加拿大的临时居民时间每天只算半天，所以这个日期决定了天数怎么算。</span>
+        <span class="hint en" style="display:none">The date on your COPR (IMM 5292/5688). Time in Canada before you became a PR counts as half a day, so this date decides how the total is calculated.</span>
+      </div>
+      <div class="form-group">
+        <label><span class="zh">PR 卡号</span><span class="en" style="display:none">PR card number</span></label>
+        <input type="text" id="prCardNo" placeholder="e.g. 1234-5678">
+      </div>
+      <div class="form-group">
+        <label><span class="zh">PR 卡到期日</span><span class="en" style="display:none">PR card expiry</span></label>
+        <input type="date" id="prCardExpiry">
+      </div>
+    </div>
     <div class="form-row cols-2">
       <div class="form-group">
         <label><span class="zh">是否有 PR 身份</span><span class="en" style="display:none">Have PR status</span></label>
@@ -1880,16 +1903,66 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
           <label><input type="radio" name="languageProof" value="No"> <span class="zh">否</span><span class="en" style="display:none">No</span></label>
           <label><input type="radio" name="languageProof" value="Yes"> <span class="zh">是</span><span class="en" style="display:none">Yes</span></label>
         </div>
+        <span class="hint zh">18 到 54 岁必须提供 CLB 4 以上的英语或法语证明。认可的有：IELTS General / CELPIP-G 等指定考试成绩，或在加拿大读过的英语/法语授课中学及以上学历，或政府资助语言课程（LINC/CLIC）达标证明。</span>
+        <span class="hint en" style="display:none">If you are 18 to 54 you must show English or French at CLB 4 or higher: an approved test (IELTS General, CELPIP-G and others), a secondary or post-secondary credential taught in English or French, or proof of reaching CLB 4 in a government-funded language program (LINC/CLIC).</span>
       </div>
     </div>
+
     <div class="form-row cols-2">
+      <div class="form-group">
+        <label><span class="zh">SIN / ITN / TTN 号码</span><span class="en" style="display:none">SIN / ITN / TTN</span></label>
+        <input type="text" id="sinNumber" placeholder="e.g. 123 456 789">
+        <span class="hint zh">CIT 0002 第 12 题要填。三个都没有、且这 5 年都不需要报税的，请留空并在下面的备注里写明。</span>
+        <span class="hint en" style="display:none">Required at CIT 0002 question 12. If you have none of the three and were not required to file for any of the five years, leave it blank and say so in the note below.</span>
+      </div>
       <div class="form-group">
         <label><span class="zh">居住计算备注</span><span class="en" style="display:none">Presence calculation note</span></label>
         <input type="text" id="presenceCalcNote" placeholder="e.g. PR 前以临时居民身份计半天上限365">
       </div>
+    </div>
+
+    <div class="form-group">
+      <label><span class="zh">逐年报税情况（近 5 个税务年度）</span><span class="en" style="display:none">Tax filing, each of the last 5 tax years</span></label>
+      <div class="section-note zh" style="margin:0 0 8px">CIT 0002 第 12 题是一年一行问的：这一年你是否必须报税、是否报了。不确定的年份先按记忆填，我们会跟 CRA 记录核对。</div>
+      <div class="section-note en" style="display:none;margin:0 0 8px">CIT 0002 question 12 asks year by year: were you required to file, and did you file. Fill in what you remember; we will check it against your CRA record.</div>
+      <table class="dynamic-table" id="citizenTaxYearsTable">
+        <thead><tr>
+          <th class="zh">税务年度</th><th class="en" style="display:none">Tax year</th>
+          <th class="zh">是否必须报税</th><th class="en" style="display:none">Required to file</th>
+          <th class="zh">是否已报</th><th class="en" style="display:none">Taxes filed</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="citizenTaxYearsBody"></tbody>
+      </table>
+      <button type="button" class="btn-add" onclick="addRow('citizenTaxYears')">
+        <span>＋</span><span class="zh">添加年度</span><span class="en" style="display:none">Add year</span>
+      </button>
+    </div>
+
+    <div class="form-group">
+      <label><span class="zh">加拿大以外的身份 / 公民身份</span><span class="en" style="display:none">Status in countries other than Canada</span></label>
+      <div class="section-note zh" style="margin:0 0 8px">CIT 0002 第 13 题。出生国的公民身份也要写进来（例如中国公民）；在别的国家有过居留、工作、学习身份的，也一并列出。</div>
+      <div class="section-note en" style="display:none;margin:0 0 8px">CIT 0002 question 13. Include citizenship of your country of birth (for example, citizen of China), and any residence, work or study status you have held in any other country.</div>
+      <table class="dynamic-table" id="citizenOtherStatusTable">
+        <thead><tr>
+          <th class="zh">国家/地区</th><th class="en" style="display:none">Country / territory</th>
+          <th class="zh">身份类型</th><th class="en" style="display:none">Type of status</th>
+          <th class="zh">开始</th><th class="en" style="display:none">From</th>
+          <th class="zh">结束（仍持有请留空）</th><th class="en" style="display:none">To (blank if current)</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="citizenOtherStatusBody"></tbody>
+      </table>
+      <button type="button" class="btn-add" onclick="addRow('citizenOtherStatus')">
+        <span>＋</span><span class="zh">添加身份</span><span class="en" style="display:none">Add status</span>
+      </button>
+    </div>
+    <div class="form-row cols-2">
       <div class="form-group">
-        <label><span class="zh">签字日期（锚定5年窗口）</span><span class="en" style="display:none">Signature date</span></label>
+        <label><span class="zh">签字日期（锚定 5 年窗口）</span><span class="en" style="display:none">Signature date (anchors the 5-year window)</span></label>
         <input type="date" id="signDate">
+        <span class="hint zh">不确定就留空，由顾问确定后填写。</span>
+        <span class="hint en" style="display:none">Leave blank if unsure; your consultant will set it.</span>
       </div>
     </div>
     <div class="form-group">
@@ -1955,7 +2028,7 @@ input.error,select.error{border-color:var(--red);background:#fff5f5}
   <div class="side-bar-tip" id="autosaveIndicatorSticky"></div>
 </div>
 
-<script id="intake-schema" type="application/json">{"app_types": {"study-permit-outland": {"label_zh": "学签·境外新申请", "label_en": "Study Permit (Outland)", "form_map_key": "study-permit-outland", "sections": ["core", "language-tests", "education", "employment", "travel-history", "family-members", "canada-history", "canadian-contacts", "funds", "background-risk", "consent-disclaimer"]}, "study-permit-inland": {"label_zh": "学签·境内续签", "label_en": "Study Permit (Inland)", "form_map_key": "study-permit-inland", "sections": ["core", "inland-status", "language-tests", "education", "employment", "canada-history", "canadian-contacts", "study-progress", "funds", "background-risk", "consent-disclaimer"]}, "work-permit-outland": {"label_zh": "工签·境外新申请", "label_en": "Work Permit (Outland)", "form_map_key": "work-permit-outland", "sections": ["core", "work-offer", "employment", "education", "language-tests", "travel-history", "family-members", "canada-history", "work-stream", "work-history", "background-risk", "consent-disclaimer"]}, "work-permit-inland": {"label_zh": "工签·境内续签", "label_en": "Work Permit (Inland)", "form_map_key": "work-permit-inland", "sections": ["core", "work-offer", "employment", "education", "language-tests", "canada-history", "inland-status", "work-stream", "work-history", "background-risk", "consent-disclaimer"]}, "visitor-trv": {"label_zh": "访客·旅游签 (TRV)", "label_en": "Visitor (TRV)", "form_map_key": "visitor-trv", "sections": ["core", "employment", "education", "travel-history", "family-members", "canadian-contacts", "canada-history", "visit-purpose", "funds", "super-visa", "background-risk", "consent-disclaimer"]}, "visitor-extension": {"label_zh": "访客·延期 (境内)", "label_en": "Visitor Extension (Inland)", "form_map_key": "visitor-extension", "sections": ["core", "canada-history", "inland-status", "visit-purpose", "funds", "education", "employment", "background-risk", "consent-disclaimer"]}, "pr-card-renewal": {"label_zh": "PR 卡·续签/换发", "label_en": "PR Card Renewal", "form_map_key": "pr-card-renewal", "sections": ["core", "residency-obligation", "address-history", "travel-history", "employment", "education", "canada-history", "background-risk", "consent-disclaimer"]}, "spousal-sponsorship": {"label_zh": "夫妻/同居担保", "label_en": "Spousal Sponsorship", "form_map_key": "spousal-sponsorship", "sections": ["core", "sponsor", "relationship", "family-members", "education", "employment", "address-history", "travel-history", "canada-history", "background-risk", "consent-disclaimer"]}, "pr-economic": {"label_zh": "PR·经济类 (Express Entry/PNP)", "label_en": "PR - Economic", "form_map_key": "pr-economic", "sections": ["core", "education", "education-years", "employment", "language-tests", "address-history", "travel-history", "family-members", "canada-history", "ee-profile", "funds", "background-risk", "consent-disclaimer"]}, "citizenship-adult": {"label_zh": "入籍·成人 (5(1))", "label_en": "Citizenship (Adult)", "form_map_key": "citizenship-adult", "sections": ["core", "citizenship-presence", "address-history", "travel-history", "language-tests", "canada-history", "background-risk", "consent-disclaimer"]}, "citizenship-minor": {"label_zh": "入籍·未成年", "label_en": "Citizenship (Minor)", "form_map_key": "citizenship-minor", "sections": ["core", "citizenship-minor-routing", "citizenship-presence", "address-history", "travel-history", "consent-disclaimer"]}}, "sections": {"core": {"label_zh": "基本信息", "label_en": "Basic Information", "always": true, "fields": [{"id": "familyName", "zh": "姓(拼音)", "en": "Family name", "type": "text", "required": true}, {"id": "givenName", "zh": "名(拼音)", "en": "Given name", "type": "text", "required": true}, {"id": "chineseName", "zh": "中文姓名", "en": "Chinese name", "type": "text"}, {"id": "dob", "zh": "出生日期", "en": "Date of birth", "type": "date", "required": true}, {"id": "birthCity", "zh": "出生城市", "en": "City of birth", "type": "text"}, {"id": "birthCountry", "zh": "出生国家", "en": "Country of birth", "type": "text"}, {"id": "gender", "zh": "性别", "en": "Gender", "type": "select", "options": ["Male", "Female", "Another gender"]}, {"id": "nationality", "zh": "国籍", "en": "Nationality", "type": "text"}, {"id": "currentAddress", "zh": "现居住地址", "en": "Current address", "type": "text"}, {"id": "phone", "zh": "电话", "en": "Phone", "type": "text"}, {"id": "email", "zh": "邮箱", "en": "Email", "type": "text"}, {"id": "wechat", "zh": "微信", "en": "WeChat", "type": "text"}, {"id": "usCard", "zh": "是否持有美国绿卡/签证", "en": "Hold US green card / visa", "type": "radio", "options": ["Yes", "No"]}, {"id": "passportNum", "zh": "护照号", "en": "Passport number", "type": "text"}, {"id": "passportIssue", "zh": "护照签发日", "en": "Passport issue date", "type": "date"}, {"id": "passportExpiry", "zh": "护照失效日", "en": "Passport expiry date", "type": "date"}, {"id": "passportAuthority", "zh": "护照签发机关", "en": "Passport issuing authority", "type": "text"}, {"id": "maritalStatus", "zh": "婚姻状况", "en": "Marital status", "type": "select", "options": ["Single", "Married", "Common-law", "Divorced", "Separated", "Widowed"], "triggers": {"Married": "family-members", "Common-law": "family-members"}}, {"id": "uci", "zh": "UCI (如有)", "en": "UCI (if any)", "type": "text"}]}, "language-tests": {"label_zh": "语言测试成绩", "label_en": "Language Test Results", "fields": []}, "canada-history": {"label_zh": "入境及签证历史", "label_en": "Canada Entry & Visa/Permit History", "fields": []}, "education": {"label_zh": "教育经历", "label_en": "Education History", "fields": []}, "education-years": {"label_zh": "各阶段教育年限", "label_en": "Years of Education by Level", "fields": []}, "employment": {"label_zh": "工作经历", "label_en": "Employment History", "fields": []}, "address-history": {"label_zh": "居住地址历史", "label_en": "Residential Address History", "fields": []}, "travel-history": {"label_zh": "出行记录", "label_en": "Travel History", "fields": []}, "canadian-contacts": {"label_zh": "加拿大联系人", "label_en": "Canadian Contacts", "fields": []}, "family-members": {"label_zh": "家庭成员", "label_en": "Family Members", "fields": [{"id": "spouseFamilyName", "zh": "配偶姓(拼音)", "en": "Spouse family name", "type": "text"}, {"id": "spouseGivenName", "zh": "配偶名(拼音)", "en": "Spouse given name", "type": "text"}, {"id": "spouseChineseName", "zh": "配偶中文姓名", "en": "Spouse Chinese name", "type": "text"}, {"id": "spouseDob", "zh": "配偶出生日期", "en": "Spouse date of birth", "type": "date"}, {"id": "spousePassport", "zh": "配偶护照号", "en": "Spouse passport number", "type": "text"}, {"id": "spouseNationality", "zh": "配偶国籍", "en": "Spouse nationality", "type": "text"}, {"id": "spouseInCa", "zh": "配偶是否在加拿大", "en": "Spouse in Canada", "type": "radio", "options": ["Yes", "No"]}, {"id": "children", "zh": "子女信息", "en": "Children", "type": "rows"}, {"id": "parents", "zh": "父母信息", "en": "Parents", "type": "rows"}]}, "inland-status": {"label_zh": "境内身份", "label_en": "Status in Canada", "fields": [{"id": "currentStatus", "zh": "当前移民身份", "en": "Current immigration status", "type": "select", "options": ["Study Permit", "Work Permit", "Visitor Record", "Visitor", "Implied Status", "Restoration", "Other"]}, {"id": "currentDocNumber", "zh": "当前身份文件号", "en": "Current document number", "type": "text"}, {"id": "lastEntryDate", "zh": "最近入境日期", "en": "Last entry date", "type": "date"}, {"id": "statusExpiry", "zh": "身份到期日", "en": "Status expiry date", "type": "date"}]}, "study-details": {"label_zh": "学习信息", "label_en": "Study Details", "fields": [{"id": "schoolName", "zh": "学校名称", "en": "School name", "type": "text"}, {"id": "dliNumber", "zh": "DLI 编号", "en": "DLI number", "type": "text"}, {"id": "program", "zh": "专业/课程", "en": "Program", "type": "text"}, {"id": "studyLevel", "zh": "学习层级", "en": "Study level", "type": "select", "options": ["Secondary", "Language", "College/Diploma", "Bachelor", "Master", "Doctorate", "Other"]}, {"id": "tuition", "zh": "学费 (CAD)", "en": "Tuition (CAD)", "type": "number"}, {"id": "studyStart", "zh": "课程开始日", "en": "Study start date", "type": "date"}, {"id": "studyEnd", "zh": "课程结束日", "en": "Study end date", "type": "date"}, {"id": "palTal", "zh": "是否有 PAL/TAL 省证明", "en": "Have PAL/TAL", "type": "radio", "options": ["Yes", "No", "N/A"]}, {"id": "quebecCaq", "zh": "是否有魁北克 CAQ", "en": "Have Quebec CAQ", "type": "radio", "options": ["Yes", "No", "N/A"]}]}, "study-plan-inputs": {"label_zh": "学习计划要点", "label_en": "Study Plan Inputs", "fields": [{"id": "studyBackground", "zh": "教育背景概述", "en": "Study background", "type": "textarea"}, {"id": "whyProgram", "zh": "为何选择该专业", "en": "Why this program", "type": "textarea"}, {"id": "whyCanada", "zh": "为何选择加拿大", "en": "Why Canada", "type": "textarea"}, {"id": "careerPlan", "zh": "毕业后职业规划", "en": "Career plan", "type": "textarea"}]}, "study-progress": {"label_zh": "在读进度", "label_en": "Study Progress", "fields": [{"id": "enrolmentProof", "zh": "是否有在读/录取证明", "en": "Have enrolment proof", "type": "radio", "options": ["Yes", "No"]}, {"id": "academicStanding", "zh": "学术状态 (GPA/出勤)", "en": "Academic standing", "type": "text"}, {"id": "transcriptNote", "zh": "成绩单备注", "en": "Transcript note", "type": "text"}]}, "funds": {"label_zh": "资金证明", "label_en": "Proof of Funds", "fields": [{"id": "fundAmount", "zh": "可用资金金额 (CAD)", "en": "Available funds (CAD)", "type": "number"}, {"id": "fundSource", "zh": "资金来源", "en": "Source of funds", "type": "select", "options": ["Self", "Parents", "Spouse", "Scholarship", "Loan", "Other"]}, {"id": "fundProofNote", "zh": "资金证明文件备注", "en": "Proof of funds note", "type": "text"}]}, "visit-purpose": {"label_zh": "访问目的", "label_en": "Purpose of Visit", "fields": [{"id": "visitReason", "zh": "访问原因", "en": "Reason for visit", "type": "select", "options": ["Tourism", "Family visit", "Business", "Medical", "Conference/Event", "Other"]}, {"id": "inviterName", "zh": "邀请人姓名", "en": "Inviter name", "type": "text"}, {"id": "inviterRelation", "zh": "与邀请人关系", "en": "Relationship to inviter", "type": "text"}, {"id": "itinerary", "zh": "行程安排", "en": "Itinerary", "type": "textarea"}, {"id": "tiesHome", "zh": "与母国的牵绊 (会按期离境)", "en": "Ties to home country", "type": "textarea"}, {"id": "travelHistory", "zh": "旅行史", "en": "Travel history", "type": "rows"}]}, "super-visa": {"label_zh": "超级签证 (父母祖父母)", "label_en": "Super Visa", "fields": [{"id": "isParentGrandparent", "zh": "是否父母/祖父母 (超级签证)", "en": "Parent/grandparent (super visa)", "type": "radio", "options": ["Yes", "No"]}, {"id": "hostName", "zh": "加方接待人姓名", "en": "Host name", "type": "text"}, {"id": "hostIncomeNote", "zh": "接待人最低收入备注", "en": "Host income note", "type": "text"}, {"id": "medicalInsurance", "zh": "是否有 ≥$100k 加拿大认可医疗保险", "en": "Have qualifying medical insurance", "type": "radio", "options": ["Yes", "No"]}]}, "work-offer": {"label_zh": "工作 Offer", "label_en": "Work Offer", "fields": [{"id": "employerName", "zh": "雇主名称", "en": "Employer name", "type": "text"}, {"id": "jobTitle", "zh": "职位", "en": "Job title", "type": "text"}, {"id": "nocCode", "zh": "NOC 2021 代码", "en": "NOC 2021 code", "type": "text"}, {"id": "teer", "zh": "TEER 等级", "en": "TEER level", "type": "select", "options": ["0", "1", "2", "3", "4", "5"]}, {"id": "duties", "zh": "工作职责", "en": "Duties", "type": "textarea"}, {"id": "lmiaNumber", "zh": "LMIA 号 (LMIA 类)", "en": "LMIA number", "type": "text"}, {"id": "offerNumber", "zh": "Offer 号 \"A\"+7位 (LMIA 豁免)", "en": "Offer of employment number", "type": "text"}]}, "work-stream": {"label_zh": "工签流派", "label_en": "Work Permit Stream", "fields": [{"id": "workStream", "zh": "工签类别", "en": "Work permit stream", "type": "select", "options": ["LMIA", "PGWP", "ICT", "SOWP", "BOWP"]}, {"id": "graduationProof", "zh": "是否有毕业证明 (PGWP)", "en": "Have graduation proof (PGWP)", "type": "radio", "options": ["Yes", "No", "N/A"]}, {"id": "principalStatus", "zh": "主申请人身份 (SOWP)", "en": "Principal applicant status (SOWP)", "type": "text"}, {"id": "principalTeer", "zh": "主申请人 TEER (SOWP)", "en": "Principal TEER (SOWP)", "type": "select", "options": ["0", "1", "2", "3", "4", "5", "N/A"]}, {"id": "relationProof", "zh": "与主申请人关系证明 (SOWP)", "en": "Relationship proof (SOWP)", "type": "text"}, {"id": "ictCategory", "zh": "ICT 类别", "en": "ICT category", "type": "select", "options": ["Executive", "Senior Manager", "Specialized Knowledge", "N/A"]}, {"id": "overseasEmployment", "zh": "海外任职证明 (ICT)", "en": "Overseas employment (ICT)", "type": "text"}, {"id": "prAorNumber", "zh": "PR 申请 AOR 号 (BOWP)", "en": "PR application AOR number (BOWP)", "type": "text"}]}, "work-history": {"label_zh": "工作经历", "label_en": "Work History", "fields": [{"id": "pastEmployers", "zh": "过往雇主", "en": "Past employers", "type": "rows"}, {"id": "referenceLetterNote", "zh": "推荐信备注", "en": "Reference letter note", "type": "text"}, {"id": "experienceProofNote", "zh": "工作经历证明备注", "en": "Experience proof note", "type": "text"}]}, "residency-obligation": {"label_zh": "居住义务", "label_en": "Residency Obligation", "fields": [{"id": "daysInCanada5yr", "zh": "5年内境内天数", "en": "Days in Canada (5 yrs)", "type": "number"}, {"id": "addressHistory5yr", "zh": "5年地址史 (按月)", "en": "Address history (5 yrs)", "type": "rows"}, {"id": "absences5yr", "zh": "5年离境记录", "en": "Absences (5 yrs)", "type": "rows"}, {"id": "filedTaxNote", "zh": "报税 (NOA) 备注", "en": "Filed tax (NOA) note", "type": "text"}, {"id": "accompanyingException", "zh": "是否随加籍配偶/受雇加企等例外", "en": "Accompanying / employment exception", "type": "radio", "options": ["Yes", "No"]}]}, "sponsor": {"label_zh": "担保人信息", "label_en": "Sponsor Information", "fields": [{"id": "sponsorName", "zh": "担保人姓名", "en": "Sponsor name", "type": "text"}, {"id": "sponsorStatus", "zh": "担保人身份", "en": "Sponsor status", "type": "select", "options": ["Citizen", "Permanent Resident"]}, {"id": "sponsorEmployment", "zh": "担保人在职情况", "en": "Sponsor employment", "type": "text"}, {"id": "sponsorIncomeNote", "zh": "担保人收入备注", "en": "Sponsor income note", "type": "text"}, {"id": "coSigner", "zh": "是否有共签人", "en": "Have co-signer", "type": "radio", "options": ["Yes", "No"]}]}, "relationship": {"label_zh": "关系真实性", "label_en": "Relationship", "fields": [{"id": "howMet", "zh": "如何相识、关系发展", "en": "How you met", "type": "textarea"}, {"id": "marriageOrCohabDate", "zh": "结婚/开始同居日期", "en": "Marriage / cohabitation date", "type": "date"}, {"id": "cohabProofNote", "zh": "同居证明备注 (≥2组)", "en": "Cohabitation proof note", "type": "text"}, {"id": "communicationProofNote", "zh": "沟通记录备注", "en": "Communication proof note", "type": "text"}, {"id": "recognizedByNote", "zh": "亲友/雇主认可备注", "en": "Recognized by note", "type": "text"}]}, "ee-profile": {"label_zh": "Express Entry 档案", "label_en": "Express Entry Profile", "fields": [{"id": "education", "zh": "最高学历", "en": "Highest education", "type": "select", "options": ["Secondary", "One-year post-secondary", "Two-year post-secondary", "Bachelor", "Two or more credentials", "Master", "Doctoral"]}, {"id": "ecaReport", "zh": "是否有学历认证 (ECA)", "en": "Have ECA report", "type": "radio", "options": ["Yes", "No", "N/A"]}, {"id": "langTest", "zh": "语言考试", "en": "Language test", "type": "select", "options": ["IELTS-GT", "CELPIP-G", "PTE Core", "TEF Canada", "TCF Canada", "None"]}, {"id": "langScores", "zh": "语言成绩 (R/W/L/S)", "en": "Language scores", "type": "text"}, {"id": "nocCode2", "zh": "技术工作 NOC 代码", "en": "Skilled work NOC code", "type": "text"}, {"id": "teer2", "zh": "TEER 等级", "en": "TEER level", "type": "select", "options": ["0", "1", "2", "3", "4", "5"]}, {"id": "workMonths", "zh": "技术工作经历 (月)", "en": "Skilled work experience (months)", "type": "number"}, {"id": "canadianExp", "zh": "是否有加拿大工作/学习经历", "en": "Have Canadian experience", "type": "radio", "options": ["Yes", "No"]}, {"id": "jobOffer", "zh": "是否有 job offer/LMIA", "en": "Have job offer/LMIA", "type": "radio", "options": ["Yes", "No"]}, {"id": "pnpNomination", "zh": "是否有省提名 (PNP)", "en": "Have PNP nomination", "type": "radio", "options": ["Yes", "No"]}]}, "citizenship-presence": {"label_zh": "公民居住天数", "label_en": "Physical Presence", "fields": [{"id": "prStatus", "zh": "是否有 PR 身份", "en": "Have PR status", "type": "radio", "options": ["Yes", "No"]}, {"id": "daysInCanada1095", "zh": "5年内境内天数 (需≥1,095)", "en": "Days in Canada (need >=1,095)", "type": "number"}, {"id": "presenceCalcNote", "zh": "居住计算备注", "en": "Presence calculation note", "type": "text"}, {"id": "filedTax3of5", "zh": "5年中是否报税满3年", "en": "Filed tax 3 of 5 years", "type": "radio", "options": ["Yes", "No"]}, {"id": "languageProof", "zh": "是否有语言证明 (18-54)", "en": "Have language proof (18-54)", "type": "radio", "options": ["Yes", "No", "N/A"]}, {"id": "prevPassports", "zh": "5年内全部护照", "en": "Passports (past 5 yrs)", "type": "rows"}, {"id": "signDate", "zh": "签字日期 (锚定5年窗口)", "en": "Signature date", "type": "date"}]}, "citizenship-minor-routing": {"label_zh": "未成年入籍分支", "label_en": "Minor Citizenship Routing", "fields": [{"id": "parentIsCitizen", "zh": "父母是否为加拿大公民", "en": "Parent is Canadian citizen", "type": "radio", "options": ["Yes", "No"], "triggers": {"No": "citizenship-presence"}}, {"id": "custodyNote", "zh": "监护情况备注", "en": "Custody note", "type": "text"}, {"id": "minorSignDate", "zh": "签字日期", "en": "Signature date", "type": "date"}]}, "background-risk": {"label_zh": "背景与历史", "label_en": "Background & History", "always": true, "fields": [{"id": "everRefused", "zh": "是否曾被任何国家拒签", "en": "Ever refused a visa", "type": "radio", "options": ["Yes", "No"], "triggers": {"Yes": "background-risk"}}, {"id": "refusalDetail", "zh": "拒签详情", "en": "Refusal details", "type": "textarea"}, {"id": "prevCaApp", "zh": "是否曾申请过加拿大签证/身份", "en": "Prior Canadian application", "type": "radio", "options": ["Yes", "No"]}, {"id": "prevCaAppDetail", "zh": "过往加拿大申请详情", "en": "Prior Canadian application details", "type": "textarea"}, {"id": "prevMarriage", "zh": "是否有过往婚姻", "en": "Previous marriage", "type": "radio", "options": ["Yes", "No"]}, {"id": "criminalNote", "zh": "刑事/违法记录备注", "en": "Criminal record note", "type": "textarea"}, {"id": "medicalNote", "zh": "重大病史备注", "en": "Medical note", "type": "textarea"}]}, "consent-disclaimer": {"label_zh": "同意与声明", "label_en": "Consent & Disclaimer", "always": true, "fields": [{"id": "consent", "zh": "我已阅读并同意隐私说明，理解本工具仅协助准备、不构成法律意见，由我自行提交", "en": "I consent to the privacy notice and understand this tool only assists preparation and is not legal advice.", "type": "checkbox", "required": true}, {"id": "privacyAck", "zh": "我确认所填信息真实准确", "en": "I confirm the information provided is true and accurate.", "type": "checkbox", "required": true}]}}}</script>
+<script id="intake-schema" type="application/json">{"app_types": {"study-permit-outland": {"label_zh": "学签·境外新申请", "label_en": "Study Permit (Outland)", "form_map_key": "study-permit-outland", "sections": ["core", "language-tests", "education", "employment", "travel-history", "family-members", "canada-history", "canadian-contacts", "funds", "background-risk", "consent-disclaimer"]}, "study-permit-inland": {"label_zh": "学签·境内续签", "label_en": "Study Permit (Inland)", "form_map_key": "study-permit-inland", "sections": ["core", "inland-status", "language-tests", "education", "employment", "canada-history", "canadian-contacts", "study-progress", "funds", "background-risk", "consent-disclaimer"]}, "work-permit-outland": {"label_zh": "工签·境外新申请", "label_en": "Work Permit (Outland)", "form_map_key": "work-permit-outland", "sections": ["core", "work-offer", "employment", "education", "language-tests", "travel-history", "family-members", "canada-history", "work-stream", "work-history", "background-risk", "consent-disclaimer"]}, "work-permit-inland": {"label_zh": "工签·境内续签", "label_en": "Work Permit (Inland)", "form_map_key": "work-permit-inland", "sections": ["core", "work-offer", "employment", "education", "language-tests", "canada-history", "inland-status", "work-stream", "work-history", "background-risk", "consent-disclaimer"]}, "visitor-trv": {"label_zh": "访客·旅游签 (TRV)", "label_en": "Visitor (TRV)", "form_map_key": "visitor-trv", "sections": ["core", "employment", "education", "travel-history", "family-members", "canadian-contacts", "canada-history", "visit-purpose", "funds", "super-visa", "background-risk", "consent-disclaimer"]}, "visitor-extension": {"label_zh": "访客·延期 (境内)", "label_en": "Visitor Extension (Inland)", "form_map_key": "visitor-extension", "sections": ["core", "canada-history", "inland-status", "visit-purpose", "funds", "education", "employment", "background-risk", "consent-disclaimer"]}, "pr-card-renewal": {"label_zh": "PR 卡·续签/换发", "label_en": "PR Card Renewal", "form_map_key": "pr-card-renewal", "sections": ["core", "residency-obligation", "address-history", "travel-history", "employment", "education", "canada-history", "background-risk", "consent-disclaimer"]}, "spousal-sponsorship": {"label_zh": "夫妻/同居担保", "label_en": "Spousal Sponsorship", "form_map_key": "spousal-sponsorship", "sections": ["core", "sponsor", "relationship", "family-members", "education", "employment", "address-history", "travel-history", "canada-history", "background-risk", "consent-disclaimer"]}, "pr-economic": {"label_zh": "PR·经济类 (Express Entry/PNP)", "label_en": "PR - Economic", "form_map_key": "pr-economic", "sections": ["core", "education", "education-years", "employment", "language-tests", "address-history", "travel-history", "family-members", "canada-history", "ee-profile", "funds", "background-risk", "consent-disclaimer"]}, "citizenship-adult": {"label_zh": "入籍·成人 (5(1))", "label_en": "Citizenship (Adult)", "form_map_key": "citizenship-adult", "sections": ["core", "citizenship-presence", "education", "employment", "address-history", "travel-history", "language-tests", "canada-history", "background-risk", "consent-disclaimer"]}, "citizenship-minor": {"label_zh": "入籍·未成年", "label_en": "Citizenship (Minor)", "form_map_key": "citizenship-minor", "sections": ["core", "citizenship-minor-routing", "citizenship-presence", "education", "employment", "address-history", "travel-history", "consent-disclaimer"]}}, "sections": {"core": {"label_zh": "基本信息", "label_en": "Basic Information", "always": true, "fields": [{"id": "familyName", "zh": "姓(拼音)", "en": "Family name", "type": "text", "required": true}, {"id": "givenName", "zh": "名(拼音)", "en": "Given name", "type": "text", "required": true}, {"id": "chineseName", "zh": "中文姓名", "en": "Chinese name", "type": "text"}, {"id": "dob", "zh": "出生日期", "en": "Date of birth", "type": "date", "required": true}, {"id": "birthCity", "zh": "出生城市", "en": "City of birth", "type": "text"}, {"id": "birthCountry", "zh": "出生国家", "en": "Country of birth", "type": "text"}, {"id": "gender", "zh": "性别", "en": "Gender", "type": "select", "options": ["Male", "Female", "Another gender"]}, {"id": "nationality", "zh": "国籍", "en": "Nationality", "type": "text"}, {"id": "currentAddress", "zh": "现居住地址", "en": "Current address", "type": "text"}, {"id": "phone", "zh": "电话", "en": "Phone", "type": "text"}, {"id": "email", "zh": "邮箱", "en": "Email", "type": "text"}, {"id": "wechat", "zh": "微信", "en": "WeChat", "type": "text"}, {"id": "usCard", "zh": "是否持有美国绿卡/签证", "en": "Hold US green card / visa", "type": "radio", "options": ["Yes", "No"]}, {"id": "passportNum", "zh": "护照号", "en": "Passport number", "type": "text"}, {"id": "passportIssue", "zh": "护照签发日", "en": "Passport issue date", "type": "date"}, {"id": "passportExpiry", "zh": "护照失效日", "en": "Passport expiry date", "type": "date"}, {"id": "passportAuthority", "zh": "护照签发机关", "en": "Passport issuing authority", "type": "text"}, {"id": "maritalStatus", "zh": "婚姻状况", "en": "Marital status", "type": "select", "options": ["Single", "Married", "Common-law", "Divorced", "Separated", "Widowed"], "triggers": {"Married": "family-members", "Common-law": "family-members"}}, {"id": "uci", "zh": "UCI (如有)", "en": "UCI (if any)", "type": "text"}]}, "language-tests": {"label_zh": "语言测试成绩", "label_en": "Language Test Results", "fields": []}, "canada-history": {"label_zh": "入境及签证历史", "label_en": "Canada Entry & Visa/Permit History", "fields": []}, "education": {"label_zh": "教育经历", "label_en": "Education History", "fields": []}, "education-years": {"label_zh": "各阶段教育年限", "label_en": "Years of Education by Level", "fields": []}, "employment": {"label_zh": "工作经历", "label_en": "Employment History", "fields": []}, "address-history": {"label_zh": "居住地址历史", "label_en": "Residential Address History", "fields": []}, "travel-history": {"label_zh": "出行记录", "label_en": "Travel History", "fields": []}, "canadian-contacts": {"label_zh": "加拿大联系人", "label_en": "Canadian Contacts", "fields": []}, "family-members": {"label_zh": "家庭成员", "label_en": "Family Members", "fields": [{"id": "spouseFamilyName", "zh": "配偶姓(拼音)", "en": "Spouse family name", "type": "text"}, {"id": "spouseGivenName", "zh": "配偶名(拼音)", "en": "Spouse given name", "type": "text"}, {"id": "spouseChineseName", "zh": "配偶中文姓名", "en": "Spouse Chinese name", "type": "text"}, {"id": "spouseDob", "zh": "配偶出生日期", "en": "Spouse date of birth", "type": "date"}, {"id": "spousePassport", "zh": "配偶护照号", "en": "Spouse passport number", "type": "text"}, {"id": "spouseNationality", "zh": "配偶国籍", "en": "Spouse nationality", "type": "text"}, {"id": "spouseInCa", "zh": "配偶是否在加拿大", "en": "Spouse in Canada", "type": "radio", "options": ["Yes", "No"]}, {"id": "children", "zh": "子女信息", "en": "Children", "type": "rows"}, {"id": "parents", "zh": "父母信息", "en": "Parents", "type": "rows"}]}, "inland-status": {"label_zh": "境内身份", "label_en": "Status in Canada", "fields": [{"id": "currentStatus", "zh": "当前移民身份", "en": "Current immigration status", "type": "select", "options": ["Study Permit", "Work Permit", "Visitor Record", "Visitor", "Implied Status", "Restoration", "Other"]}, {"id": "currentDocNumber", "zh": "当前身份文件号", "en": "Current document number", "type": "text"}, {"id": "lastEntryDate", "zh": "最近入境日期", "en": "Last entry date", "type": "date"}, {"id": "statusExpiry", "zh": "身份到期日", "en": "Status expiry date", "type": "date"}]}, "study-details": {"label_zh": "学习信息", "label_en": "Study Details", "fields": [{"id": "schoolName", "zh": "学校名称", "en": "School name", "type": "text"}, {"id": "dliNumber", "zh": "DLI 编号", "en": "DLI number", "type": "text"}, {"id": "program", "zh": "专业/课程", "en": "Program", "type": "text"}, {"id": "studyLevel", "zh": "学习层级", "en": "Study level", "type": "select", "options": ["Secondary", "Language", "College/Diploma", "Bachelor", "Master", "Doctorate", "Other"]}, {"id": "tuition", "zh": "学费 (CAD)", "en": "Tuition (CAD)", "type": "number"}, {"id": "studyStart", "zh": "课程开始日", "en": "Study start date", "type": "date"}, {"id": "studyEnd", "zh": "课程结束日", "en": "Study end date", "type": "date"}, {"id": "palTal", "zh": "是否有 PAL/TAL 省证明", "en": "Have PAL/TAL", "type": "radio", "options": ["Yes", "No", "N/A"]}, {"id": "quebecCaq", "zh": "是否有魁北克 CAQ", "en": "Have Quebec CAQ", "type": "radio", "options": ["Yes", "No", "N/A"]}]}, "study-plan-inputs": {"label_zh": "学习计划要点", "label_en": "Study Plan Inputs", "fields": [{"id": "studyBackground", "zh": "教育背景概述", "en": "Study background", "type": "textarea"}, {"id": "whyProgram", "zh": "为何选择该专业", "en": "Why this program", "type": "textarea"}, {"id": "whyCanada", "zh": "为何选择加拿大", "en": "Why Canada", "type": "textarea"}, {"id": "careerPlan", "zh": "毕业后职业规划", "en": "Career plan", "type": "textarea"}]}, "study-progress": {"label_zh": "在读进度", "label_en": "Study Progress", "fields": [{"id": "enrolmentProof", "zh": "是否有在读/录取证明", "en": "Have enrolment proof", "type": "radio", "options": ["Yes", "No"]}, {"id": "academicStanding", "zh": "学术状态 (GPA/出勤)", "en": "Academic standing", "type": "text"}, {"id": "transcriptNote", "zh": "成绩单备注", "en": "Transcript note", "type": "text"}]}, "funds": {"label_zh": "资金证明", "label_en": "Proof of Funds", "fields": [{"id": "fundAmount", "zh": "可用资金金额 (CAD)", "en": "Available funds (CAD)", "type": "number"}, {"id": "fundSource", "zh": "资金来源", "en": "Source of funds", "type": "select", "options": ["Self", "Parents", "Spouse", "Scholarship", "Loan", "Other"]}, {"id": "fundProofNote", "zh": "资金证明文件备注", "en": "Proof of funds note", "type": "text"}]}, "visit-purpose": {"label_zh": "访问目的", "label_en": "Purpose of Visit", "fields": [{"id": "visitReason", "zh": "访问原因", "en": "Reason for visit", "type": "select", "options": ["Tourism", "Family visit", "Business", "Medical", "Conference/Event", "Other"]}, {"id": "inviterName", "zh": "邀请人姓名", "en": "Inviter name", "type": "text"}, {"id": "inviterRelation", "zh": "与邀请人关系", "en": "Relationship to inviter", "type": "text"}, {"id": "itinerary", "zh": "行程安排", "en": "Itinerary", "type": "textarea"}, {"id": "tiesHome", "zh": "与母国的牵绊 (会按期离境)", "en": "Ties to home country", "type": "textarea"}, {"id": "travelHistory", "zh": "旅行史", "en": "Travel history", "type": "rows"}]}, "super-visa": {"label_zh": "超级签证 (父母祖父母)", "label_en": "Super Visa", "fields": [{"id": "isParentGrandparent", "zh": "是否父母/祖父母 (超级签证)", "en": "Parent/grandparent (super visa)", "type": "radio", "options": ["Yes", "No"]}, {"id": "hostName", "zh": "加方接待人姓名", "en": "Host name", "type": "text"}, {"id": "hostIncomeNote", "zh": "接待人最低收入备注", "en": "Host income note", "type": "text"}, {"id": "medicalInsurance", "zh": "是否有 ≥$100k 加拿大认可医疗保险", "en": "Have qualifying medical insurance", "type": "radio", "options": ["Yes", "No"]}]}, "work-offer": {"label_zh": "工作 Offer", "label_en": "Work Offer", "fields": [{"id": "employerName", "zh": "雇主名称", "en": "Employer name", "type": "text"}, {"id": "jobTitle", "zh": "职位", "en": "Job title", "type": "text"}, {"id": "nocCode", "zh": "NOC 2021 代码", "en": "NOC 2021 code", "type": "text"}, {"id": "teer", "zh": "TEER 等级", "en": "TEER level", "type": "select", "options": ["0", "1", "2", "3", "4", "5"]}, {"id": "duties", "zh": "工作职责", "en": "Duties", "type": "textarea"}, {"id": "lmiaNumber", "zh": "LMIA 号 (LMIA 类)", "en": "LMIA number", "type": "text"}, {"id": "offerNumber", "zh": "Offer 号 \"A\"+7位 (LMIA 豁免)", "en": "Offer of employment number", "type": "text"}]}, "work-stream": {"label_zh": "工签流派", "label_en": "Work Permit Stream", "fields": [{"id": "workStream", "zh": "工签类别", "en": "Work permit stream", "type": "select", "options": ["LMIA", "PGWP", "ICT", "SOWP", "BOWP"]}, {"id": "graduationProof", "zh": "是否有毕业证明 (PGWP)", "en": "Have graduation proof (PGWP)", "type": "radio", "options": ["Yes", "No", "N/A"]}, {"id": "principalStatus", "zh": "主申请人身份 (SOWP)", "en": "Principal applicant status (SOWP)", "type": "text"}, {"id": "principalTeer", "zh": "主申请人 TEER (SOWP)", "en": "Principal TEER (SOWP)", "type": "select", "options": ["0", "1", "2", "3", "4", "5", "N/A"]}, {"id": "relationProof", "zh": "与主申请人关系证明 (SOWP)", "en": "Relationship proof (SOWP)", "type": "text"}, {"id": "ictCategory", "zh": "ICT 类别", "en": "ICT category", "type": "select", "options": ["Executive", "Senior Manager", "Specialized Knowledge", "N/A"]}, {"id": "overseasEmployment", "zh": "海外任职证明 (ICT)", "en": "Overseas employment (ICT)", "type": "text"}, {"id": "prAorNumber", "zh": "PR 申请 AOR 号 (BOWP)", "en": "PR application AOR number (BOWP)", "type": "text"}]}, "work-history": {"label_zh": "工作经历", "label_en": "Work History", "fields": [{"id": "pastEmployers", "zh": "过往雇主", "en": "Past employers", "type": "rows"}, {"id": "referenceLetterNote", "zh": "推荐信备注", "en": "Reference letter note", "type": "text"}, {"id": "experienceProofNote", "zh": "工作经历证明备注", "en": "Experience proof note", "type": "text"}]}, "residency-obligation": {"label_zh": "居住义务", "label_en": "Residency Obligation", "fields": [{"id": "daysInCanada5yr", "zh": "5年内境内天数", "en": "Days in Canada (5 yrs)", "type": "number"}, {"id": "addressHistory5yr", "zh": "5年地址史 (按月)", "en": "Address history (5 yrs)", "type": "rows"}, {"id": "absences5yr", "zh": "5年离境记录", "en": "Absences (5 yrs)", "type": "rows"}, {"id": "filedTaxNote", "zh": "报税 (NOA) 备注", "en": "Filed tax (NOA) note", "type": "text"}, {"id": "accompanyingException", "zh": "是否随加籍配偶/受雇加企等例外", "en": "Accompanying / employment exception", "type": "radio", "options": ["Yes", "No"]}]}, "sponsor": {"label_zh": "担保人信息", "label_en": "Sponsor Information", "fields": [{"id": "sponsorName", "zh": "担保人姓名", "en": "Sponsor name", "type": "text"}, {"id": "sponsorStatus", "zh": "担保人身份", "en": "Sponsor status", "type": "select", "options": ["Citizen", "Permanent Resident"]}, {"id": "sponsorEmployment", "zh": "担保人在职情况", "en": "Sponsor employment", "type": "text"}, {"id": "sponsorIncomeNote", "zh": "担保人收入备注", "en": "Sponsor income note", "type": "text"}, {"id": "coSigner", "zh": "是否有共签人", "en": "Have co-signer", "type": "radio", "options": ["Yes", "No"]}]}, "relationship": {"label_zh": "关系真实性", "label_en": "Relationship", "fields": [{"id": "howMet", "zh": "如何相识、关系发展", "en": "How you met", "type": "textarea"}, {"id": "marriageOrCohabDate", "zh": "结婚/开始同居日期", "en": "Marriage / cohabitation date", "type": "date"}, {"id": "cohabProofNote", "zh": "同居证明备注 (≥2组)", "en": "Cohabitation proof note", "type": "text"}, {"id": "communicationProofNote", "zh": "沟通记录备注", "en": "Communication proof note", "type": "text"}, {"id": "recognizedByNote", "zh": "亲友/雇主认可备注", "en": "Recognized by note", "type": "text"}]}, "ee-profile": {"label_zh": "Express Entry 档案", "label_en": "Express Entry Profile", "fields": [{"id": "education", "zh": "最高学历", "en": "Highest education", "type": "select", "options": ["Secondary", "One-year post-secondary", "Two-year post-secondary", "Bachelor", "Two or more credentials", "Master", "Doctoral"]}, {"id": "ecaReport", "zh": "是否有学历认证 (ECA)", "en": "Have ECA report", "type": "radio", "options": ["Yes", "No", "N/A"]}, {"id": "langTest", "zh": "语言考试", "en": "Language test", "type": "select", "options": ["IELTS-GT", "CELPIP-G", "PTE Core", "TEF Canada", "TCF Canada", "None"]}, {"id": "langScores", "zh": "语言成绩 (R/W/L/S)", "en": "Language scores", "type": "text"}, {"id": "nocCode2", "zh": "技术工作 NOC 代码", "en": "Skilled work NOC code", "type": "text"}, {"id": "teer2", "zh": "TEER 等级", "en": "TEER level", "type": "select", "options": ["0", "1", "2", "3", "4", "5"]}, {"id": "workMonths", "zh": "技术工作经历 (月)", "en": "Skilled work experience (months)", "type": "number"}, {"id": "canadianExp", "zh": "是否有加拿大工作/学习经历", "en": "Have Canadian experience", "type": "radio", "options": ["Yes", "No"]}, {"id": "jobOffer", "zh": "是否有 job offer/LMIA", "en": "Have job offer/LMIA", "type": "radio", "options": ["Yes", "No"]}, {"id": "pnpNomination", "zh": "是否有省提名 (PNP)", "en": "Have PNP nomination", "type": "radio", "options": ["Yes", "No"]}]}, "citizenship-presence": {"label_zh": "公民居住天数", "label_en": "Physical Presence", "fields": [{"id": "prStatus", "zh": "是否有 PR 身份", "en": "Have PR status", "type": "radio", "options": ["Yes", "No"]}, {"id": "prLandingDate", "zh": "成为 PR 的日期 (登陆日)", "en": "Date you became a PR", "type": "date"}, {"id": "prCardNo", "zh": "PR 卡号", "en": "PR card number", "type": "text"}, {"id": "prCardExpiry", "zh": "PR 卡到期日", "en": "PR card expiry", "type": "date"}, {"id": "daysInCanada1095", "zh": "5年内境内天数 (需≥1,095)", "en": "Days in Canada (need >=1,095)", "type": "number"}, {"id": "presenceCalcNote", "zh": "居住计算备注", "en": "Presence calculation note", "type": "text"}, {"id": "filedTax3of5", "zh": "5年中是否报税满3年", "en": "Filed tax 3 of 5 years", "type": "radio", "options": ["Yes", "No"]}, {"id": "sinNumber", "zh": "SIN / ITN / TTN 号码", "en": "SIN / ITN / TTN", "type": "text"}, {"id": "taxYears", "zh": "逐年报税情况 (CIT0002 Q12b)", "en": "Tax filing by year", "type": "rows"}, {"id": "otherCountryStatus", "zh": "加拿大以外的身份/公民身份 (Q13)", "en": "Status in countries other than Canada", "type": "rows"}, {"id": "languageProof", "zh": "是否有语言证明 (18-54)", "en": "Have language proof (18-54)", "type": "radio", "options": ["Yes", "No", "N/A"]}, {"id": "prevPassports", "zh": "5年内全部护照", "en": "Passports (past 5 yrs)", "type": "rows"}, {"id": "signDate", "zh": "签字日期 (锚定5年窗口)", "en": "Signature date", "type": "date"}]}, "citizenship-minor-routing": {"label_zh": "未成年入籍分支", "label_en": "Minor Citizenship Routing", "fields": [{"id": "parentIsCitizen", "zh": "父母是否为加拿大公民", "en": "Parent is Canadian citizen", "type": "radio", "options": ["Yes", "No"], "triggers": {"No": "citizenship-presence"}}, {"id": "custodyNote", "zh": "监护情况备注", "en": "Custody note", "type": "text"}, {"id": "minorSignDate", "zh": "签字日期", "en": "Signature date", "type": "date"}]}, "background-risk": {"label_zh": "背景与历史", "label_en": "Background & History", "always": true, "fields": [{"id": "everRefused", "zh": "是否曾被任何国家拒签", "en": "Ever refused a visa", "type": "radio", "options": ["Yes", "No"], "triggers": {"Yes": "background-risk"}}, {"id": "refusalDetail", "zh": "拒签详情", "en": "Refusal details", "type": "textarea"}, {"id": "prevCaApp", "zh": "是否曾申请过加拿大签证/身份", "en": "Prior Canadian application", "type": "radio", "options": ["Yes", "No"]}, {"id": "prevCaAppDetail", "zh": "过往加拿大申请详情", "en": "Prior Canadian application details", "type": "textarea"}, {"id": "prevMarriage", "zh": "是否有过往婚姻", "en": "Previous marriage", "type": "radio", "options": ["Yes", "No"]}, {"id": "criminalNote", "zh": "刑事/违法记录备注", "en": "Criminal record note", "type": "textarea"}, {"id": "medicalNote", "zh": "重大病史备注", "en": "Medical note", "type": "textarea"}]}, "consent-disclaimer": {"label_zh": "同意与声明", "label_en": "Consent & Disclaimer", "always": true, "fields": [{"id": "consent", "zh": "我已阅读并同意隐私说明，理解本工具仅协助准备、不构成法律意见，由我自行提交", "en": "I consent to the privacy notice and understand this tool only assists preparation and is not legal advice.", "type": "checkbox", "required": true}, {"id": "privacyAck", "zh": "我确认所填信息真实准确", "en": "I confirm the information provided is true and accurate.", "type": "checkbox", "required": true}]}}}</script>
 <script>
   // sync-intake-form.sh replaces the __INTAKE_SCHEMA__ placeholder with real JSON at deploy.
   // Tests override window.__SCHEMA__ directly. Fall back to parsing the inlined <script> tag.
@@ -1988,15 +2061,11 @@ function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Re-render file list labels when language is toggled
-const _origSetLang = typeof setLang === 'undefined' ? null : null;
-document.addEventListener('DOMContentLoaded', function() {
-  const origSetLang = window.setLang;
-  window.setLang = function(lang) {
-    origSetLang(lang);
-    renderUploadList();
-  };
-});
+// (Removed: a setLang wrapper copied over from client-upload.html. It called
+// renderUploadList(), which this page has never defined — there is no file list
+// here — so every language toggle threw an uncaught ReferenceError. The language
+// still switched, because origSetLang ran first, but the wrapper did nothing
+// else, and any future wrapper chained after it would have been dead.)
 
 // ===== LANGUAGE TOGGLE =====
 let currentLang = 'zh';
@@ -2006,6 +2075,7 @@ function setLang(lang) {
   document.querySelectorAll('.en').forEach(el => el.style.display = lang==='en' ? '' : 'none');
   document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.lang-btn')[lang==='zh'?0:1].classList.add('active');
+  if (typeof applyCitOnly === 'function') applyCitOnly();
 }
 
 // ===== CONDITIONAL SECTIONS =====
@@ -2103,7 +2173,37 @@ function applySectionVisibility(appType) {
   document.querySelectorAll('[data-section]').forEach(el => {
     el.style.display = show.has(el.getAttribute('data-section')) ? 'block' : 'none';
   });
+  window.__isCitizenship = key.indexOf('citizenship') === 0;
+  applyCitOnly();
+  if (window.__isCitizenship) seedTaxYearRows();
   renumberVisibleSections();
+}
+
+// Notes that are true only for a citizenship application (the five-year
+// activity history, the UCI, the language requirement). They carry .cit-only
+// plus the usual .zh/.en, so both switches have to agree before one shows —
+// which is why this runs from setLang() as well as from the app-type switch.
+function applyCitOnly() {
+  const on = !!window.__isCitizenship;
+  document.querySelectorAll('.cit-only').forEach(el => {
+    const langOk = el.classList.contains('zh') ? currentLang === 'zh'
+                 : el.classList.contains('en') ? currentLang === 'en'
+                 : true;
+    el.style.display = (on && langOk) ? '' : 'none';
+  });
+}
+
+// CIT0002 Q12 asks year by year, so hand the client the years already laid
+// out. Only ever fills an empty table: a restored draft must not be overwritten.
+function seedTaxYearRows() {
+  const tbody = document.getElementById('citizenTaxYearsBody');
+  if (!tbody || tbody.children.length) return;
+  const thisYear = new Date().getFullYear();
+  for (let i = 1; i <= 5; i++) {
+    addRow('citizenTaxYears');
+    const input = tbody.lastElementChild.querySelector('input');
+    if (input) input.value = String(thisYear - i);
+  }
 }
 
 // Renumber ALL visible content sections sequentially (1..N) so the badges
@@ -2339,6 +2439,23 @@ const rowConfigs = {
       {type:'date'},
       {type:'text',placeholder:'Destination / 目的地'},
       {type:'number',placeholder:'0',min:0}
+    ]
+  },
+  citizenTaxYears: {
+    body:'citizenTaxYearsBody',
+    fields: [
+      {type:'text',placeholder:'e.g. 2025'},
+      {type:'select',options:['','Yes/是','No/否']},
+      {type:'select',options:['','Yes/是','No/否']}
+    ]
+  },
+  citizenOtherStatus: {
+    body:'citizenOtherStatusBody',
+    fields: [
+      {type:'text',placeholder:'China / 中国'},
+      {type:'select',options:['Citizen/公民','Permanent resident/永久居民','Work permit/工作许可','Study permit/学习许可','Visitor/访客','Other/其他']},
+      {type:'date'},
+      {type:'date'}
     ]
   },
   citizenPrevPassports: {
@@ -2676,9 +2793,15 @@ function collectData() {
     },
     citizenship: {
       prStatus: getRadio('prStatus'),
+      prLandingDate: getVal('prLandingDate'),
+      prCardNo: getVal('prCardNo'),
+      prCardExpiry: getVal('prCardExpiry'),
       daysInCanada1095: getVal('daysInCanada1095'),
       presenceCalcNote: getVal('presenceCalcNote'),
       filedTax3of5: getRadio('filedTax3of5'),
+      sinNumber: getVal('sinNumber'),
+      taxYears: getRows('citizenTaxYearsBody'),
+      otherCountryStatus: getRows('citizenOtherStatusBody'),
       languageProof: getRadio('languageProof'),
       prevPassports: getRows('citizenPrevPassportsBody'),
       signDate: getVal('signDate'),
@@ -2743,6 +2866,28 @@ function validate() {
       errors.push(currentLang==='zh' ? r.zh : r.en);
     }
   });
+
+  // Citizenship only. These three are what a returned CIT0002 usually comes
+  // back for, and none of them is asked by the visa-type sections, so they
+  // cannot live in the shared list above.
+  if (window.__isCitizenship) {
+    [{id:'uci', zh:'UCI 客户识别号（入籍必填，在枫叶卡或登陆纸上）', en:'UCI (required for citizenship; on your PR card or COPR)'},
+     {id:'prLandingDate', zh:'成为 PR 的日期（登陆日）', en:'Date you became a PR'}].forEach(f => {
+      const el = document.getElementById(f.id);
+      if (!el || isHidden(el)) return;
+      if (!el.value.trim()) {
+        el.classList.add('error');
+        errors.push(currentLang==='zh' ? f.zh : f.en);
+      } else el.classList.remove('error');
+    });
+    const activityRows = document.querySelectorAll('#employmentBody tr').length +
+                         document.querySelectorAll('#educationBody tr').length;
+    if (activityRows === 0) {
+      errors.push(currentLang==='zh'
+        ? '工作/教育经历：入籍要交代近 5 年每一个月在做什么，失业、退休、在家照顾家人也要各写一段，不能整栏空着'
+        : 'Work / education history: a citizenship application must account for every month of the last five years. Unemployment, retirement and caring for family at home each go in as their own line; this cannot be left empty.');
+    }
+  }
   return errors;
 }
 
